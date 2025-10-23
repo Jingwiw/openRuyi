@@ -43,14 +43,6 @@ Requires:      %{name}%{?_isa} = %{version}-%{release}
 %description devel
 This package contains the header files and development libraries for procps-ng.
 
-%package lang
-Summary:       Translations for procps-ng
-License:       GPL-2.0-or-later AND LGPL-2.1-or-later
-BuildArch:     noarch
-
-%description lang
-This package contains the translations for the procps-ng utilities.
-
 %conf -p
 # Use autoreconf to regenerate build files, this is more robust than ./autogen.sh
 autoreconf -fiv
@@ -67,7 +59,7 @@ rm -rf %{buildroot}%{_mandir}/pl/man5
 rm -rf %{buildroot}%{_mandir}/{fr,de,pt_BR}/man3
 
 # Package localization files using the find_lang macro for the -lang subpackage.
-%find_lang %{name}  --all-name --with-man
+%find_lang %{name}  --all-name --with-man --generate-subpackages
 
 %ldconfig_scriptlets
 
@@ -102,9 +94,6 @@ rm -rf %{buildroot}%{_mandir}/{fr,de,pt_BR}/man3
 %{_libdir}/pkgconfig/%{libname}.pc
 %{_libdir}/%{libname}.a
 %{_mandir}/man3/*
-
-
-%files lang -f %{name}.lang
 
 %changelog
 %{?autochangelog}

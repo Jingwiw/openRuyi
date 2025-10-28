@@ -28,8 +28,6 @@ precision than is directly supported by the basic C types.
 Summary: Development library package for GMP.
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-c++%{?_isa} = %{version}-%{release}
-Conflicts: %{name}%{?_isa} < 1:6.3.0-3
-Conflicts: %{name}-c++%{?_isa} < 1:6.3.0-3
 
 %description devel
 Devel package include header files, documentation and libraries for GMP

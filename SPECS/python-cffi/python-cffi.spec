@@ -7,7 +7,7 @@
 %global srcname cffi
 
 Name:           python-%{srcname}
-Version:        1.17.1
+Version:        2.0.0
 Release:        %autorelease
 Summary:        Foreign function interface for Python
 License:        MIT

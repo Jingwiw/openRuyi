@@ -27,7 +27,7 @@ BuildRequires:  perl(Carp)
 BuildRequires:  perl(Encode)
 BuildRequires:  perl(Exporter)
 BuildRequires:  perl(HTML::Entities)
-%if %{with bootstrap}
+%if %{without bootstrap}
 BuildRequires:  perl(HTML::FormatText)
 %endif
 BuildRequires:  perl(HTML::Parser) >= 3.46

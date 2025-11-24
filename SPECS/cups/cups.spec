@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Dingli Zhang <dingli@iscas.ac.cn>
+# SPDX-FileContributor: Jingkun Zheng <zhengjingkun@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -37,16 +38,17 @@ BuildOption(conf): --with-rundir=%{_rundir}/cups
 BuildOption(conf): --localedir=%{_datadir}/locale
 
 BuildRequires:  pkgconfig(gnutls)
-BuildRequires:  acl-devel
+BuildRequires:  pkgconfig(libacl)
 BuildRequires:  pkgconfig(libusb-1.0)
-BuildRequires:  krb5-devel
+BuildRequires:  pkgconfig(krb5)
 BuildRequires:  systemd
 BuildRequires:  pkgconfig(libsystemd)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  automake
-BuildRequires:  zlib-devel
-BuildRequires:  libselinux-devel
+BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  make
+BuildRequires:  pkgconfig(pam)
 
 Requires:       dbus
 Requires:       systemd

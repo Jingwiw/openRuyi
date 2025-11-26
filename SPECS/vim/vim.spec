@@ -16,6 +16,7 @@ Release:        %autorelease
 Summary:        Tools needed to create Texinfo format documentation files
 License:        Vim AND LGPL-2.1-or-later AND MIT AND GPL-1.0-only AND (GPL-2.0-only OR Vim) AND Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND GPL-2.0-or-later AND GPL-3.0-or-later AND OPUBL-1.0 AND Apache-2.0
 URL:            https://www.vim.org/
+VCS:            git:https://github.com/vim/vim
 #!RemoteAsset
 Source0:        https://github.com/%{name}/%{name}/archive/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildSystem:    autotools

@@ -203,7 +203,7 @@ BuildRequires:  bpftool
 BuildRequires:  pkgconfig(libbpf)
 %endif
 
-BuildRequires:  distribution-release
+BuildRequires:  system-release
 
 Requires:       dbus
 Requires(post): coreutils

@@ -216,7 +216,7 @@ database support to rsyslog.
 Summary:        TLS protocol support for rsyslog via OpenSSL library
 BuildRequires:  pkgconfig(openssl)
 Requires:       %{name} = %{version}-%{release}
-Requires:       openssl-libs
+Requires:       openssl
 
 %description    openssl
 This subpackage contains the rsyslog plugins that provide the ability

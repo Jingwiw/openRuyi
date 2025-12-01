@@ -81,7 +81,7 @@ to switch roles.
 %package        devel
 Summary:        SELinux policy core policy devel utilities
 Requires:       python-policycoreutils = %{version}-%{release}
-Requires:       make python3-dnf
+Requires:       make
 Requires:       (selinux-policy-devel if selinux-policy)
 
 %description    devel

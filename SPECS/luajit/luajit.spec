@@ -2,31 +2,33 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Mahno <bestwow2014@gmail.com>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: gns <wangbingzhen.riscv@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           luajit
 # LuaJIT is a rolling release, see http://luajit.org/status.html
-%global luajit_version 2.1
+# Use OpenResty branch, as their modifications are of optimizations and extensions.
+# This also avoids having to package both vanilla LuaJIT and OR LuaJIT.
+%global major 2.1
 # The commit that could be patched
-%global commit_date 20250113
-%global commit a4f56a4
-Version:        %{commit_date}+git%{commit}
+%global minor 20251030
+Version:        %{major}+openresty%{minor}
 Release:        %autorelease
 Summary:        Just-In-Time Compiler for Lua
 License:        MIT
 URL:            http://luajit.org
 #!RemoteAsset
-Source0:        https://github.com/LuaJIT/LuaJIT/archive/%{commit}.tar.gz
-# Support for risc-v patch, should remove once PR is mereged
+Source0:        https://github.com/openresty/luajit2/archive/refs/tags/v%{major}-%{minor}.tar.gz#/luajit-openresty-v%{major}-%{minor}.tar.gz
+# RISC-V 64 support, from https://github.com/openresty/luajit2/pull/236
+# Should remove once PR is mereged.
 Patch0:         0001-add_riscv_support.patch
-# Enable Lua 5.2 features
-Patch1:         0002-enable-lua52compat.patch
 # Preserve timestamps during installation
-Patch2:         0003-preserve-timestamps.patch
+Patch1:         0002-preserve-timestamps.patch
 # not autotools, use this for ease
 BuildSystem:    autotools
 BuildOption(build): amalg Q= E=@: PREFIX=%{_prefix} TARGET_STRIP=:
+BuildOption(build): XCFLAGS="-DLUAJIT_ENABLE_LUA52COMPAT"
 BuildOption(build): CFLAGS="%{build_cflags}" LDFLAGS="%{build_ldflags}"
 BuildOption(build): MULTILIB=%{_lib}
 BuildOption(install): PREFIX=%{_prefix} MULTILIB=%{_lib}
@@ -58,11 +60,11 @@ find %{buildroot} -type f -name *.a -delete -print
 %{_bindir}/luajit*
 %{_libdir}/libluajit-*.so.*
 %{_mandir}/man1/luajit.1*
-%{_datadir}/luajit-%{luajit_version}
+%{_datadir}/luajit-%{major}
 
 %files devel
 %doc doc/*
-%{_includedir}/luajit-%{luajit_version}/
+%{_includedir}/luajit-%{major}/
 %{_libdir}/libluajit-*.so
 %{_libdir}/pkgconfig/luajit.pc
 

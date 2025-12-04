@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           nano
-Version:        8.6
+Version:        8.7
 Release:        %autorelease
 Summary:        Text editor
 License:        GPL-3.0-or-later

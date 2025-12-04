@@ -1,5 +1,5 @@
-# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
-# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
@@ -7,18 +7,18 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           dnf5
-Version:        5.2.17.0
+Version:        5.3.0.0
 Release:        %autorelease
 Summary:        Command-line package manager
 License:        GPL-2.0-or-later
 URL:            https://github.com/rpm-software-management/dnf5
-#!RemoteAsset
+#!RemoteAsset:  sha256:c7e744773dd300e539cd5285344810a9aee4c934f716722c42cafc383945b0e8
 Source0:        https://github.com/rpm-software-management/dnf5/archive/%{version}/dnf5-%{version}.tar.gz
 BuildSystem:    cmake
 Provides:       dnf
 BuildOption(conf):  -DVERSION_PRIME:STRING=5
-BuildOption(conf):  -DVERSION_MAJOR:STRING=2
-BuildOption(conf):  -DVERSION_MINOR:STRING=17
+BuildOption(conf):  -DVERSION_MAJOR:STRING=3
+BuildOption(conf):  -DVERSION_MINOR:STRING=0
 BuildOption(conf):  -DVERSION_MICRO:STRING=0
 BuildOption(conf):  -DPACKAGE_VERSION:STRING=%{version}
 BuildOption(conf):  -DWITH_LIBDNF5_CLI:BOOL=ON
@@ -27,7 +27,7 @@ BuildOption(conf):  -DWITH_DNF5DAEMON_CLIENT:BOOL=OFF
 BuildOption(conf):  -DWITH_DNF5DAEMON_SERVER:BOOL=OFF
 BuildOption(conf):  -DWITH_COMPS:BOOL=OFF
 BuildOption(conf):  -DWITH_MODULEMD:BOOL=OFF
-BuildOption(conf):  -DWITH_SYSTEMD:BOOL=OFF
+BuildOption(conf):  -DWITH_SYSTEMD:BOOL=ON
 BuildOption(conf):  -DWITH_HTML:BOOL=OFF
 BuildOption(conf):  -DWITH_MAN:BOOL=OFF
 BuildOption(conf):  -DWITH_GO:BOOL=OFF
@@ -48,6 +48,8 @@ BuildRequires:  pkgconfig(libsolv) >= 0.7.25
 BuildRequires:  pkgconfig(libsolvext) >= 0.7.25
 BuildRequires:  pkgconfig(rpm) >= 4.17.0
 BuildRequires:  pkgconfig(sqlite3) >= 3.35.0
+BuildRequires:  pkgconfig(libpkgmanifest)
+BuildRequires:  pkgconfig(systemd)
 BuildRequires:  toml11
 BuildRequires:  zlib-devel
 BuildRequires:  pkgconfig(smartcols)
@@ -142,13 +144,16 @@ ln -sf dnf5 %{buildroot}%{_bindir}/dnf
 %dir %{_sysconfdir}/dnf/dnf5-plugins
 %dir %{_libdir}/libdnf5/plugins
 %{_sysconfdir}/bash_completion.d/dnf5
-%{_unitdir}/dnf5-makecache.service
-%{_unitdir}/dnf5-makecache.timer
 %{_bindir}/dnf-automatic
 %{_unitdir}/dnf-automatic.service
 %{_unitdir}/dnf-automatic.timer
 %{_unitdir}/dnf5-automatic.service
 %{_unitdir}/dnf5-automatic.timer
+%{_unitdir}/dnf5-makecache.service
+%{_unitdir}/dnf5-makecache.timer
+%{_unitdir}/dnf5-offline-transaction-cleanup.service
+%{_unitdir}/dnf5-offline-transaction.service
+
 %files -n libdnf5
 %license lgpl-2.1.txt
 %config(noreplace) %{_sysconfdir}/dnf/dnf.conf
@@ -173,6 +178,8 @@ ln -sf dnf5 %{buildroot}%{_bindir}/dnf
 %dir %{_sysconfdir}/dnf/libdnf5-plugins
 %config(noreplace) %{_sysconfdir}/dnf/libdnf5-plugins/actions.conf
 %config(noreplace) %{_sysconfdir}/dnf/libdnf5-plugins/expired-pgp-keys.conf
+%config(noreplace) %{_sysconfdir}/dnf/libdnf5-plugins/local.conf
+%config(noreplace) %{_sysconfdir}/dnf/libdnf5-plugins/python_plugins_loader.conf
 %dir %{_libdir}/dnf5
 %dir %{_libdir}/dnf5/plugins
 %doc %{_libdir}/dnf5/plugins/README

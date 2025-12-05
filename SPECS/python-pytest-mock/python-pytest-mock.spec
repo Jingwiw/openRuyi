@@ -9,18 +9,23 @@
 Name:           python-%{srcname}
 Version:        3.14.0
 Release:        %autorelease
-License:        MIT
-URL:            https://github.com/pytest-dev/pytest-mock/
 Summary:        Thin-wrapper around the mock package for easier use with py.test
+License:        MIT
+URL:            https://github.com/pytest-dev/pytest-mock
+# This is messed up upstream... - 251
+#!RemoteAsset
+Source0:        https://files.pythonhosted.org/packages/source/p/%{srcname}/pytest_mock-%{version}.tar.gz
+BuildArch:      noarch
+BuildSystem:    pyproject
+
+BuildOption(install): pytest_mock +auto
+
+BuildRequires:  pyproject-rpm-macros
+BuildRequires:  python3-devel
+
 Provides:       python3-%{srcname}
 %python_provide python3-%{srcname}
-#!RemoteAsset
-Source0:        https://files.pythonhosted.org/packages/source/p/%{srcname}/%{srcname}-%{version}.tar.gz
-BuildArch:      noarch
 
-BuildRequires:  python3-devel
-BuildSystem:    pyproject
-BuildOption(install): pytest_mock +auto
 %description
 This plugin installs a @code{mocker} fixture which is a thin-wrapper
 around the patching API provided by the @code{mock} package, but with the

@@ -18,6 +18,7 @@ BuildSystem:    autotools
 
 BuildRequires:  audit-devel bison flex bzip2-devel libselinux-devel libsepol-devel
 BuildRequires:  pkgconfig make gcc
+BuildRequires:  python3 python3-devel python3-setuptools swig
 
 
 BuildOption(build): CFLAGS="%{optflags} -fno-semantic-interposition"
@@ -28,6 +29,7 @@ BuildOption(build): SHLIBDIR="%{_libdir}"
 BuildOption(install): LIBDIR="%{_libdir}"
 BuildOption(install): LIBEXECDIR="%{_libexecdir}"
 BuildOption(install): SHLIBDIR="%{_libdir}"
+BuildOption(install): all install-pywrap
 
 %description
 libsemanage is the SELinux policy management library. It is used to
@@ -42,11 +44,24 @@ Requires:       %{name} = %{version}
 The libsemanage-devel package contains the header files, static and shared
 libraries needed for developing applications that manipulate SELinux policies.
 
+%package -n python3-libsemanage
+Summary: semanage python 3 bindings for libsemanage
+Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: python3-libselinux
+%{?python_provide:%python_provide python3-libsemanage}
+
+%description -n python3-libsemanage
+The libsemanage-python3 package contains the python 3 bindings for developing
+SELinux management applications.
+
 %prep -a
 grep /usr/libexec . -rl | xargs sed -i "s|/usr/libexec|%{_libexecdir}|g"
 
 # No configure
 %conf
+
+%build -a
+%make_build pywrap
 
 %install -a
 install -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/selinux/semanage.conf
@@ -68,6 +83,11 @@ install -d -m 755 %{buildroot}%{_localstatedir}/lib/selinux
 %{_includedir}/semanage/
 %{_mandir}/man3/*
 %{_mandir}/man5/*
+
+%files -n python3-libsemanage
+%{python3_sitearch}/*.so
+%{python3_sitearch}/semanage.py*
+%{_libexecdir}/selinux/semanage_migrate_store
 
 %changelog
 %{?autochangelog}

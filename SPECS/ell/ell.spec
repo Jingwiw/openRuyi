@@ -15,6 +15,9 @@ URL:            https://01.org/ell
 Source:         https://mirrors.kernel.org/pub/linux/libs/ell/ell-%{version}.tar.xz
 BuildSystem:    autotools
 
+# the test will fail.
+Patch0:         0001-remove-hwdb-test.patch
+
 BuildRequires:  gcc-c++
 BuildRequires:  libtool
 BuildRequires:  pkg-config

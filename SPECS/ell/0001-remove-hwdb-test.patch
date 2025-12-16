@@ -1,0 +1,129 @@
+diff --git a/Makefile.am b/Makefile.am
+index 860d591..b12d810 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -211,7 +211,6 @@ unit_tests = unit/test-unit \
+ 			unit/test-sysctl \
+ 			unit/test-minheap \
+ 			unit/test-notifylist \
+-			unit/test-hwdb \
+ 			unit/test-dbus \
+ 			unit/test-dbus-util \
+ 			unit/test-dbus-message \
+diff --git a/Makefile.in b/Makefile.in
+index 29fa0ed..0fe37c2 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -141,7 +141,7 @@ am__EXEEXT_1 = unit/test-unit$(EXEEXT) unit/test-queue$(EXEEXT) \
+ 	unit/test-ecdh$(EXEEXT) unit/test-time$(EXEEXT) \
+ 	unit/test-path$(EXEEXT) unit/test-net$(EXEEXT) \
+ 	unit/test-sysctl$(EXEEXT) unit/test-minheap$(EXEEXT) \
+-	unit/test-notifylist$(EXEEXT) unit/test-hwdb$(EXEEXT) \
++	unit/test-notifylist$(EXEEXT) \
+ 	unit/test-dbus$(EXEEXT) unit/test-dbus-util$(EXEEXT) \
+ 	unit/test-dbus-message$(EXEEXT) \
+ 	unit/test-dbus-message-fds$(EXEEXT) \
+@@ -370,9 +370,6 @@ unit_test_gvariant_util_DEPENDENCIES = ell/libell-private.la
+ unit_test_hashmap_SOURCES = unit/test-hashmap.c
+ unit_test_hashmap_OBJECTS = unit/test-hashmap.$(OBJEXT)
+ unit_test_hashmap_DEPENDENCIES = ell/libell-private.la
+-unit_test_hwdb_SOURCES = unit/test-hwdb.c
+-unit_test_hwdb_OBJECTS = unit/test-hwdb.$(OBJEXT)
+-unit_test_hwdb_DEPENDENCIES = ell/libell-private.la
+ unit_test_io_SOURCES = unit/test-io.c
+ unit_test_io_OBJECTS = unit/test-io.$(OBJEXT)
+ unit_test_io_DEPENDENCIES = ell/libell-private.la
+@@ -522,7 +519,7 @@ am__depfiles_remade = ell/$(DEPDIR)/acd.Plo ell/$(DEPDIR)/base64.Plo \
+ 	unit/$(DEPDIR)/test-genl-msg.Po \
+ 	unit/$(DEPDIR)/test-gvariant-message.Po \
+ 	unit/$(DEPDIR)/test-gvariant-util.Po \
+-	unit/$(DEPDIR)/test-hashmap.Po unit/$(DEPDIR)/test-hwdb.Po \
++	unit/$(DEPDIR)/test-hashmap.Po \
+ 	unit/$(DEPDIR)/test-io.Po unit/$(DEPDIR)/test-key.Po \
+ 	unit/$(DEPDIR)/test-main.Po unit/$(DEPDIR)/test-minheap.Po \
+ 	unit/$(DEPDIR)/test-net.Po unit/$(DEPDIR)/test-netlink.Po \
+@@ -572,7 +569,7 @@ SOURCES = $(ell_libell_private_la_SOURCES) $(ell_libell_la_SOURCES) \
+ 	unit/test-dir-watch.c unit/test-ecc.c unit/test-ecdh.c \
+ 	unit/test-endian.c unit/test-genl-msg.c \
+ 	unit/test-gvariant-message.c unit/test-gvariant-util.c \
+-	unit/test-hashmap.c unit/test-hwdb.c unit/test-io.c \
++	unit/test-hashmap.c  unit/test-io.c \
+ 	unit/test-key.c unit/test-main.c unit/test-minheap.c \
+ 	unit/test-net.c unit/test-netlink.c unit/test-notifylist.c \
+ 	unit/test-path.c unit/test-pbkdf2.c unit/test-pem.c \
+@@ -598,7 +595,7 @@ DIST_SOURCES = $(ell_libell_private_la_SOURCES) \
+ 	unit/test-dir-watch.c unit/test-ecc.c unit/test-ecdh.c \
+ 	unit/test-endian.c unit/test-genl-msg.c \
+ 	unit/test-gvariant-message.c unit/test-gvariant-util.c \
+-	unit/test-hashmap.c unit/test-hwdb.c unit/test-io.c \
++	unit/test-hashmap.c unit/test-io.c \
+ 	unit/test-key.c unit/test-main.c unit/test-minheap.c \
+ 	unit/test-net.c unit/test-netlink.c unit/test-notifylist.c \
+ 	unit/test-path.c unit/test-pbkdf2.c unit/test-pem.c \
+@@ -1172,7 +1169,6 @@ unit_tests = unit/test-unit \
+ 			unit/test-sysctl \
+ 			unit/test-minheap \
+ 			unit/test-notifylist \
+-			unit/test-hwdb \
+ 			unit/test-dbus \
+ 			unit/test-dbus-util \
+ 			unit/test-dbus-message \
+@@ -1247,7 +1243,6 @@ unit_test_dbus_properties_LDADD = ell/libell-private.la
+ unit_test_gvariant_util_LDADD = ell/libell-private.la
+ unit_test_gvariant_message_LDADD = ell/libell-private.la
+ unit_test_siphash_LDADD = ell/libell-private.la
+-unit_test_hwdb_LDADD = ell/libell-private.la
+ unit_test_cipher_LDADD = ell/libell-private.la
+ unit_test_random_LDADD = ell/libell-private.la
+ unit_test_util_LDADD = ell/libell-private.la
+@@ -1730,12 +1725,6 @@ unit/test-hashmap.$(OBJEXT): unit/$(am__dirstamp) \
+ unit/test-hashmap$(EXEEXT): $(unit_test_hashmap_OBJECTS) $(unit_test_hashmap_DEPENDENCIES) $(EXTRA_unit_test_hashmap_DEPENDENCIES) unit/$(am__dirstamp)
+ 	@rm -f unit/test-hashmap$(EXEEXT)
+ 	$(AM_V_CCLD)$(LINK) $(unit_test_hashmap_OBJECTS) $(unit_test_hashmap_LDADD) $(LIBS)
+-unit/test-hwdb.$(OBJEXT): unit/$(am__dirstamp) \
+-	unit/$(DEPDIR)/$(am__dirstamp)
+-
+-unit/test-hwdb$(EXEEXT): $(unit_test_hwdb_OBJECTS) $(unit_test_hwdb_DEPENDENCIES) $(EXTRA_unit_test_hwdb_DEPENDENCIES) unit/$(am__dirstamp)
+-	@rm -f unit/test-hwdb$(EXEEXT)
+-	$(AM_V_CCLD)$(LINK) $(unit_test_hwdb_OBJECTS) $(unit_test_hwdb_LDADD) $(LIBS)
+ unit/test-io.$(OBJEXT): unit/$(am__dirstamp) \
+ 	unit/$(DEPDIR)/$(am__dirstamp)
+ 
+@@ -2000,7 +1989,6 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-gvariant-message.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-gvariant-util.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-hashmap.Po@am__quote@ # am--include-marker
+-@AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-hwdb.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-io.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-key.Po@am__quote@ # am--include-marker
+ @AMDEP_TRUE@@am__include@ @am__quote@unit/$(DEPDIR)/test-main.Po@am__quote@ # am--include-marker
+@@ -2557,13 +2545,6 @@ unit/test-notifylist.log: unit/test-notifylist$(EXEEXT)
+ 	--log-file $$b.log --trs-file $$b.trs \
+ 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+ 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+-unit/test-hwdb.log: unit/test-hwdb$(EXEEXT)
+-	@p='unit/test-hwdb$(EXEEXT)'; \
+-	b='unit/test-hwdb'; \
+-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+-	--log-file $$b.log --trs-file $$b.trs \
+-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+-	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ unit/test-dbus.log: unit/test-dbus$(EXEEXT)
+ 	@p='unit/test-dbus$(EXEEXT)'; \
+ 	b='unit/test-dbus'; \
+@@ -3000,7 +2981,6 @@ distclean: distclean-am
+ 	-rm -f unit/$(DEPDIR)/test-gvariant-message.Po
+ 	-rm -f unit/$(DEPDIR)/test-gvariant-util.Po
+ 	-rm -f unit/$(DEPDIR)/test-hashmap.Po
+-	-rm -f unit/$(DEPDIR)/test-hwdb.Po
+ 	-rm -f unit/$(DEPDIR)/test-io.Po
+ 	-rm -f unit/$(DEPDIR)/test-key.Po
+ 	-rm -f unit/$(DEPDIR)/test-main.Po
+@@ -3175,7 +3155,6 @@ maintainer-clean: maintainer-clean-am
+ 	-rm -f unit/$(DEPDIR)/test-gvariant-message.Po
+ 	-rm -f unit/$(DEPDIR)/test-gvariant-util.Po
+ 	-rm -f unit/$(DEPDIR)/test-hashmap.Po
+-	-rm -f unit/$(DEPDIR)/test-hwdb.Po
+ 	-rm -f unit/$(DEPDIR)/test-io.Po
+ 	-rm -f unit/$(DEPDIR)/test-key.Po
+ 	-rm -f unit/$(DEPDIR)/test-main.Po

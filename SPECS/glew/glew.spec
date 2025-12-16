@@ -56,6 +56,9 @@ Development files for glew.
 # No configure.
 %conf
 
+# No 'check' target
+%check
+
 %install -a
 find %{buildroot} -type f -name "*.a" -delete
 

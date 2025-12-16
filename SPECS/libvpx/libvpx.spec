@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%global _test_target test
+
 Name:           libvpx
 Version:        1.15.2
 Release:        %autorelease
@@ -53,6 +55,9 @@ Development headers and library for libvpx.
     --extra-cflags="-std=gnu99 -U_FORTIFY_SOURCE %{optflags}" \
     --extra-cxxflags="-U_FORTIFY_SOURCE %{optflags}" \
     --size-limit=8192x8192
+
+%check
+# just skip,the test needs to download form internet.
 
 %files
 %doc AUTHORS README CHANGELOG

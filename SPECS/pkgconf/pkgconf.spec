@@ -44,6 +44,9 @@ BuildOption(conf):  --with-system-libdir=%{_libdir}
 BuildRequires:  gcc
 BuildRequires:  make
 
+# for tests.
+BuildRequires:  kyua
+BuildRequires:  atf-tests
 
 # pkgconf uses libpkgconf internally
 Requires:       %{libname}%{?_isa} = %{version}-%{release}

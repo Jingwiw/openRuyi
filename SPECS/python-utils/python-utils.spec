@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
+# SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -17,10 +18,16 @@ Source0:        https://files.pythonhosted.org/packages/source/p/%{name}/%{srcna
 BuildArch:      noarch
 BuildSystem:    pyproject
 
-BuildOption(install): -l %{srcname}
+BuildOption(install):  -l %{srcname}
 
-BuildRequires:  python3-devel
+BuildRequires:  pkgconfig(python3)
+BuildRequires:  python3-pip
+BuildRequires:  python3-setuptools
 BuildRequires:  pyproject-rpm-macros
+# the follow is for test.
+BuildRequires:  python3-pytest
+BuildRequires:  python3-pytest-asyncio
+BuildRequires:  python3-typing-extensions
 
 Provides:       python3-utils
 %python_provide python3-utils
@@ -33,6 +40,11 @@ and making sure a string is in unicode or bytes format.
 
 %generate_buildrequires
 %pyproject_buildrequires -r
+
+%check
+# Ignoring test_logger.py and python_utils/loguru.py - we don't have loguru
+# and we don't have python3-pytest-cov yet.
+%pytest -o "addopts=" --ignore _python_utils_tests/test_logger.py --ignore python_utils/loguru.py
 
 %files -f %{pyproject_files}
 %doc README.rst

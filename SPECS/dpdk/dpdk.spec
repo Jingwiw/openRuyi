@@ -66,6 +66,10 @@ Requires:       python3-pyelftools
 %description    tools
 %{summary}
 
+# Only run fast-tests; other tests require environments with hugepages, etc.
+%check
+%meson_test --suite fast-tests --print-errorlogs
+
 %files
 %{_bindir}/dpdk-testpmd
 %{_bindir}/dpdk-proc-info

@@ -26,6 +26,9 @@ BuildSystem:    autotools
 BuildRequires:  coreutils
 BuildRequires:  findutils
 BuildRequires:  gcc-c++
+# For tests
+BuildRequires:  git
+
 Requires:       cmake-data = %{version}-%{release} cmake-rpm-macros = %{version}-%{release}
 Requires:       cmake-filesystem = %{version}-%{release}
 Provides:       bundled(md5-deutsch) bundled(kwsys) bundled(cppdap)
@@ -112,6 +115,20 @@ find %{buildroot}%{_libdir}/cmake -type d | sed -e 's!^%{buildroot}!%%dir "!g' -
 # remove unnecessary emac lisp files
 rm -rf %{buildroot}%{_datadir}/emacs
 
+%check
+# Requires network access to run some tests, so exclude them
+NO_TEST="CTestTestUpload"
+# Exclude CPack component tests
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-default"
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-OnePackPerGroup"
+NO_TEST="$NO_TEST|CPackComponentsForAll-RPM-AllInOne"
+# curl test may fail
+NO_TEST="$NO_TEST|curl"
+%ifarch riscv64
+# timeout for riscv64
+NO_TEST="$NO_TEST|Qt5Autogen.ManySources|Qt5Autogen.MocInclude|Qt5Autogen.MocIncludeSymlink|Qt6Autogen.MocIncludeSymlink"
+%endif
+bin/ctest %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
 
 %files
 %doc %dir %{_docdir}/cmake

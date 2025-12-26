@@ -12,18 +12,13 @@
 }
 
 Name:           dpdk
-Version:        25.11
+Version:        25.07
 Release:        %autorelease
 Summary:        Set of libraries and drivers for fast packet processing
 License:        BSD-3-Clause AND GPL-2.0-only AND LGPL-2.1-only
 URL:            http://dpdk.org
 #!RemoteAsset
 Source:         https://fast.dpdk.org/rel/dpdk-%{version}.tar.xz
-
-# https://patches.dpdk.org/project/dpdk/patch/20251116155001.2809998-1-sunyuechi@iscas.ac.cn/
-Patch:          0001-node-lookup-with-RISC-V-vector-extension.patch
-# https://patches.dpdk.org/project/dpdk/patch/20251130200810.879556-1-sunyuechi@iscas.ac.cn/
-Patch:          0002-acl-add-RISC-V-vector-extension-implementation.patch
 
 BuildSystem:    meson
 
@@ -38,6 +33,19 @@ BuildRequires:  libpcap-devel
 BuildRequires:  zlib-devel
 BuildRequires:  numactl-devel
 BuildRequires:  openssl-devel
+
+%patchlist
+# 25.11
+0001-config-riscv-detect-V-extension.patch
+0002-lpm-lookup-with-RISC-V-vector-extension.patch
+0003-fib-lookup-with-RISC-V-vector-extension.patch
+0004-config-riscv-consider-specified-CPU.patch
+0005-test-raise-fast-test-timeout-to-60s-on-RISC-V.patch
+0006-config-riscv-add-rv64gcv-cross-compilation-target.patch
+# https://patches.dpdk.org/project/dpdk/patch/20251116155001.2809998-1-sunyuechi@iscas.ac.cn/
+0007-node-lookup-with-RISC-V-vector-extension.patch
+# https://patches.dpdk.org/project/dpdk/patch/20251130200810.879556-1-sunyuechi@iscas.ac.cn/
+0008-acl-add-RISC-V-vector-extension-implementation.patch
 
 %description
 The Data Plane Development Kit is a set of libraries and drivers for

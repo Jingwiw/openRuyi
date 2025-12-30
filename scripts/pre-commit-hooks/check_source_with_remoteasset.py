@@ -13,7 +13,7 @@ def check_file(file_path):
     errors = []
     lines = [line.strip() for line in open(file_path).readlines()]
 
-    sourcelines = [idx for idx,line in enumerate(lines) if re.match(r'^Source\d+:\s+https?://', line)]
+    sourcelines = [idx for idx,line in enumerate(lines) if re.match(r'^Source\d+:\s+(https?://|%{url})', line)]
 
 
     # 步骤2: 如果存在，检查每一个 Source\d+ 行是否有注释

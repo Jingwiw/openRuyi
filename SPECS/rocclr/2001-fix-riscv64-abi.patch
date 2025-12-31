@@ -1,0 +1,82 @@
+From: CHEN Xuan <chenxuan@iscas.ac.cn>
+Date: Sun, 21 Sep 2025 10:37:24 +0800
+Subject: fix-riscv64-abi
+
+---
+ clr/rocclr/device/rocm/rocvirtual.cpp | 10 +++++++++-
+ clr/rocclr/include/top.hpp            |  2 ++
+ clr/rocclr/os/os.hpp                  |  3 +++
+ clr/rocclr/os/os_posix.cpp            |  2 ++
+ 4 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/rocclr/device/rocm/rocvirtual.cpp b/rocclr/device/rocm/rocvirtual.cpp
+index f4e5799..8b363c2 100644
+--- a/rocclr/device/rocm/rocvirtual.cpp
++++ b/rocclr/device/rocm/rocvirtual.cpp
+@@ -3300,7 +3300,11 @@ static inline void nontemporalMemcpy(
+   std::memcpy(dst, src, size);
+ 
+   // Add memory fence
++#if !defined(__riscv)
+   _mm_sfence();
++#else
++  asm volatile("fence w,w" ::: "memory");
++#endif
+ #else
+   std::memcpy(dst, src, size);
+ #endif
+@@ -3555,7 +3559,11 @@ bool VirtualGPU::submitKernelInternal(const amd::NDRangeContainer& sizes,
+         *dev().info().hdpMemFlushCntl = 1u;
+         auto kSentinel = *reinterpret_cast<volatile int*>(dev().info().hdpMemFlushCntl);
+       } else if (kernArgImpl == KernelArgImpl::DeviceKernelArgsReadback && argSize != 0) {
+-        _mm_sfence();
++#if !defined(__riscv)
++          _mm_sfence();
++#else
++          asm volatile("fence w,w" ::: "memory");
++#endif
+         *(argBuffer + argSize - 1) = *(parameters + argSize - 1);
+         _mm_mfence();
+         auto kSentinel = *reinterpret_cast<volatile unsigned char*>(argBuffer + argSize - 1);
+diff --git a/rocclr/include/top.hpp b/rocclr/include/top.hpp
+index d6aa00c..99b5ae9 100644
+--- a/rocclr/include/top.hpp
++++ b/rocclr/include/top.hpp
+@@ -28,6 +28,8 @@
+     defined(__x86__) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||            \
+     defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
+ #define ATI_ARCH_X86
++#elif defined(__riscv)
++#define ATI_ARCH_RISCV
+ #endif
+ 
+ #if defined(ATI_ARCH_ARM)
+diff --git a/rocclr/os/os.hpp b/rocclr/os/os.hpp
+index e8b7c0d..7a872e6 100644
+--- a/rocclr/os/os.hpp
++++ b/rocclr/os/os.hpp
+@@ -361,6 +361,9 @@ ALWAYSINLINE address Os::currentStackPtr() {
+ #elif defined(ATI_ARCH_ARM)
+       "mov %0,sp"
+       : "=r"(value)
++#elif defined(ATI_ARCH_RISCV)
++      "mv %0,sp"
++      : "=r"(value)
+ #else
+       ""
+ #endif
+diff --git a/rocclr/os/os_posix.cpp b/rocclr/os/os_posix.cpp
+index 6ee3678..de97245 100644
+--- a/rocclr/os/os_posix.cpp
++++ b/rocclr/os/os_posix.cpp
+@@ -318,8 +318,10 @@ void Os::currentStackInfo(address* base, size_t* size) {
+ 
+   ::pthread_attr_destroy(&threadAttr);
+ 
++#if !(defined(__riscv) && __riscv_xlen == 64)
+   assert(Os::currentStackPtr() >= *base - *size && Os::currentStackPtr() < *base &&
+          "just checking");
++#endif
+ }
+ 
+ void Os::setCurrentThreadName(const char* name) { ::prctl(PR_SET_NAME, name); }

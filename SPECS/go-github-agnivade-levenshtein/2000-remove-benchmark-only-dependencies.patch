@@ -1,0 +1,62 @@
+From: Taavi VÃ¤Ã¤nÃ¤nen <hi@taavi.wtf>
+Date: 2022-10-30 10:20:08 +0200
+Subject: Drop dependencies only used for comparison benchmarks
+Forwarded: not-needed
+Last-Update: 2022-10-30
+
+Removes dependencies on two other Levenshtein implementations that are
+not available as Debian packages. Those were only used in benchmarks
+comparing the libraries, and especially trifles would require a
+significant amount of time to package.
+diff --git a/go.mod b/go.mod
+index f71f642..7b2671b 100644
+--- a/go.mod
++++ b/go.mod
+@@ -2,7 +2,3 @@ module github.com/agnivade/levenshtein
+ 
+ go 1.21
+ 
+-require (
+-	github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0
+-	github.com/dgryski/trifles v0.0.0-20230903005119-f50d829f2e54
+-)
+diff --git a/go.sum b/go.sum
+deleted file mode 100644
+index 4cd4723..0000000
+--- a/go.sum
++++ /dev/null
+@@ -1,4 +0,0 @@
+-github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0 h1:jfIu9sQUG6Ig+0+Ap1h4unLjW6YQJpKZVmUzxsD4E/Q=
+-github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0/go.mod h1:t2tdKJDJF9BV14lnkjHmOQgcvEKgtqs5a1N3LNdJhGE=
+-github.com/dgryski/trifles v0.0.0-20230903005119-f50d829f2e54 h1:SG7nF6SRlWhcT7cNTs5R6Hk4V2lcmLz2NsG2VnInyNo=
+-github.com/dgryski/trifles v0.0.0-20230903005119-f50d829f2e54/go.mod h1:if7Fbed8SFyPtHLHbg49SI7NAdJiC5WIA09pe59rfAA=
+diff --git a/levenshtein_test.go b/levenshtein_test.go
+index dd3607a..525bc99 100644
+--- a/levenshtein_test.go
++++ b/levenshtein_test.go
+@@ -4,8 +4,6 @@ import (
+ 	"testing"
+ 
+ 	agnivade "github.com/agnivade/levenshtein"
+-	arbovm "github.com/arbovm/levenshtein"
+-	dgryski "github.com/dgryski/trifles/leven"
+ )
+ 
+ func TestSanity(t *testing.T) {
+@@ -128,16 +126,6 @@ func BenchmarkAll(b *testing.B) {
+ 					tmp = agnivade.ComputeDistance(test.a, test.b)
+ 				}
+ 			})
+-			b.Run("arbovm", func(b *testing.B) {
+-				for n := 0; n < b.N; n++ {
+-					tmp = arbovm.Distance(test.a, test.b)
+-				}
+-			})
+-			b.Run("dgryski", func(b *testing.B) {
+-				for n := 0; n < b.N; n++ {
+-					tmp = dgryski.Levenshtein([]rune(test.a), []rune(test.b))
+-				}
+-			})
+ 		})
+ 	}
+ 	sink = tmp

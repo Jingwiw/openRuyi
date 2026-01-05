@@ -36,8 +36,16 @@ Requires: glibc
 Requires: libcap
 
 # TODO: Use rva23 rust toolchain to compile
+%ifarch x86_64
+%define rust_def_target x86_64-unknown-linux-gnu
+%define cargo_pkg_feature_opts --no-default-features --features "mshv,kvm" -p cloud-hypervisor
+%endif
+
+%ifarch riscv64
 %define rust_def_target riscv64gc-unknown-linux-gnu
 %define cargo_pkg_feature_opts --no-default-features --features "kvm" -p cloud-hypervisor
+%endif
+
 %define cargo_offline --offline
 
 %description

@@ -1,0 +1,30 @@
+From bd0217312deea09261c67d205692d001e710b308 Mon Sep 17 00:00:00 2001
+From: Georges Varouchas <gvarouchas@wallix.com>
+Date: Sat, 26 Oct 2024 12:39:42 +0400
+Subject: [PATCH] adjust splitLines to match go 1.22 behavior
+ 
+see https://tip.golang.org/doc/go1.22#minor_library_changes
+ 
+there was a change in bufio.Scanner, which does not "report" anymore
+a 'nil' final line
+ 
+unit test would work pre 1.22, and fail on 1.22 and onwards
+ 
+fixes #29
+---
+ gotenv.go | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ 
+diff --git a/gotenv.go b/gotenv.go
+index 1191d35..41b283c 100644
+--- a/gotenv.go
++++ b/gotenv.go
+@@ -186,7 +186,7 @@ func Write(env Env, filename string) error {
+ // If a CR is immediately followed by a LF, it is treated as a CRLF (one single line break).
+ func splitLines(data []byte, atEOF bool) (advance int, token []byte, err error) {
+ 	if atEOF && len(data) == 0 {
+-		return 0, nil, bufio.ErrFinalToken
++		return 0, []byte{}, bufio.ErrFinalToken
+ 	}
+ 
+ 	idx := bytes.IndexAny(data, "\r\n")

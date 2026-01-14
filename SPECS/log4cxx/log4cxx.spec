@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
-# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
-# SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
+# SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -15,6 +15,7 @@ Source:         https://www.apache.org/dist/logging/log4cxx/%{version}/apache-lo
 BuildSystem:    cmake
 
 BuildOption(conf): -DBUILD_SITE:BOOL=OFF
+BuildOption(check): -E "autoconfiguretestcase"
 
 BuildRequires: apr-devel
 BuildRequires: apr-util-devel

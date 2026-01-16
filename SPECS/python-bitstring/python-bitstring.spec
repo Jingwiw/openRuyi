@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Jvle <keke.oerv@isrc.iscas.ac.cn>
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+%global srcname bitstring
+
+Name:           python-%{srcname}
+Version:        4.3.1
+Release:        %autorelease
+Summary:        Simple construction, analysis and modification of binary data
+License:        MIT
+URL:            https://github.com/scott-griffiths/bitstring
+
+#!RemoteAsset
+Source0:        https://files.pythonhosted.org/packages/source/b/%{srcname}/%{srcname}-%{version}.tar.gz
+
+BuildArch:      noarch
+BuildSystem:    pyproject
+
+BuildOption(install): -l %{srcname}
+
+BuildRequires:  pyproject-rpm-macros
+BuildRequires:  python3-devel
+BuildRequires:  python3dist(pip) >= 19
+BuildRequires:  python3dist(setuptools) >= 61
+
+Provides:       python3-%{srcname}
+%python_provide python3-%{srcname}
+
+%global _description %{expand:
+bitstring is a pure Python module designed to help make the creation and
+analysis of binary data as simple and natural as possible.
+
+Bitstrings can be constructed from integers (big and little endian), hex,
+octal, binary, strings or files. They can be sliced, joined, reversed,
+inserted into, overwritten, etc. with simple functions or slice notation.
+They can also be read from, searched and replaced, and navigated in, similar
+to a file or stream.
+}
+
+%description %_description
+
+%generate_buildrequires
+%pyproject_buildrequires
+
+%files -f %{pyproject_files}
+%license LICENSE
+%doc README.md
+
+%changelog
+%{?autochangelog}

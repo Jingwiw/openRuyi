@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Yafen Fang <yafen@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -15,19 +16,19 @@ License:        GPL-2.0-or-later
 URL:            https://git.kernel.dk/cgit/blktrace
 #!RemoteAsset
 Source0:        https://git.kernel.dk/cgit/blktrace/snapshot/%{name}-%{commit}.tar.gz
-
 BuildSystem:    autotools
-BuildOption(build): CFLAGS="%{optflags} %{?build_ldflags}"
-BuildOption(build): all
-BuildOption(install): DESTDIR=%{buildroot}
-BuildOption(install): prefix=%{_prefix}
-BuildOption(install): mandir=%{_mandir}
+
+BuildOption(build):  CFLAGS="%{optflags} %{?build_ldflags}"
+BuildOption(build):  all
+BuildOption(install):  DESTDIR=%{buildroot}
+BuildOption(install):  prefix=%{_prefix}
+BuildOption(install):  mandir=%{_mandir}
 
 BuildRequires:  gcc
 BuildRequires:  make
-BuildRequires:  libaio-devel
+BuildRequires:  pkgconfig(libaio)
 # BuildRequires:  librsvg-devel
-BuildRequires:  python3-devel
+BuildRequires:  pkgconfig(python3)
 
 # Requires:       librsvg-tools
 

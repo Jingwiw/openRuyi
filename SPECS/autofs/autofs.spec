@@ -2,43 +2,51 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: laokz <zhangkai@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-Summary: A tool from automatically mounting and umounting filesystems.
-Name: autofs
-Version: 5.1.9
-Release: %autorelease
-License: GPL-2.0-or-later
+Name:           autofs
+Version:        5.1.9
+Release:        %autorelease
+Summary:        A tool from automatically mounting and umounting filesystems.
+License:        GPL-2.0-or-later
+URL:            https://docs.kernel.org/filesystems/autofs.html
+VCS:            git:https://git.kernel.org/pub/scm/linux/storage/autofs/autofs.git
 #!RemoteAsset
-Source: https://www.kernel.org/pub/linux/daemons/autofs/v5/autofs-%{version}.tar.gz
-Patch0: autofs-5.1.9-Fix-incompatible-function-pointer-types-in-cyrus-sasl-module.patch
+Source:         https://www.kernel.org/pub/linux/daemons/autofs/v5/autofs-%{version}.tar.gz
+BuildSystem:    autotools
 
-BuildRequires: pkgconfig(libsystemd)
-BuildRequires: pkgconfig(libtirpc)
-BuildRequires: pkgconfig(libxml-2.0)
-BuildRequires: pkgconfig(libnsl)
-BuildRequires: autoconf
-BuildRequires: automake
-BuildRequires: make
-BuildRequires: m4
-BuildRequires: bison
-BuildRequires: flex
-#BuildRequires: openldap2-devel
-BuildRequires: cyrus-sasl-devel
-BuildRequires: openssl-devel
-BuildRequires: util-linux
-BuildRequires: krb5-devel
-Requires: /usr/bin/bash sed grep /usr/bin/ps
+Patch0:         autofs-5.1.9-Fix-incompatible-function-pointer-types-in-cyrus-sasl-module.patch
 
-BuildSystem: autotools
-BuildOption(conf): --with-systemd
-BuildOption(conf): --disable-mount-locking
-BuildOption(conf): --enable-ignore-busy
-BuildOption(conf): --enable-force-shutdown
-BuildOption(conf): --without-hesiod
-BuildOption(conf): --with-libtirpc
-BuildOption(build): DONTSTRIP=1
+BuildOption(conf):  --with-systemd
+BuildOption(conf):  --disable-mount-locking
+BuildOption(conf):  --enable-ignore-busy
+BuildOption(conf):  --enable-force-shutdown
+BuildOption(conf):  --without-hesiod
+BuildOption(conf):  --with-libtirpc
+BuildOption(build):  DONTSTRIP=1
+
+BuildRequires:  pkgconfig(libsystemd)
+BuildRequires:  pkgconfig(libtirpc)
+BuildRequires:  pkgconfig(libxml-2.0)
+BuildRequires:  pkgconfig(libnsl)
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  make
+BuildRequires:  m4
+BuildRequires:  bison
+BuildRequires:  flex
+#BuildRequires:  openldap2-devel
+BuildRequires:  cyrus-sasl-devel
+BuildRequires:  openssl-devel
+BuildRequires:  util-linux
+BuildRequires:  krb5-devel
+
+Requires:       /usr/bin/bash
+Requires:       sed
+Requires:       grep
+Requires:       /usr/bin/ps
 
 %description
 autofs is a daemon which automatically mounts filesystems when you use

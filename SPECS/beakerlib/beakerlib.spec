@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
@@ -10,14 +11,14 @@ Version:        1.31.6
 Release:        %autorelease
 Summary:        A shell-level integration testing library
 License:        GPL-2.0-only
-URL:            https://github.com/%{name}
+URL:            https://github.com/beakerlib/beakerlib
 #!RemoteAsset
 Source0:        https://github.com/beakerlib/beakerlib/archive/refs/tags/1.31.6.tar.gz
 Source1:        %{name}-tmpfiles.conf
 BuildSystem:    autotools
 
-BuildOption(build): build
-BuildOption(install): DESTDIR=%{buildroot}/usr
+BuildOption(build):  build
+BuildOption(install):  DESTDIR=%{buildroot}/usr
 
 BuildRequires:  perl
 BuildRequires:  util-linux
@@ -25,23 +26,34 @@ BuildRequires:  make
 
 Requires:       /bin/bash
 Requires:       /bin/sh
-Requires:       coreutils grep gzip iproute2 sed tar util-linux which
+Requires:       coreutils
+Requires:       grep
+Requires:       gzip
+Requires:       iproute2
+Requires:       sed
+Requires:       tar
+Requires:       util-linux
+Requires:       which
 Requires:       /usr/bin/bc /usr/bin/time
 Requires:       (wget or curl)
 Requires:       nfs-utils
-Recommends:     /usr/bin/perl python3-lxml /usr/bin/xmllint
+
+Recommends:     /usr/bin/perl
+Recommends:     python3-lxml
+Recommends:     /usr/bin/xmllint
 
 %description
 The BeakerLib project provides a library of shell functions to be used for
 writing operating system level integration tests.
 
-%package       vim-syntax
-Summary: Files for syntax highlighting BeakerLib tests in VIM editor
-Requires:      vim
-BuildRequires: vim
-BuildRequires: make
+%package        vim-syntax
+Summary:        Files for syntax highlighting BeakerLib tests in VIM editor
+BuildRequires:  vim
+BuildRequires:  make
+Requires:       vim
 
-%description   vim-syntax
+
+%description    vim-syntax
 Files for syntax highlighting BeakerLib tests in VIM editor
 
 # No configure

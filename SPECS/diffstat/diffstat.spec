@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,11 +12,16 @@ Release:        %autorelease
 Summary:        A utility for displaying a histogram of diff output
 License:        X11
 URL:            https://invisible-island.net/diffstat
+# VCS: No VCS link available
 #!RemoteAsset
 Source:         https://invisible-mirror.net/archives/diffstat/diffstat-%{version}.tgz
 BuildSystem:    autotools
 
-BuildRequires:  gcc libtool autoconf automake make
+BuildRequires:  gcc
+BuildRequires:  libtool
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  make
 
 %description
 diffstat reads the output of the diff command and displays a histogram of the

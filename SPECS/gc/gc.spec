@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Xuhai Chang <xuhai.oerv@isrc.iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -10,22 +11,31 @@ Version:        8.2.8
 Release:        %autorelease
 Summary:        A garbage collector for C and C++
 License:        BSD and GPLv1+
-Url:            http://www.hboehm.info/gc/
+URL:            http://www.hboehm.info/gc/
+VCS:            git:https://github.com/bdwgc/bdwgc/
 #!RemoteAsset
 Source0:        https://github.com/bdwgc/bdwgc/releases/download/v%{version}/gc-%{version}.tar.gz
 BuildSystem:    autotools
 
-BuildRequires: gcc gcc-c++ libtool
-BuildOption(conf): --disable-static --disable-docs --enable-cplusplus --enable-large-config --enable-threads=posix
+BuildOption(conf):  --disable-static
+BuildOption(conf):  --disable-docs
+BuildOption(conf):  --enable-cplusplus
+BuildOption(conf):  --enable-large-config
+BuildOption(conf):  --enable-threads=posix
+
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: libtool
 
 %description
 The Boehm-Demers-Weiser conservative garbage collector can be
 used as a garbage collecting replacement for C malloc or C++ new.
 
-%package devel
-Summary: Libraries and header files for %{name} development
-Requires: %{name}%{?_isa} = %{version}-%{release}
-%description devel
+%package        devel
+Summary:        Libraries and header files for %{name} development
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+
+%description    devel
 %{summary}.
 
 %install -a

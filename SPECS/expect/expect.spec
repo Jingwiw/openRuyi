@@ -2,18 +2,23 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global _test_target test
+
 Name:           expect
 Version:        5.45.4
 Release:        %autorelease
 Summary:        A Tool for Automating Interactive Programs
 License:        OpenRuyi-Public-Domain
 URL:            https://core.tcl-lang.org/expect/
+# VCS: TODO: Protentially cvs https://sourceforge.net/p/expect/code/
 #!RemoteAsset
 Source:         https://downloads.sourceforge.net/expect/expect%{version}.tar.gz
+BuildSystem:    autotools
+
 Patch1:         0001-expect.patch
 Patch2:         0002-expect-fixes.patch
 Patch3:         0003-expect-log.patch
@@ -21,22 +26,19 @@ Patch4:         0004-config-guess-sub-update.patch
 Patch5:         0005-expect-errorfd.patch
 Patch6:         0006-expect-5.45-format-security.patch
 Patch7:         0007-expect-fix-implicit.patch
-BuildSystem:    autotools
 
-BuildOption(prep): -p0 -n %{name}%{version}
-BuildOption(conf): --with-tcl=%{_libdir}
-BuildOption(conf): --with-tk=no_tk
-BuildOption(conf): --with-tclinclude=%{_includedir}
-BuildOption(conf): --enable-shared
-
-BuildOption(build): CFLAGS="%{optflags} -fPIC -pie -std=gnu89"
-BuildOption(build): SHLIB_LD="gcc -shared"
-BuildOption(build): pkglibdir=%{_libdir}/tcl/%{name}%{version}
-
-BuildOption(install): pkglibdir=%{_libdir}/tcl/%{name}%{version}
+BuildOption(prep):  -p0 -n %{name}%{version}
+BuildOption(conf):  --with-tcl=%{_libdir}
+BuildOption(conf):  --with-tk=no_tk
+BuildOption(conf):  --with-tclinclude=%{_includedir}
+BuildOption(conf):  --enable-shared
+BuildOption(build):  CFLAGS="%{optflags} -fPIC -pie -std=gnu89"
+BuildOption(build):  SHLIB_LD="gcc -shared"
+BuildOption(build):  pkglibdir=%{_libdir}/tcl/%{name}%{version}
+BuildOption(install):  pkglibdir=%{_libdir}/tcl/%{name}%{version}
 
 BuildRequires:  autoconf
-BuildRequires:  tcl-devel
+BuildRequires:  pkgconfig(tcl)
 
 %description
 Expect is a tool for automating interactive applications like telnet, ftp, passwd,
@@ -44,9 +46,9 @@ and more. It is also useful for testing these applications.
 
 %package        devel
 Summary:        Header Files and C API Documentation for expect
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
-%description   devel
+%description    devel
 This package contains header files and documentation needed for linking to expect
 from compiled languages like C or C++.
 

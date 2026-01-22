@@ -54,7 +54,7 @@ package.
 
 %package        tools
 Summary:        dracut tools to build the local initramfs
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    tools
 This package contains tools to assemble the local initrd and host configuration.

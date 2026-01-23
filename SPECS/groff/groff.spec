@@ -14,6 +14,7 @@ Release:        %autorelease
 Summary:        A document formatting system
 License:        GPL-3.0-or-later AND GFDL-1.3-or-later AND BSD-4-Clause-UC AND MIT AND X11 AND LicenseRef-openRuyi-Public-Domain
 URL:            http://www.gnu.org/software/groff/
+VCS:            git:https://https.git.savannah.gnu.org/git/groff.git
 #!RemoteAsset
 Source0:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
 #!RemoteAsset
@@ -43,7 +44,6 @@ BuildRequires:  netpbm-progs
 %endif
 
 Provides:       nroff-i18n = %{version}-%{release}
-Provides:       bundled(gnulib)
 
 Requires:       coreutils
 Requires:       groff-base = %{version}-%{release}

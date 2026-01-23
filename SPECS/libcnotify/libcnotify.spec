@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Yafen Fang <yafen@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -14,9 +15,9 @@ URL:            https://github.com/libyal/libcnotify
 Source0:        %{url}/releases/download/%{version}/libcnotify-beta-%{version}.tar.gz
 #!RemoteAsset
 Source1:        %{url}/releases/download/%{version}/libcnotify-beta-%{version}.tar.gz.asc
-
 BuildSystem:    autotools
-BuildOption(conf): --disable-static
+
+BuildOption(conf):  --disable-static
 
 BuildRequires:  gcc
 BuildRequires:  pkg-config
@@ -27,11 +28,11 @@ libcnotify is a library for cross-platform C notification functions.
 
 This package is  part of the libyal library collection.
 
-%package devel
+%package        devel
 Summary:        Development files for libcnotify, a C notify library
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
-%description devel
+%description    devel
 libcnotify is a library for cross-platform C notification functions.
 
 This subpackage contains libraries and header files for developing

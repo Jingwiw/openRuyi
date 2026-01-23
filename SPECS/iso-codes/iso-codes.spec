@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: ayostl <yao_xp@yeah.net>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -13,17 +14,16 @@ License:        LGPL-2.1-or-later
 URL:            https://salsa.debian.org/iso-codes-team/iso-codes
 #!RemoteAsset
 Source0:        https://salsa.debian.org/iso-codes-team/%{name}/-/archive/v%{version}/%{name}-v%{version}.tar.gz
+BuildArch:      noarch
 BuildSystem:    autotools
 
 BuildOption(install):  INSTALL="%{__install} -p"
 
 BuildRequires:  pkgconfig
-BuildRequires:  python3-devel
+BuildRequires:  pkgconfig(python3)
 BuildRequires:  python3-lxml
 
-BuildArch:      noarch
 Provides:       iso-codes-lang = %{version}
-Obsoletes:      iso-codes-lang <= %{version}
 
 %description
 This package provides the ISO-639 language code list, the ISO-3166
@@ -32,7 +32,7 @@ translations in gettext .po form.
 
 %package        devel
 Summary:        ISO code lists and translations
-Requires:       %{name} = %{version}
+Requires:       %{name} = %{version}-%{release}
 
 %description    devel
 This package provides the ISO-639 Language code list, the ISO-3166

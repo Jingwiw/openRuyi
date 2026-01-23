@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Yafen Fang <yafen@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -10,22 +11,25 @@ Release:        %autorelease
 Summary:        ITS-based XML translation tool
 License:        GPL-3.0-or-later
 URL:            http://itstool.org/
+VCS:            git:https://github.com/itstool/itstool
 #!RemoteAsset
 Source0:        http://files.itstool.org/itstool/%{name}-%{version}.tar.bz2
+BuildArch:      noarch
+BuildSystem:    autotools
+
 Patch0001:      0001-Fix-insufficiently-quoted-regular-expressions.patch
 Patch0002:      0002-Switch-from-libxml2-to-lxml.patch
 
-BuildSystem:    autotools
-
-BuildArch:      noarch
+BuildOption(prep):  -n %{name}-%{version} -p1
 
 BuildRequires:  python3-lxml
-BuildRequires:  python3-devel
+BuildRequires:  pkgconfig(python3)
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  libtool
+
 Requires:       python3-lxml
-BuildOption(prep): -n %{name}-%{version} -p1
+
 %description
 ITS Tool allows you to translate XML documents with PO files, using rules from
 the W3C Internationalization Tag Set (ITS) to determine what to translate and

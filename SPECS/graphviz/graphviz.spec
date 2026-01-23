@@ -1,17 +1,19 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-Name:    	graphviz
-Summary:    Graph Visualization Tools
-Version:    14.0.4
-Release:    %autorelease
-License:    EPL-1.0 AND CPL-1.0 AND BSD-3-Clause AND MIT AND GPL-3.0-or-later
-URL:    	http://www.graphviz.org/
+Name:           graphviz
+Summary:        Graph Visualization Tools
+Version:        14.0.4
+Release:        %autorelease
+License:        EPL-1.0 AND CPL-1.0 AND BSD-3-Clause AND MIT AND GPL-3.0-or-later
+URL:            http://www.graphviz.org/
+VCS:            git:https://gitlab.com/graphviz/graphviz
 #!RemoteAsset
-Source:     https://gitlab.com/graphviz/graphviz/-/archive/%{version}/graphviz-%{version}.tar.gz
+Source:         https://gitlab.com/graphviz/graphviz/-/archive/%{version}/graphviz-%{version}.tar.gz
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-static
@@ -41,7 +43,9 @@ BuildOption(conf):  --disable-go
 BuildOption(conf):  --enable-python=yes
 BuildOption(conf):  --disable-lefty
 
-BuildRequires:  autoconf automake libtool
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
 BuildRequires:  automake
 BuildRequires:  gcc-c++
 BuildRequires:  make
@@ -77,7 +81,7 @@ Graphviz libraries.
 
 %package        devel
 Summary:        Development package for graphviz
-Requires:       %{name}-libs = %{version}-%{release}
+Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 Requires:       pkgconfig
 
 %description    devel
@@ -85,7 +89,7 @@ This package contains development files for graphviz.
 
 %package        python3
 Summary:        Python 3 extension for graphviz
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    python3
 Python 3 extension for graphviz.

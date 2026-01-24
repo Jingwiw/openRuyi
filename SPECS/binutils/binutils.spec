@@ -1,9 +1,13 @@
-# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
-# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: laokz <zhangkai@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+# Do not set this in cflags to avoid test failures. Instead, use the LTO option
+# provided by binutils.
+%global _lto_cflags %{nil}
 
 # disable libalternatives for now until it's changed to not
 # introduce cmake/cunit-tests into the bootstrap cycle
@@ -71,6 +75,7 @@ cd build-dir
       --enable-default-hash-style=both \
     --enable-compressed-debug-sections=all \
       --enable-shared \
+      --enable-lto \
 %if %{with bootstrap} && 0%{?do_profiling}
       --enable-pgo-build=lto \
 %endif

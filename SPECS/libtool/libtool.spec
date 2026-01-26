@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -10,21 +11,25 @@
 %else
 %define psuffix %{nil}
 %endif
+
 Name:           libtool%{psuffix}
 Version:        2.4.7
 Release:        %autorelease
 Summary:        A Tool to Build Shared Libraries
 License:        GFDL-1.2-or-later AND GPL-2.0-or-later AND LGPL-2.1-or-later
 URL:            https://www.gnu.org/software/libtool/
+VCS:            git:https://git.savannah.gnu.org/git/libtool.git
 #!RemoteAsset
 Source0:        https://ftpmirror.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
 #!RemoteAsset
 Source1:        https://ftpmirror.gnu.org/gnu/libtool/libtool-%{version}.tar.xz.sig
+Buildsystem:    autotools
+
 Patch0:         libtool-reproducible-hostname.patch
 Patch1:         handle-Werror-return-type.patch
 Patch2:         libtool-2.4.7-grep-3.8.patch
 
-Buildsystem:    autotools
+BuildOption(conf):  --enable-ltdl-install
 
 BuildRequires:  automake
 BuildRequires:  gcc-c++
@@ -34,23 +39,22 @@ BuildRequires:  help2man
 BuildRequires:  lzma
 BuildRequires:  texinfo
 BuildRequires:  pkgconfig(zlib)
+
 Requires:       automake > 1.4
-Requires:       libltdl7 = %{version}
+Requires:       libltdl = %{version}-%{release}
 Requires:       m4 >= 1.4.16
 Requires:       tar
-Provides:       libltdl-devel
-Provides:       libtool-ltdl-devel
-BuildOption: --enable-ltdl-install
+
 
 %description
 GNU libtool is a set of shell scripts to automatically configure UNIX
 architectures to build shared libraries in a generic fashion.
 
-%package -n libltdl7
+%package     -n libltdl
 Summary:        Libtool Runtime Library
 License:        LGPL-2.1-or-later
 
-%description -n libltdl7
+%description -n libltdl
 Library needed by programs that use the ltdl interface of GNU libtool.
 
 %conf -p
@@ -90,7 +94,7 @@ sed -i "/uname -n/d" %{buildroot}%{_datadir}/aclocal/libtool.m4
 %{_mandir}/man1/libtoolize.1%{?ext_man}
 %{_datadir}/libtool
 
-%files -n libltdl7
+%files -n libltdl
 %{_libdir}/libltdl.so.7*
 %endif
 

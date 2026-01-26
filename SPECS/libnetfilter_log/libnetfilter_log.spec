@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,15 +12,23 @@ Release:        %autorelease
 Summary:        Netfilter logging userspace library
 License:        GPL-2.0-only
 URL:            http://netfilter.org
+VCS:            git:https://git.netfilter.org/libnetfilter_log
 #!RemoteAsset
 Source0:        http://netfilter.org/projects/%{name}/files/%{name}-%{version}.tar.bz2
 BuildSystem:    autotools
 
-BuildOption(conf): --disable-static
-BuildOption(conf): --disable-rpath
+BuildOption(conf):  --disable-static
+BuildOption(conf):  --disable-rpath
 
-BuildRequires:  gcc make autoconf automake libtool libmnl-devel
-BuildRequires:  libnfnetlink-devel pkgconfig linux-headers
+BuildRequires:  gcc
+BuildRequires:  make
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+BuildRequires:  pkgconfig(libmnl)
+BuildRequires:  pkgconfig(libnfnetlink)
+BuildRequires:  pkgconfig
+BuildRequires:  linux-headers
 
 %description
 libnetfilter_log is a userspace library providing an interface to packets
@@ -28,10 +37,10 @@ that deprecates the old syslog/dmesg based packet logging.
 
 %package        devel
 Summary:        Development files for the Netfilter logging library
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       pkgconfig
 Requires:       linux-headers
-Requires:       libnfnetlink-devel
+Requires:       pkgconfig(libnfnetlink)
 
 %description    devel
 This package contains the header files and development library for

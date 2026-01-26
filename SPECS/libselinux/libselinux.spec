@@ -5,11 +5,12 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %define libsepol_ver 3.9
+
 Name:           libselinux
 Version:        3.9
 Release:        %autorelease
 Summary:        SELinux runtime library and utilities
-License:        Public-Domain
+License:        LicenseRef-openRuyi-Public-Domain
 URL:            https://github.com/SELinuxProject/selinux/wiki/Releases
 #!RemoteAsset
 Source0:        https://github.com/SELinuxProject/selinux/releases/download/%{version}/%{name}-%{version}.tar.gz
@@ -17,35 +18,41 @@ Source0:        https://github.com/SELinuxProject/selinux/releases/download/%{ve
 Source1:        https://github.com/SELinuxProject/selinux/releases/download/%{version}/%{name}-%{version}.tar.gz.asc
 Source2:        libselinux.keyring
 Source3:        selinux-ready
-Patch4:         readv-proto.patch
-Patch5:         skip_cycles.patch
+BuildSystem:    autotools
+
+Patch0:         readv-proto.patch
+Patch1:         skip_cycles.patch
 # Make linking working even when default pkg-config doesn’t provide -lpython<ver>
-Patch6:         python3.8-compat.patch
-Patch7:         swig4_moduleimport.patch
+Patch2:         python3.8-compat.patch
+Patch3:         swig4_moduleimport.patch
+
 BuildRequires:  libsepol-devel >= %{libsepol_ver}
 BuildRequires:  libsepol-static >= %{libsepol_ver}
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(libpcre2-8)
-BuildRequires:  python3 python3-devel python3-setuptools python3-pip swig
+BuildRequires:  python3
+BuildRequires:  pkgconfig(python3)
+BuildRequires:  python3-setuptools
+BuildRequires:  python3-pip
+BuildRequires:  swig
 
-BuildSystem:    autotools
-BuildOption(build): LIBDIR="%{_libdir}" CC="%__cc"
-BuildOption(build): CFLAGS="%{optflags} -fno-semantic-interposition -ffat-lto-objects"
-BuildOption(build): USE_PCRE2=y
-BuildOption(install): LIBDIR="%{_libdir}"
-BuildOption(install): SHLIBDIR="%{_libdir}"
-BuildOption(install): BINDIR="%{_bindir}"
-BuildOption(install): SBINDIR="%{_sbindir}"
-BuildOption(install): PIP_NO_BUILD_ISOLATION=0
-BuildOption(install): all install-pywrap
+BuildOption(build):  LIBDIR="%{_libdir}" CC="%__cc"
+BuildOption(build):  CFLAGS="%{optflags} -fno-semantic-interposition -ffat-lto-objects"
+BuildOption(build):  USE_PCRE2=y
+BuildOption(install):  LIBDIR="%{_libdir}"
+BuildOption(install):  SHLIBDIR="%{_libdir}"
+BuildOption(install):  BINDIR="%{_bindir}"
+BuildOption(install):  SBINDIR="%{_sbindir}"
+BuildOption(install):  PIP_NO_BUILD_ISOLATION=0
+BuildOption(install):  all install-pywrap
 
 %description
 libselinux provides an interface to get and set process and file
 security contexts and to obtain security policy decisions.
 
-%package -n selinux-tools
+%package     -n selinux-tools
 Summary:        SELinux command-line utilities
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Provides:       libselinux-utils = %{version}-%{release}
 
 %description -n selinux-tools
@@ -57,42 +64,42 @@ Security.
 This subpackage contains utilities to inspect and administer the
 system's SELinux state.
 
-%package devel
+%package        devel
 Summary:        Development files for the SELinux runtime library
 Requires:       glibc-devel
-Requires:       libselinux = %{version}
-#Automatic dependency on libsepol-devel via pkgconfig
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
-%description devel
+%description    devel
 libselinux provides an interface to get and set process and file
 security contexts and to obtain security policy decisions.
 
 This package contains the development files, which are
 necessary to develop your own software using libselinux.
 
-%package static
+%package        static
 Summary:        Static archives for the SELinux runtime
-Requires:       libselinux-devel = %{version}
+Requires:       libselinux-devel = %{version}-%{release}
 Requires:       pkgconfig(libpcre2-8)
 Requires:       pkgconfig(libsepol)
 
-%description static
+%description    static
 libselinux provides an interface to get and set process and file
 security contexts and to obtain security policy decisions.
 
 This package contains the static development files, which are
 necessary to develop your own software using libselinux.
 
-%package -n python3-libselinux
-Summary: SELinux python 3 bindings for libselinux
-Requires: %{name}%{?_isa} = %{version}-%{release}
+%package     -n python-libselinux
+Summary:        SELinux python bindings for libselinux
+Provides:       python3-libselinux = %{version}-%{release}
 %{?python_provide:%python_provide python3-libselinux}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
-%description -n python3-libselinux
-The libselinux-python3 package contains python 3 bindings for developing
+%description -n python-libselinux
+The libselinux-python package contains python 3 bindings for developing
 SELinux applications.
 
-#  no configure scripts
+# no configure scripts
 %conf
 
 %build -a
@@ -103,7 +110,6 @@ mkdir -p %{buildroot}/%{_lib}
 mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_includedir}
 mkdir -p %{buildroot}%{_sbindir}
-
 
 %install -a
 mv %{buildroot}%{_sbindir}/getdefaultcon %{buildroot}%{_sbindir}/selinuxdefcon
@@ -158,7 +164,7 @@ install -m 0755 %{SOURCE3} %{buildroot}%{_sbindir}/selinux-ready
 %files static
 %{_libdir}/libselinux.a
 
-%files -n python3-libselinux
+%files -n python-libselinux
 %{python3_sitearch}/selinux/
 %{python3_sitearch}/selinux-%{version}*
 %{python3_sitearch}/_selinux*

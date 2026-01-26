@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,13 +12,13 @@ Release:        %autorelease
 Summary:        Library for Microsoft CAB file compression and decompression
 License:        LGPL-2.1-or-later
 URL:            http://www.cabextract.org.uk/libmspack/
+VCS:            git:https://github.com/kyz/libmspack
 #!RemoteAsset
 Source0:        https://github.com/kyz/libmspack/archive/v%{version}alpha/libmspack-%{version}alpha.tar.gz
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-silent-rules
 BuildOption(conf):  --disable-static
-
 BuildOption(build):  CFLAGS="%{optflags} -fno-strict-aliasing" -C libmspack
 BuildOption(install):  -C libmspack
 BuildOption(check):  -C libmspack
@@ -34,7 +35,7 @@ libmspack is a library for compressing and decompressing Microsoft cabinet
 
 %package        devel
 Summary:        Development files for %{name}
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    devel
 This package contains the header files, documentation, and other files needed

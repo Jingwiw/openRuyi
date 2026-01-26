@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,6 +12,7 @@ Release:        %autorelease
 Summary:        A library implementing the SSH2 protocol
 License:        BSD-3-Clause
 URL:            https://www.libssh2.org/
+VCS:            git:https://github.com/libssh2/libssh2
 #!RemoteAsset
 Source:         https://libssh2.org/download/%{name}-%{version}.tar.gz
 BuildSystem:    autotools
@@ -38,7 +40,7 @@ of SFTP and SCP operations.
 %package        devel
 Summary:        Development files for libssh2
 Requires:       pkgconfig
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    devel
 The libssh2-devel package contains libraries, header files, API documentation,

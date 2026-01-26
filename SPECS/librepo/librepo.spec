@@ -23,7 +23,6 @@ BuildSystem:    cmake
 BuildOption(conf):  -DCMAKE_C_FLAGS="%{build_cflags} $(pkg-config --cflags glib-2.0)"
 BuildOption(conf):  -DENABLE_PYTHON=OFF
 BuildOption(conf):  -DENABLE_PYTHON_TESTS=OFF
-
 %if %{with zchunk}
 BuildOption(conf):  -DWITH_ZCHUNK=ON
 %else
@@ -42,12 +41,11 @@ BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  doxygen
-# Tests
-BuildRequires:  gnupg
-
 %if %{with zchunk}
 BuildRequires:  pkgconfig(zck)
 %endif
+# Tests
+BuildRequires:  gnupg
 
 %description
 A library providing a C API for downloading repository metadata.

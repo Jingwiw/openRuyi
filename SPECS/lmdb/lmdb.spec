@@ -19,14 +19,14 @@ Source0:        https://git.openldap.org/openldap/openldap/-/archive/LMDB_%{vers
 Source1:        lmdb.pc.in
 BuildSystem:    autotools
 
-BuildOption(build): -C libraries/liblmdb SOVERSION=%{version} CFLAGS="%{optflags}"
-BuildOption(install): -C libraries/liblmdb
-BuildOption(install): SOVERSION=%{version} bindir=%{_bindir} libdir=%{_libdir}
-BuildOption(install): mandir=%{_mandir} includedir=%{_includedir} datarootdir=%{_datadir}
-BuildOption(check): -C libraries/liblmdb
-
 # Build and link to shared library
 Patch0:         0001-lmdb-make.patch
+
+BuildOption(build):  -C libraries/liblmdb SOVERSION=%{version} CFLAGS="%{optflags}"
+BuildOption(install):  -C libraries/liblmdb
+BuildOption(install):  SOVERSION=%{version} bindir=%{_bindir} libdir=%{_libdir}
+BuildOption(install):  mandir=%{_mandir} includedir=%{_includedir} datarootdir=%{_datadir}
+BuildOption(check):  -C libraries/liblmdb
 
 BuildRequires:  make
 
@@ -46,7 +46,7 @@ applications that use the %{name} embedded database.
 
 %package        devel
 Summary:        Development files for %{name}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    devel
 The %{name}-devel package contains libraries and header files for

@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,18 +12,26 @@ Release:         %autorelease
 Summary:         Library for creating and expanding ISO-9660 filesystems
 License:         GPL-2.0-or-later
 URL:             https://libburnia-project.org/
+VCS:             git:https://dev.lovelyhq.com/libburnia/libisoburn.git
 #!RemoteAsset
 Source0:         https://files.libburnia-project.org/releases/libisoburn-%{version}.tar.gz
 Source1:         xorriso_extract_iso_image.desktop
 BuildSystem:     autotools
 
-BuildOption(conf): --disable-static
-BuildOption(conf): --disable-doxygen-docs
+BuildOption(conf):  --disable-static
+BuildOption(conf):  --disable-doxygen-docs
 
-BuildRequires:   gcc gcc-c++ make readline-devel pkgconfig(libacl) zlib-devel
-BuildRequires:   libburn-devel >= %{version}
-BuildRequires:   libisofs-devel >= %{version}
-BuildRequires:   autoconf automake libtool
+BuildRequires:   gcc
+BuildRequires:   gcc-c++
+BuildRequires:   make
+BuildRequires:   pkgconfig(readline)
+BuildRequires:   pkgconfig(libacl)
+BuildRequires:   pkgconfig(zlib)
+BuildRequires:   pkgconfig(libburn-1) >= %{version}
+BuildRequires:   pkgconfig(libisofs-1) >= %{version}
+BuildRequires:   autoconf
+BuildRequires:   automake
+BuildRequires:   libtool
 
 %description
 Libisoburn is a frontend for libburn and libisofs, enabling creation and expansion
@@ -30,17 +39,17 @@ of ISO-9660 filesystems on all optical media.
 
 %package         devel
 Summary:         Development files for %{name}
-Requires:        %{name} = %{version}
+Requires:        %{name}%{?_isa} = %{version}-%{release}
 Requires:        pkgconfig
 
 %description     devel
 This package contains libraries and header files for developing applications
 that use libisoburn.
 
-%package -n      xorriso
+%package     -n  xorriso
 Summary:         ISO-9660 and Rock Ridge image manipulation tool
 URL:             https://scdbackup.sourceforge.net/xorriso_eng.html
-Requires:        %{name} = %{version}
+Requires:        %{name}%{?_isa} = %{version}-%{release}
 Requires(post):  alternatives
 Requires(preun): alternatives
 

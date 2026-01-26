@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,12 +12,19 @@ Release:        %autorelease
 Summary:        PCI access library
 License:        HPND AND MIT
 URL:            https://www.x.org/
+VCS:            git:https://gitlab.freedesktop.org/xorg/lib/libpciaccess.git
 #!RemoteAsset
 Source0:        https://www.x.org/archive/individual/lib/libpciaccess-%{version}.tar.xz
 BuildSystem:    meson
 
-BuildRequires:  autoconf automake libtool pkgconfig util-macros
-BuildRequires:  meson zlib-devel
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+BuildRequires:  pkgconfig
+BuildRequires:  util-macros
+BuildRequires:  meson
+BuildRequires:  pkgconfig(zlib)
+
 Requires:       hwdata
 
 %description
@@ -25,7 +33,7 @@ operating systems.
 
 %package devel
 Summary:        Development files for the PCI access library
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       pkgconfig
 
 %description devel

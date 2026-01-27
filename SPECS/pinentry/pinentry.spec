@@ -20,6 +20,7 @@ Release:        %autorelease
 Summary:        Collection of simple PIN or passphrase entry dialogs
 License:        GPL-2.0-or-later
 URL:            https://gnupg.org/
+VCS:            git:https://git.gnupg.org/pinentry.git
 #!RemoteAsset
 Source0:        %{url}/ftp/gcrypt/%{name}/%{name}-%{version}.tar.bz2
 #!RemoteAsset

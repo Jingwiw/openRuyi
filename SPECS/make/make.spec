@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -12,23 +13,26 @@ Release:        %autorelease
 Summary:        A tool which controls the generation of executables and non-source files of a program
 License:        GPL-3.0-or-later
 URL:            https://www.gnu.org/software/make/
+VCS:            git:https://https.git.savannah.gnu.org/git/make.git
 #!RemoteAsset
 Source0:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
+BuildSystem:    autotools
 
-BuildSystem: autotools
 %if %{with guile}
-BuildOption(conf): --with-guile
+BuildOption(conf):  --with-guile
 %else
-BuildOption(conf): --without-guile
+BuildOption(conf):  --without-guile
 %endif
 
-BuildRequires:        gcc autoconf automake
-BuildRequires:        make
+BuildRequires:  gcc
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  make
 %if %{with guile}
-BuildRequires:  guile-devel
+BuildRequires:  pkgconfig(guile-2.0)
 %endif
-Provides:       %{name}-devel = %{version}-%{release}
-Obsoletes:      %{name}-devel < %{version}-%{release}
+
+Provides:       %{name}-devel%{?_isa} = %{version}-%{release}
 
 %description
 GNU Make is a tool which controls the generation of executables and other

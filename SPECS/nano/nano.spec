@@ -11,6 +11,7 @@ Release:        %autorelease
 Summary:        Text editor
 License:        GPL-3.0-or-later
 URL:            https://www.nano-editor.org
+VCS:            git:https://https.git.savannah.gnu.org/git/nano.git
 #!RemoteAsset
 Source0:        https://www.nano-editor.org/dist/latest/%{name}-%{version}.tar.xz
 #!RemoteAsset
@@ -23,9 +24,9 @@ BuildOption(conf):  --enable-nanorc
 BuildOption(conf):  --enable-multibuffer
 BuildOption(conf):  --enable-utf8
 
-BuildRequires:  file-devel
+BuildRequires:  pkgconfig(libmagic)
 BuildRequires:  make
-BuildRequires:  ncurses-devel
+BuildRequires:  pkgconfig(ncurses)
 BuildRequires:  texinfo
 
 %description

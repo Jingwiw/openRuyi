@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,22 +12,24 @@ Release:        %autorelease
 Summary:        Implementation of Hypertext Transfer Protocol version 2 in C
 License:        MIT
 URL:            https://nghttp2.org/
+VCS:            git:https://github.com/nghttp2/nghttp2
 #!RemoteAsset
 Source0:        https://github.com/nghttp2/nghttp2/releases/download/v%{version}/nghttp2-%{version}.tar.xz
 #!RemoteAsset
 Source1:        https://github.com/nghttp2/nghttp2/releases/download/v%{version}/nghttp2-%{version}.tar.xz.asc
 Source2:        nghttp2.keyring
 BuildSystem:    autotools
-BuildOption(conf):    --disable-static
-BuildOption(conf):    --disable-silent-rules
+
+BuildOption(conf):  --disable-static
+BuildOption(conf):  --disable-silent-rules
 # Attention: for now,wo can only build shared library
-BuildOption(conf):    --disable-app
+BuildOption(conf):  --disable-app
 
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig
 BuildRequires:  python3-rpm-macros
 BuildRequires:  pkgconfig(zlib)
-BuildRequires:  pkgconfig(openssl) >= 1.1.1
+BuildRequires:  pkgconfig(openssl)
 
 %description
 This is an implementation of Hypertext Transfer Protocol version 2.
@@ -37,11 +40,11 @@ have also developed load test and benchmarking tool for HTTP/2.
 
 HPACK encoder and decoder are available as public API.
 
-%package devel
+%package        devel
 Summary:        Development files for nghttp2
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
-%description devel
+%description    devel
 Development files for usage with libnghttp2, which implements
 Hypertext Transfer Protocol version 2.
 

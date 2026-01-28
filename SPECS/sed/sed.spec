@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -10,16 +11,19 @@ Release:        %autorelease
 Summary:        A Stream-Oriented Non-Interactive Text Editor
 License:        GPL-3.0-or-later
 URL:            https://www.gnu.org/software/sed/
+VCS:            git:https://https.git.savannah.gnu.org/git/sed.git
 #!RemoteAsset
 Source0:        https://ftpmirror.gnu.org/gnu/sed/%{name}-%{version}.tar.xz
 #!RemoteAsset
 Source1:        https://ftpmirror.gnu.org/gnu/sed/%{name}-%{version}.tar.xz.sig
-BuildRequires:  acl-devel
-BuildRequires:  libselinux-devel
-Provides:       base:/bin/sed
-
 BuildSystem:    autotools
-BuildOption(conf): --without-included-regex
+
+BuildOption(conf):  --without-included-regex
+
+BuildRequires:  pkgconfig(libacl)
+BuildRequires:  pkgconfig(libselinux)
+
+Provides:       base:/bin/sed
 
 %description
 Sed takes text input, performs one or more operations on it, and

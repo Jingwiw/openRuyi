@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -18,20 +19,27 @@ URL:            https://github.com/zlib-ng/zlib-ng
 Source:         https://github.com/zlib-ng/zlib-ng/archive/refs/tags/%{version}.tar.gz
 BuildSystem:    cmake
 
-BuildOption(conf): -DINSTALL_LIB_DIR=%{_libdir}
-BuildOption(conf): -DWITH_RVV:BOOL=ON
-BuildOption(conf): -DWITH_GTEST:BOOL=OFF
-BuildOption(conf): -DWITH_NEW_STRATEGIES:BOOL=OFF
-BuildOption(conf): -DWITH_ARMV6:BOOL=OFF
+BuildOption(conf):  -DINSTALL_LIB_DIR=%{_libdir}
+BuildOption(conf):  -DWITH_RVV:BOOL=ON
+BuildOption(conf):  -DWITH_GTEST:BOOL=OFF
+BuildOption(conf):  -DWITH_NEW_STRATEGIES:BOOL=OFF
+BuildOption(conf):  -DWITH_ARMV6:BOOL=OFF
 %if %{with zlib_compat}
-BuildOption(conf): -DZLIB_COMPAT:BOOL=ON
+BuildOption(conf):  -DZLIB_COMPAT:BOOL=ON
 %else
-BuildOption(conf): -DZLIB_COMPAT:BOOL=OFF
+BuildOption(conf):  -DZLIB_COMPAT:BOOL=OFF
 %endif
 
-BuildRequires:  cmake gcc gcc-c++
+BuildRequires:  cmake
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
 %if %{with systemtap}
 BuildRequires:  systemtap-sdt-devel
+%endif
+
+# Forbid co-install with zlib when compat mode is enabled
+%if %{with zlib_compat}
+Conflicts:      zlib%{?_isa}
 %endif
 
 %description
@@ -42,10 +50,12 @@ This package provides a drop-in zlib-compatible library.
 
 %package        devel
 Summary:        Development files for %{name}
-Requires:       %{name} = %{version}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 %if %{with zlib_compat}
-Conflicts:      zlib-devel
-Provides:       zlib-devel = %{version}
+Conflicts:      zlib-devel%{?_isa}
+Obsoletes:      zlib-devel%{?_isa}
+Provides:       zlib-devel = %{version}-%{release}
+Provides:       zlib-devel%{?_isa} = %{version}-%{release}
 %endif
 
 %description    devel

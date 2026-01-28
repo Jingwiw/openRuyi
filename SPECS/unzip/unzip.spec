@@ -11,6 +11,7 @@ Release:        %autorelease
 Summary:        A utility for unpacking zip files
 License:        Info-ZIP
 URL:            https://infozip.sourceforge.net/UnZip.html
+# VCS: No VCS link available
 #!RemoteAsset
 Source0:        https://downloads.sourceforge.net/infozip/unzip60.tar.gz
 BuildSystem:    autotools

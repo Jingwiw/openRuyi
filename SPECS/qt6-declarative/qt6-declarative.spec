@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -43,7 +44,7 @@ for building highly dynamic, custom user interfaces.
 
 %package        devel
 Summary:        Development files for %{name}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       pkgconfig(Qt6Core)
 Provides:       qt6-quickcontrols2-devel = %{version}-%{release}
 Provides:       %{name}-private-devel = %{version}-%{release}
@@ -53,14 +54,14 @@ Development files for %{name}.
 
 %package        static
 Summary:        Static library files for %{name}
-Requires:       %{name}-devel = %{version}-%{release}
+Requires:       %{name}-devel%{?_isa} = %{version}-%{release}
 
 %description    static
 Static library files for %{name}.
 
 %package        examples
 Summary:        Programming examples for %{name}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 Provides:       qt6-quickcontrols2-examples = %{version}-%{release}
 
 %description    examples

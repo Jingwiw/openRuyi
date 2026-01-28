@@ -16,73 +16,76 @@ License:       BSD-3-Clause AND GPL-2.0-or-later
 URL:           https://github.com/shadow-maint/shadow
 #!RemoteAsset
 Source0:       https://github.com/shadow-maint/shadow/releases/download/%{version}/%{name}-%{version}.tar.xz
-
 Source1:       useradd.defaults
 Source2:       login.defs
 Source3:       shadow.timer
 Source4:       shadow.service
 Source5:       passwd.service
+BuildSystem:   autotools
 
 Patch0:        0001-openruyi-disable-conflicting-tools.patch
 Patch1:        0002-openruyi-adapt-configs.patch
 
-BuildSystem:   autotools
-
 # Configure options for a modern, systemd-centric distro.
-BuildOption(conf): --enable-shadowgrp
-BuildOption(conf): --with-audit
-BuildOption(conf): --with-libpam
-BuildOption(conf): --with-acl
-BuildOption(conf): --with-attr
-BuildOption(conf): --with-selinux
+BuildOption(conf):  --enable-shadowgrp
+BuildOption(conf):  --with-audit
+BuildOption(conf):  --with-libpam
+BuildOption(conf):  --with-acl
+BuildOption(conf):  --with-attr
+BuildOption(conf):  --with-selinux
 # Enable modern password hashing algorithms.
-BuildOption(conf): --with-sha-crypt
-BuildOption(conf): --with-yescrypt
-BuildOption(conf): --without-libbsd
-BuildOption(conf): --without-libcrack
-BuildOption(conf): --without-nscd
-BuildOption(conf): --without-sssd
+BuildOption(conf):  --with-sha-crypt
+BuildOption(conf):  --with-yescrypt
+BuildOption(conf):  --without-libbsd
+BuildOption(conf):  --without-libcrack
+BuildOption(conf):  --without-nscd
+BuildOption(conf):  --without-sssd
 # --- CRITICAL: Disable tools provided by util-linux/systemd ---
-BuildOption(conf): --without-su
-BuildOption(conf): --disable-account-tools-setuid
-BuildOption(conf): --with-group-name-max-length=32
-BuildOption(conf): --sbindir=%{_bindir}
+BuildOption(conf):  --without-su
+BuildOption(conf):  --disable-account-tools-setuid
+BuildOption(conf):  --with-group-name-max-length=32
+BuildOption(conf):  --sbindir=%{_bindir}
+BuildOption(install):  gnulocaledir=$RPM_BUILD_ROOT%{_datadir}/locale
+BuildOption(install):  MKINSTALLDIRS=`pwd`/mkinstalldirs
 
-BuildOption(install): gnulocaledir=$RPM_BUILD_ROOT%{_datadir}/locale
-BuildOption(install): MKINSTALLDIRS=`pwd`/mkinstalldirs
+BuildRequires:  make
+BuildRequires:  gcc
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+BuildRequires:  pkgconfig(audit)
+BuildRequires:  pkgconfig(libacl)
+BuildRequires:  pkgconfig(libattr)
+BuildRequires:  pkgconfig(pam_misc)
+BuildRequires:  pkgconfig(libselinux)
+BuildRequires:  pkgconfig(libsemanage)
+BuildRequires:  pkgconfig(libxcrypt)
 
-BuildRequires: make, gcc, autoconf, automake, libtool
-BuildRequires: audit-devel, acl-devel, libattr-devel, pam-devel
-BuildRequires: libselinux-devel, libsemanage-devel, libxcrypt-devel
+Provides:       shadow = %{version}-%{release}
+Provides:       passwd
 
-Requires:      audit, acl, libattr, pam, libxcrypt
 # Requires the subid library, which is part of this source package.
-Requires:      subid%{?_isa} = %{version}-%{release}
-
-Requires:      setup
-
-Provides: shadow = %{version}-%{release}
-Provides: passwd = 0.80-18
-Obsoletes: passwd <= 0.80-19
+Requires:       subid%{?_isa} = %{version}-%{release}
+Requires:       setup
 
 %description
 This package includes the necessary programs for managing user and group
 accounts, and their passwords and groups in shadow format.
 
 # --- Library Subpackage for Subordinate IDs ---
-%package -n subid
-Summary:       A library to manage subordinate UID and GID ranges
+%package     -n subid
+Summary:        A library to manage subordinate UID and GID ranges
 
 %description -n subid
 The subid library provides a way to manage subordinate ID ranges,
 primarily used for unprivileged containers.
 
 # --- Development Package ---
-%package devel
-Summary:       Development files for shadow and subid
-Requires:      subid%{?_isa} = %{version}-%{release}
+%package     -n subid-devel
+Summary:        Development files for shadow and subid
+Requires:       subid%{?_isa} = %{version}-%{release}
 
-%description devel
+%description -n subid-devel
 This package contains the header files and development libraries for
 shadow and subid.
 
@@ -123,7 +126,6 @@ install -Dm644 %{SOURCE4} %{buildroot}%{_unitdir}/shadow.service
 # touch %{buildroot}%{_sysconfdir}/subuid
 # touch %{buildroot}%{_sysconfdir}/subgid
 
-
 %post
 %systemd_post shadow.service shadow.timer
 
@@ -139,15 +141,12 @@ install -Dm644 %{SOURCE4} %{buildroot}%{_unitdir}/shadow.service
 # %config(noreplace) %attr(0600,root,root) %{_sysconfdir}/subuid
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
-
 %config(noreplace) %{_pam_confdir}/passwd
 %config(noreplace) %{_pam_confdir}/chpasswd
 %config(noreplace) %{_pam_confdir}/groupmems
 %config(noreplace) %{_pam_confdir}/newusers
-
 %{_unitdir}/shadow.service
 %{_unitdir}/shadow.timer
-
 %{_bindir}/sg
 %attr(4755,root,root) %{_bindir}/chage
 %attr(4755,root,root) %{_bindir}/gpasswd
@@ -164,7 +163,6 @@ install -Dm644 %{SOURCE4} %{buildroot}%{_unitdir}/shadow.service
 %{_bindir}/pwconv
 %{_bindir}/pwunconv
 %{_bindir}/user*
-
 %{_mandir}/man1/chage.1*
 %{_mandir}/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
@@ -196,7 +194,7 @@ install -Dm644 %{SOURCE4} %{buildroot}%{_unitdir}/shadow.service
 %{_bindir}/getsubids
 %{_mandir}/man1/getsubids.1*
 
-%files devel
+%files -n subid-devel
 %{includesubiddir}/subid.h
 %{_libdir}/libsubid.so
 

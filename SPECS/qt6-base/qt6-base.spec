@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
 # SPDX-FileContributor: jingyupu <pujingyu@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -21,6 +22,7 @@ Release:        %autorelease
 Summary:        Qt 6 core components
 License:        LGPL-3.0-only OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 URL:            https://www.qt.io
+VCS:            git:https://code.qt.io/qt/qtbase.git
 #!RemoteAsset
 Source0:        https://download.qt.io/official_releases/qt/%{short_version}/%{real_version}%{tar_suffix}/submodules/%{tar_name}-%{real_version}%{tar_suffix}.tar.xz
 Source1:        macros.qt6-qtbase
@@ -152,10 +154,10 @@ BuildRequires:  pkgconfig(sm)
 BuildRequires:  pkgconfig(ice)
 %endif
 %if %{with mysql}
-BuildRequires:  mariadb-connector-c-devel
+BuildRequires:  pkgconfig(libmariadb)
 %endif
 %if %{with postgresql}
-BuildRequires:  libpq-devel
+BuildRequires:  pkgconfig(libpq)
 %endif
 
 %description
@@ -163,7 +165,7 @@ Qt is a software toolkit for developing applications.
 
 %package        common
 Summary:        Common files for Qt6
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    common
 Common files for Qt6.
@@ -171,7 +173,7 @@ Common files for Qt6.
 %package        devel
 Summary:        Development files for %{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       %{name}-gui%{?_isa}
+Requires:       %{name}-gui%{?_isa} = %{version}-%{release}
 Requires:       qt6-macros
 Requires:       pkgconfig(egl)
 Requires:       pkgconfig(gl)

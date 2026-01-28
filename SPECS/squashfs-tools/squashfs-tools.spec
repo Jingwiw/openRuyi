@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <1772413353@qq.com>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -15,16 +16,24 @@ URL:            https://github.com/plougher/squashfs-tools
 Source0:        https://github.com/plougher/squashfs-tools/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildSystem:    autotools
 
-BuildOption(build): -C squashfs-tools LZMA_XZ_SUPPORT=1 XZ_SUPPORT=1 LZO_SUPPORT=1 LZ4_SUPPORT=1 ZSTD_SUPPORT=1
-BuildOption(install): -C squashfs-tools INSTALL_DIR=%{buildroot}%{_bindir} INSTALL_MANPAGES_DIR=%{buildroot}%{_mandir}
+BuildOption(build):  -C squashfs-tools
+BuildOption(build):  LZMA_XZ_SUPPORT=1
+BuildOption(build):  XZ_SUPPORT=1
+BuildOption(build):  LZO_SUPPORT=1
+BuildOption(build):  LZ4_SUPPORT=1
+BuildOption(build):  ZSTD_SUPPORT=1
+BuildOption(install):  -C squashfs-tools
+BuildOption(install):  INSTALL_DIR=%{buildroot}%{_bindir}
+BuildOption(install):  INSTALL_MANPAGES_DIR=%{buildroot}%{_mandir}
 
-BuildRequires:  lz4-devel
-BuildRequires:  lzma-devel
-BuildRequires:  lzo-devel
-BuildRequires:  libzstd-devel
-BuildRequires:  zlib-devel
+BuildRequires:  pkgconfig(liblz4)
+BuildRequires:  pkgconfig(liblzma)
+BuildRequires:  pkgconfig(lzo2)
+BuildRequires:  pkgconfig(libzstd)
+BuildRequires:  pkgconfig(zlib)
 
 Provides:       squashfs
+
 Supplements:    filesystem(squashfs)
 
 %description

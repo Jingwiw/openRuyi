@@ -36,7 +36,7 @@ BuildRequires:  qt6-base-devel >= %{version}
 BuildRequires:  qt6-base-private-devel
 BuildRequires:  qt6-declarative-devel >= %{version}
 BuildRequires:  pkgconfig(Qt6ShaderTools) >= %{version}
-BuildRequires:  qt6-quick3d-devel >= %{version}
+BuildRequires:  pkgconfig(Qt6Quick3D) >= %{version}
 BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(xkbcommon) >= 0.5.0
 BuildRequires:  pkgconfig(openssl)

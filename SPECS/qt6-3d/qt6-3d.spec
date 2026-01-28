@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -16,6 +17,7 @@ Release:        %autorelease
 Summary:        Qt6 - Qt3D QML bindings and C++ APIs
 License:        LGPL-3.0-only OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 URL:            https://www.qt.io
+VCS:            git:https://code.qt.io/qt/qt3d.git
 #!RemoteAsset
 Source0:        https://download.qt.io/official_releases/qt/%{short_version}/%{real_version}/submodules/%{qt_module}-everywhere-src-%{real_version}.tar.xz
 BuildSystem:    cmake
@@ -39,7 +41,7 @@ BuildRequires:  pkgconfig(Qt6Widgets)
 BuildRequires:  pkgconfig(Qt6OpenGL)
 BuildRequires:  qt6-base-static >= %{version}
 BuildRequires:  qt6-base-private-devel
-BuildRequires:  qt6-declarative-devel >= %{version}
+BuildRequires:  pkgconfig(Qt6Quick) >= %{version}
 BuildRequires:  pkgconfig(Qt6ShaderTools) >= %{version}
 BuildRequires:  qt6-imageformats >= %{version}
 %if %{with system_assimp}
@@ -52,15 +54,15 @@ support for 2D and 3D rendering in both Qt C++ and Qt Quick applications.
 
 %package        devel
 Summary:        Development files for %{name}
-Requires:       %{name} = %{version}-%{release}
-Requires:       qt6-quick3d-devel
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       pkgconfig(Qt6Quick3D)
 
 %description    devel
 Development files for %{name}.
 
 %package        examples
 Summary:        Programming examples for %{name}
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    examples
 Programming examples for %{name}.

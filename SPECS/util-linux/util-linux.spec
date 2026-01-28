@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
 # SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -11,16 +12,17 @@ Release:       %autorelease
 Summary:       A collection of basic system utilities
 License:       GPL-2.0-or-later and others
 URL:           https://www.kernel.org/pub/linux/utils/util-linux/
+VCS:           git:https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git
 #!RemoteAsset
 Source0:       https://www.kernel.org/pub/linux/utils/util-linux/v2.41/%{name}-%{version}.tar.xz
-
 # These files define the default behavior for openRuyi.
 Source10:      login.pam
-Source12:      su-l.pam
-Source13:      runuser.pam
-Source14:      runuser-l.pam
-Source15:      chfn.pam
-Source20:      60-rfkill.rules
+Source11:      su-l.pam
+Source12:      runuser.pam
+Source13:      runuser-l.pam
+Source14:      chfn.pam
+Source15:      60-rfkill.rules
+BuildSystem:   autotools
 
 # --- Essential Patches ---
 # Ensures /var/log/lastlog is created correctly.
@@ -30,116 +32,135 @@ Patch1:        login-default-motd-file.patch
 # Fixes an issue with the EROFS filesystem.
 Patch2:        0001-libmount-disable-EROFS-backing-file-support.patch
 
-BuildSystem:   autotools
-
 # Configure options for a modern, feature-rich build.
-BuildOption(conf): --with-systemdsystemunitdir=%{_unitdir}
-BuildOption(conf): --disable-silent-rules
-BuildOption(conf): --enable-chfn-chsh
-BuildOption(conf): --enable-login
-BuildOption(conf): --enable-su
-BuildOption(conf): --with-python=3
-BuildOption(conf): --with-systemd
-BuildOption(conf): --with-udev
-BuildOption(conf): --with-selinux
-BuildOption(conf): --without-slang
-BuildOption(conf): --disable-makeinstall-chown
-BuildOption(conf): --enable-nologin
-BuildOption(conf): --disable-logger
+BuildOption(conf):  --with-systemdsystemunitdir=%{_unitdir}
+BuildOption(conf):  --disable-silent-rules
+BuildOption(conf):  --enable-chfn-chsh
+BuildOption(conf):  --enable-login
+BuildOption(conf):  --enable-su
+BuildOption(conf):  --with-python=3
+BuildOption(conf):  --with-systemd
+BuildOption(conf):  --with-udev
+BuildOption(conf):  --with-selinux
+BuildOption(conf):  --without-slang
+BuildOption(conf):  --disable-makeinstall-chown
+BuildOption(conf):  --enable-nologin
+BuildOption(conf):  --disable-logger
 
-BuildRequires: make, gcc, autoconf, automake, libtool, python3-libs
-BuildRequires: audit-devel, gettext-devel, libcap-ng-devel
-BuildRequires: libselinux-devel, libxcrypt-devel, ncurses-devel
-BuildRequires: pam-devel, popt-devel, readline-devel, python3-devel
-BuildRequires: zlib-devel, sqlite-devel, libudev-devel
-BuildRequires: file-devel, cryptsetup-devel, libeconf-devel
-BuildRequires: pkgconfig(systemd)
+BuildRequires:  make
+BuildRequires:  gcc
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+BuildRequires:  python3-libs
+BuildRequires:  pkgconfig(audit)
+BuildRequires:  gettext-devel
+BuildRequires:  pkgconfig(libcap-ng)
+BuildRequires:  pkgconfig(libselinux)
+BuildRequires:  pkgconfig(libxcrypt)
+BuildRequires:  pkgconfig(ncurses)
+BuildRequires:  pkgconfig(pam)
+BuildRequires:  pkgconfig(popt)
+BuildRequires:  pkgconfig(readline)
+BuildRequires:  pkgconfig(python3)
+BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(sqlite)
+BuildRequires:  pkgconfig(libudev)
+BuildRequires:  pkgconfig(libmagic)
+BuildRequires:  pkgconfig(libcryptsetup)
+BuildRequires:  pkgconfig(libeconf)
+BuildRequires:  pkgconfig(systemd)
 
-# This ensures a clean upgrade path and replaces older, separate packages.
-Obsoletes:     eject <= 2.1.5
-Provides:      eject = 2.1.6
-Obsoletes:     rfkill <= 0.5
-Provides:      rfkill = 0.5
-Obsoletes:     hardlink <= 1:1.3-9
-Provides:      hardlink = 1:1.3-9
-Conflicts:     sysvinit-tools < 2.88-14
-Conflicts:     coreutils < 8.20
+Provides:      eject
+Provides:      rfkill
+Provides:      hardlink
 
-# The main tools package requires all the runtime libraries it was built with.
 Requires:      libuuid%{?_isa} = %{version}-%{release}
 Requires:      libblkid%{?_isa} = %{version}-%{release}
 Requires:      libmount%{?_isa} = %{version}-%{release}
 Requires:      libsmartcols%{?_isa} = %{version}-%{release}
 Requires:      libfdisk%{?_isa} = %{version}-%{release}
 Requires:      liblastlog2%{?_isa} = %{version}-%{release}
-Requires:      audit, ncurses, pam, readline, zlib
+Requires:      audit
+Requires:      ncurses
+Requires:      pam
+Requires:      readline
+Requires:      zlib
 
 %description
 The util-linux package contains a large variety of low-level system
 utilities that are necessary for a Linux system to function. It includes
 tools like fdisk, mount, login, and more.
 
-%package -n libuuid
-Summary:       Universally unique ID library
+%package     -n libuuid
+Summary:        Universally unique ID library
+
 %description -n libuuid
 The libuuid library generates and parses 128-bit universally unique IDs (UUIDs).
 
-%package -n libblkid
-Summary:       Block device ID library
-Requires:      libuuid%{?_isa} = %{version}-%{release}
+%package     -n libblkid
+Summary:        Block device ID library
+Requires:       libuuid%{?_isa} = %{version}-%{release}
+
 %description -n libblkid
 The libblkid library is used for block device identification.
 
-%package -n libmount
-Summary:       Device mounting library
-Requires:      libblkid%{?_isa} = %{version}-%{release}
+%package     -n libmount
+Summary:        Device mounting library
+Requires:       libblkid%{?_isa} = %{version}-%{release}
+
 %description -n libmount
 The libmount library is used for mounting and unmounting filesystems.
 
-%package -n libsmartcols
-Summary:       Column-based text formatting library
+%package     -n libsmartcols
+Summary:        Column-based text formatting library
+
 %description -n libsmartcols
 The libsmartcols library is used for formatting text output in columns.
 
-%package -n libfdisk
-Summary:       Partitioning library for fdisk-like programs
+%package     -n libfdisk
+Summary:        Partitioning library for fdisk-like programs
+
 %description -n libfdisk
 The libfdisk library provides functions for manipulating disk partition tables.
 
-%package -n liblastlog2
-Summary:       The lastlog2 database library and PAM module
+%package     -n liblastlog2
+Summary:        The lastlog2 database library and PAM module
+
 %description -n liblastlog2
 This is the lastlog database library and PAM module, part of util-linux.
 
-%package -n uuidd
-Summary:       Helper daemon to guarantee uniqueness of time-based UUIDs
-Requires:      libuuid%{?_isa} = %{version}-%{release}
+%package     -n uuidd
+Summary:        Helper daemon to guarantee uniqueness of time-based UUIDs
+Requires:       libuuid%{?_isa} = %{version}-%{release}
 %{?systemd_requires}
 Requires(pre): shadow
 
 %description -n uuidd
 The uuidd daemon guarantees uniqueness of time-based UUID generation.
 
-%package -n python3-libmount
-Summary:       Python 3 bindings for libmount
-Requires:      libmount%{?_isa} = %{version}-%{release}
-Requires:      python3
+%package     -n python-libmount
+Summary:        Python bindings for libmount
+Provides:       python3-libmount
+%python_provide python3-libmount
+Requires:       libmount%{?_isa} = %{version}-%{release}
+Requires:       python3
 
-%description -n python3-libmount
-This package contains the Python 3 bindings for the libmount library,
+%description -n python-libmount
+This package contains the Python bindings for the libmount library,
 which is used for mounting and unmounting filesystems.
 
-%package devel
-Summary:       Development files for util-linux libraries
-Requires:      libuuid%{?_isa} = %{version}-%{release}
-Requires:      libblkid%{?_isa} = %{version}-%{release}
-Requires:      libmount%{?_isa} = %{version}-%{release}
-Requires:      libsmartcols%{?_isa} = %{version}-%{release}
-Requires:      libfdisk%{?_isa} = %{version}-%{release}
-Requires:      liblastlog2%{?_isa} = %{version}-%{release}
-Requires:      pkgconfig(zlib)
+%package        devel
+Summary:        Development files for util-linux libraries
+Requires:       libuuid%{?_isa} = %{version}-%{release}
+Requires:       libblkid%{?_isa} = %{version}-%{release}
+Requires:       libmount%{?_isa} = %{version}-%{release}
+Requires:       libsmartcols%{?_isa} = %{version}-%{release}
+Requires:       libfdisk%{?_isa} = %{version}-%{release}
+Requires:       liblastlog2%{?_isa} = %{version}-%{release}
+Requires:       pkgconfig(zlib)
 
-%description devel
+%description    devel
 This package contains all header files, static libraries, and development
 symlinks for the libraries included in util-linux.
 
@@ -159,12 +180,13 @@ ln -s %{buildroot}%{_sbindir} %{buildroot}/%{_prefix}/sbin
 unlink %{buildroot}/%{_prefix}/sbin
 %endif
 install -Dm644 %{SOURCE10} %{buildroot}%{_sysconfdir}/pam.d/login
-install -Dm644 %{SOURCE12} %{buildroot}%{_sysconfdir}/pam.d/su-l
-install -Dm644 %{SOURCE13} %{buildroot}%{_sysconfdir}/pam.d/runuser
-install -Dm644 %{SOURCE14} %{buildroot}%{_sysconfdir}/pam.d/runuser-l
-install -Dm644 %{SOURCE15} %{buildroot}%{_sysconfdir}/pam.d/chfn
+install -Dm644 %{SOURCE11} %{buildroot}%{_sysconfdir}/pam.d/su-l
+install -Dm644 %{SOURCE12} %{buildroot}%{_sysconfdir}/pam.d/runuser
+install -Dm644 %{SOURCE13} %{buildroot}%{_sysconfdir}/pam.d/runuser-l
+install -Dm644 %{SOURCE14} %{buildroot}%{_sysconfdir}/pam.d/chfn
 
-install -Dm644 %{SOURCE20} %{buildroot}%{_udevrulesdir}/60-rfkill.rules
+install -Dm644 %{SOURCE15} %{buildroot}%{_udevrulesdir}/60-rfkill.rules
+
 %find_lang %{name} --generate-subpackages
 
 %ifarch riscv64
@@ -320,7 +342,7 @@ export TS_OPT_script_options_show_diff=yes
 %{_tmpfilesdir}/uuidd-tmpfiles.conf
 %{_sysusersdir}/uuidd-sysusers.conf
 
-%files -n python3-libmount
+%files -n python-libmount
 %{python3_sitearch}/libmount/
 
 %files devel

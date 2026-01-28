@@ -3,6 +3,7 @@
 # SPDX-FileContributor: Jingkun Zheng <zhengjingkun@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: sunyuechi <sunyuechi@iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -16,24 +17,24 @@ URL:            https://github.com/dm-vdo/vdo
 Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 BuildSystem:    autotools
 
-BuildOption(build):     VDO_VERSION=%{version}
-BuildOption(install):   INSTALLOWNER=
-BuildOption(install):   name=%{name}
-BuildOption(install):   bindir=%{_bindir}
-BuildOption(install):   mandir=%{_mandir}
-BuildOption(install):   defaultdocdir=%{_defaultdocdir}
-BuildOption(install):   libexecdir=%{_libexecdir}
-BuildOption(install):   presetdir=%{_presetdir}
-BuildOption(install):   python3_sitelib=/%{python3_sitelib}
-BuildOption(install):   sysconfdir=%{_sysconfdir}
-BuildOption(install):   unitdir=%{_unitdir}
+BuildOption(build):  VDO_VERSION=%{version}
+BuildOption(install):  INSTALLOWNER=
+BuildOption(install):  name=%{name}
+BuildOption(install):  bindir=%{_bindir}
+BuildOption(install):  mandir=%{_mandir}
+BuildOption(install):  defaultdocdir=%{_defaultdocdir}
+BuildOption(install):  libexecdir=%{_libexecdir}
+BuildOption(install):  presetdir=%{_presetdir}
+BuildOption(install):  python3_sitelib=/%{python3_sitelib}
+BuildOption(install):  sysconfdir=%{_sysconfdir}
+BuildOption(install):  unitdir=%{_unitdir}
 
 # https://github.com/dm-vdo/vdo/issues/69
 # Fix cast-align error on riscv64
 Patch0:         0001-riscv64-remove-Wcast-align.patch
 
-BuildRequires:  device-mapper-devel
-BuildRequires:  device-mapper-event-devel
+BuildRequires:  pkgconfig(devmapper)
+BuildRequires:  pkgconfig(devmapper-event)
 BuildRequires:  util-linux-devel
 BuildRequires:  make
 %ifarch %{valgrind_arches}
@@ -50,7 +51,6 @@ This package provides the user-space management tools for VDO.
 
 %package        support
 Summary:        Support tools for Virtual Data Optimizer
-License:        GPL-2.0-only
 Requires:       libuuid
 
 %description    support

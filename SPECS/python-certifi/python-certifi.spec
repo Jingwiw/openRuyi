@@ -7,12 +7,12 @@
 %global srcname certifi
 
 Name:           python-%{srcname}
-Version:        2022.6.15
+Version:        2025.11.12
 Release:        %autorelease
 Summary:        Python CA certificate bundle
 License:        MIT
 URL:            https://certifi.io/
-#!RemoteAsset
+#!RemoteAsset:  sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316
 Source0:        https://files.pythonhosted.org/packages/source/c/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildArch:      noarch
 Provides:       python3-%{srcname}

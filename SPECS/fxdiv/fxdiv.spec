@@ -1,16 +1,16 @@
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%global commit_date  20201209
 # there is no release version, so we use the letest commit.
 %global commit       63058eff77e11aa15bf531df5dd34395ec3017c8
 %global shortcommit  %(c=%{commit}; echo ${c:0:7})
 
 Name:           fxdiv
-Version:        %{commit_date}+git%{shortcommit}
+Version:        0+git20260202.%{shortcommit}
 Release:        %autorelease
 Summary:        Header for division via fixed-point math
 License:        MIT

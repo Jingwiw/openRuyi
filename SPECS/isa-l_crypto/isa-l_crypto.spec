@@ -13,7 +13,7 @@
 %define _lto_cflags %{nil}
 
 Name:           isa-l_crypto
-Version:        2.25.0
+Version:        2.26
 Release:        %autorelease
 Summary:        Intelligent Storage Acceleration Library with crypto
 License:        BSD-3-Clause
@@ -22,19 +22,10 @@ URL:            https://github.com/intel/isa-l_crypto
 Source0:        https://github.com/intel/isa-l_crypto/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildSystem:    autotools
 
-Patch1:         0001-fips-enable-aes-self-tests-only-on-x86-and-aarch64.patch
-Patch2:         0002-build-add-riscv64-support.patch
-Patch3:         0003-sha1_mb-Add-missing-ISAL_-prefixes-to-base-aliases.patch
-# https://github.com/intel/isa-l_crypto/pull/166
-Patch4:         0001-build-add-riscv64-vector-build-check.patch
-Patch5:         0002-multibinary-add-run-time-cpu-feature-detect-for-risc.patch
-Patch6:         0003-mh_sha256-add-an-mh_sha256-assembly-implementation-w.patch
-# https://github.com/intel/isa-l_crypto/pull/169
-Patch7:         0002-mh_sha256-prevent-potential-unaligned-accesses-on-ve.patch
 # https://github.com/intel/isa-l_crypto/pull/168
-Patch8:         0001-mh_sha1-add-an-mh_sha1-assembly-implementation-with-.patch
+Patch1:         0001-mh_sha1-add-an-mh_sha1-assembly-implementation-with-.patch
 # https://github.com/intel/isa-l_crypto/pull/172
-Patch9:         0001-mh_sha1_murmur3_x64_128-add-an-mh_sha1_murmur3_x64_1.patch
+Patch2:         0001-mh_sha1_murmur3_x64_128-add-an-mh_sha1_murmur3_x64_1.patch
 
 BuildOption(conf):  --disable-static
 

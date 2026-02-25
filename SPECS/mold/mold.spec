@@ -19,18 +19,17 @@ BuildSystem:    cmake
 # Allow building against the system-provided `xxhash.h`
 Patch0:         0001-Use-system-compatible-include-path-for-xxhash.h.patch
 
-# use bundled mimalloc
-# BuildOption(conf):  -DMOLD_USE_SYSTEM_MIMALLOC=ON
+BuildOption(conf):  -DMOLD_USE_SYSTEM_MIMALLOC=ON
 
-# use bundled blake3 to decrease dependency
-# BuildRequires:  pkgconfig(libblake3)
+BuildRequires:  pkgconfig(libblake3)
 BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
-# BuildRequires:  pkgconfig(mimalloc)
+BuildRequires:  pkgconfig(mimalloc)
 BuildRequires:  pkgconfig(libxxhash)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libzstd)
+BuildRequires:  pkgconfig(tbb)
 
 Requires(post): update-alternatives
 Requires(preun): update-alternatives

@@ -9,7 +9,7 @@
 %define real_version 6.10.1
 %define short_version 6.10
 
-Name:           qt6-connectivity
+Name:           qt6-qtconnectivity
 Version:        6.10.1
 Release:        %autorelease
 Summary:        Qt6 - Connectivity components

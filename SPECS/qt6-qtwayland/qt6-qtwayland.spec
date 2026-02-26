@@ -9,7 +9,7 @@
 %define real_version 6.10.1
 %define short_version 6.10
 
-Name:           qt6-wayland
+Name:           qt6-qtwayland
 Version:        6.10.1
 Release:        %autorelease
 Summary:        Qt6 - Wayland platform support and QtCompositor module

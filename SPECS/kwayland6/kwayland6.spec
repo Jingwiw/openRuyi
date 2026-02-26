@@ -26,7 +26,7 @@ BuildRequires:  pkgconfig
 BuildRequires:  xcb-util
 BuildRequires:  qt6-base-gui >= %{qt6_version}
 BuildRequires:  qt6-doctools
-BuildRequires:  qt6-wayland-devel >= %{qt6_version}
+BuildRequires:  qt6-qtwayland-devel >= %{qt6_version}
 BuildRequires:  cmake(PlasmaWaylandProtocols) >= 1.14.0
 BuildRequires:  cmake(Qt6Concurrent) >= %{qt6_version}
 BuildRequires:  cmake(Qt6Gui) >= %{qt6_version}

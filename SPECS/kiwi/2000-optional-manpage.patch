@@ -1,0 +1,34 @@
+From 5d76b8936e3d770dcb24f039ee2ca8943b119c92 Mon Sep 17 00:00:00 2001
+From: misaka00251 <liuxin@iscas.ac.cn>
+Date: Thu, 26 Feb 2026 22:14:32 +0800
+Subject: [PATCH] Optional install for manpage
+
+---
+ Makefile | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 80c0418..ddc1607 100644
+--- a/Makefile
++++ b/Makefile
+@@ -30,9 +30,14 @@ install:
+ 	# Note: These information will be missing when installed from pip
+ 	# manual pages
+ 	install -d -m 755 ${buildroot}usr/share/man/man8
+-	for man in doc/build/man/*.8; do \
+-		install -m 644 $$man ${buildroot}usr/share/man/man8 ;\
+-	done
++	@if ls doc/build/man/*.8 >/dev/null 2>&1; then \
++		install -d -m 755 ${buildroot}/usr/share/man/man8; \
++		for man in doc/build/man/*.8; do \
++			install -m 644 $$man ${buildroot}/usr/share/man/man8; \
++		done; \
++	else \
++		echo "Skipping man pages install (doc/build/man/*.8 not found)"; \
++	fi
+ 	# completion
+ 	install -d -m 755 ${buildroot}usr/share/bash-completion/completions
+ 	$(python) helper/completion_generator.py \
+-- 
+2.53.0
+

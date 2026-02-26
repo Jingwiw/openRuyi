@@ -1,0 +1,45 @@
+From 14b46c51c81159547f528b8caea583f9125cfef8 Mon Sep 17 00:00:00 2001
+From: misaka00251 <liuxin@iscas.ac.cn>
+Date: Mon, 2 Mar 2026 21:01:54 +0800
+Subject: [PATCH] Fix kiwi find path
+
+---
+ kiwi/bootloader/config/grub2.py | 7 +++++--
+ kiwi/defaults.py                | 2 +-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/kiwi/bootloader/config/grub2.py b/kiwi/bootloader/config/grub2.py
+index 54cf8ed..a5cfcbb 100644
+--- a/kiwi/bootloader/config/grub2.py
++++ b/kiwi/bootloader/config/grub2.py
+@@ -1363,9 +1363,12 @@ class BootLoaderConfigGrub2(BootLoaderConfigBase):
+     ):
+         if not lookup_path:
+             lookup_path = self.boot_dir
+-        return Defaults.get_grub_path(
+-            lookup_path, format_name, raise_on_error
++        moddep = Defaults.get_grub_path(
++            lookup_path,
++            os.path.join(format_name, 'moddep.lst'),
++            raise_on_error
+         )
++        return os.path.dirname(moddep)
+ 
+     def _find_theme_background_file(self, lookup_path):
+         background_pattern = os.sep.join(
+diff --git a/kiwi/defaults.py b/kiwi/defaults.py
+index a306ed1..e249e49 100644
+--- a/kiwi/defaults.py
++++ b/kiwi/defaults.py
+@@ -876,7 +876,7 @@ class Defaults:
+         """
+         log.debug(f'Searching grub file: {filename}')
+         install_dirs = [
+-            'usr/share', 'usr/lib'
++            'usr/share', 'usr/lib64', 'usr/lib'
+         ]
+         lookup_list = []
+         for grub_name in ['grub2', 'grub']:
+-- 
+2.53.0
+

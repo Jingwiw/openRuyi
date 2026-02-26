@@ -9,7 +9,7 @@
 %define real_version 6.10.1
 %define short_version 6.10
 
-Name:           qt6-grpc
+Name:           qt6-qtgrpc
 Version:        6.10.1
 Release:        %autorelease
 Summary:        Qt6 - Support for using gRPC and Protobuf

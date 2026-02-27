@@ -7,9 +7,6 @@
 
 %bcond nls 0
 
-# It is traditionally used for kdb data (console fonts, keymaps, ...).
-%global kbd_datadir %{_libdir}/kbd
-
 Name:           kbd
 Version:        2.8.0
 Release:        %autorelease
@@ -22,10 +19,6 @@ Source0:        https://www.kernel.org/pub/linux/utils/%{name}/%{name}-%{version
 Source1:        vlock.pamd
 BuildSystem:    autotools
 
-BuildOption(conf):  --prefix=%{_prefix}
-BuildOption(conf):  --datadir=%{kbd_datadir}
-BuildOption(conf):  --mandir=%{_mandir}
-BuildOption(conf):  --localedir=%{_datadir}/locale
 %if %{with nls}
 BuildOption(conf):  --enable-nls
 %else
@@ -69,10 +62,10 @@ install -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/vlock
 %{_bindir}/*
 %{_mandir}/*/*
 %config(noreplace) %{_sysconfdir}/pam.d/vlock
-%{kbd_datadir}/consolefonts/*
-%{kbd_datadir}/consoletrans/*
-%{kbd_datadir}/unimaps/*
-%{kbd_datadir}/keymaps/*
+%{_datadir}/consolefonts/*
+%{_datadir}/consoletrans/*
+%{_datadir}/unimaps/*
+%{_datadir}/keymaps/*
 
 %changelog
 %{?autochangelog}

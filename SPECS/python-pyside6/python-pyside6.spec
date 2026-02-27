@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
+# SPDX-FileContributor: jingyupu <pujingyu@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
@@ -51,6 +52,7 @@ BuildRequires:  pkgconfig(libffi)
 BuildRequires:  pkgconfig(libxslt)
 BuildRequires:  cmake(Qt6Core)
 BuildRequires:  cmake(Qt6Gui)
+BuildRequires:  cmake(Qt6CorePrivate)
 BuildRequires:  cmake(Qt6Widgets)
 BuildRequires:  cmake(Qt6Network)
 BuildRequires:  cmake(Qt6DBus)

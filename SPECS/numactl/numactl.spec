@@ -32,6 +32,10 @@ License:        LGPL-2.1-only and GPL-2.0-only
 %description    devel
 Provides development headers for numa library calls
 
+%check -p
+# Remove these tests as not fit for OBS environment.
+sed -i 's|test/bind_range test/checkaffinity test/checktopology|test/checkaffinity|' Makefile
+
 %files
 %doc README.md
 %{_bindir}/numactl

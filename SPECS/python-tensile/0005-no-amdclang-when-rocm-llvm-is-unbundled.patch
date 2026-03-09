@@ -1,0 +1,71 @@
+From 746af14c11ee1b455f1adbab8bf6bc3c93fb3fde Mon Sep 17 00:00:00 2001
+From: Sakura286 <chenxuan@iscas.ac.cn>
+Date: Fri, 6 Mar 2026 16:45:10 +0800
+Subject: [PATCH 5/6] no amdclang when rocm-llvm is unbundled
+
+---
+ Tensile/Common.py              |  4 ++--
+ Tensile/Utilities/Toolchain.py | 10 +++++-----
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/Tensile/Common.py b/Tensile/Common.py
+index 376afc4..90c579e 100644
+--- a/Tensile/Common.py
++++ b/Tensile/Common.py
+@@ -269,7 +269,7 @@ globalParameters["DictLibraryLogic"] = False
+ globalParameters["CurrentISA"] = (0,0,0)
+ globalParameters["ROCmAgentEnumeratorPath"] = None      # /opt/rocm/bin/rocm_agent_enumerator
+ globalParameters["ROCmSMIPath"] = None                  # /opt/rocm/bin/rocm-smi
+-globalParameters["AssemblerPath"] = None                # /opt/rocm/llvm/bin/clang++
++globalParameters["AssemblerPath"] = "clang++"                # /opt/rocm/llvm/bin/clang++
+ globalParameters["WorkingPath"] = os.getcwd()           # path where tensile called from
+ globalParameters["IndexChars"] =  "IJKLMNOPQRSTUVWXYZ"  # which characters to use for C[ij]=Sum[k] A[ik]*B[jk]
+ globalParameters["ScriptPath"] = os.path.dirname(os.path.realpath(__file__))            # path to Tensile/Tensile.py
+@@ -279,7 +279,7 @@ globalParameters["HipClangVersion"] = "0.0.0"
+ globalParameters["RuntimeLanguage"] = "HIP"
+ 
+ globalParameters["CodeObjectVersion"] = "default"
+-globalParameters["CxxCompiler"] = "amdclang++" if os.name != "nt" else "clang++"
++globalParameters["CxxCompiler"] = "hipcc" if os.name != "nt" else "clang++"
+ globalParameters["CCompiler"] = "amdclang" if os.name != "nt" else "clang"
+ globalParameters["Architecture"] = "all"
+ 
+diff --git a/Tensile/Utilities/Toolchain.py b/Tensile/Utilities/Toolchain.py
+index ee9cbee..e3de82b 100644
+--- a/Tensile/Utilities/Toolchain.py
++++ b/Tensile/Utilities/Toolchain.py
+@@ -106,10 +106,10 @@ def _posixSearchPaths() -> List[Path]:
+ 
+ 
+ class ToolchainDefaults(NamedTuple):
+-    CXX_COMPILER = osSelect(linux="amdclang++", windows="clang++.exe")
+-    C_COMPILER = osSelect(linux="amdclang", windows="clang.exe")
++    CXX_COMPILER = osSelect(linux="hipcc", windows="clang++.exe")
++    C_COMPILER = osSelect(linux="clang", windows="clang.exe")
+     OFFLOAD_BUNDLER = osSelect(linux="clang-offload-bundler", windows="clang-offload-bundler.exe")
+-    ASSEMBLER = osSelect(linux="amdclang++", windows="clang++.exe")
++    ASSEMBLER = osSelect(linux="clang++", windows="clang++.exe")
+     HIP_CONFIG = osSelect(linux="hipconfig", windows="hipconfig")
+     DEVICE_ENUMERATOR = osSelect(linux="rocm_agent_enumerator", windows="hipinfo.exe")
+ 
+@@ -132,7 +132,7 @@ def supportedCCompiler(compiler: str) -> bool:
+     Return:
+         If supported True; otherwise, False.
+     """
+-    return _supportedComponent(compiler, ["amdclang", "clang", "hipcc"])
++    return _supportedComponent(compiler, ["clang", "clang", "hipcc"])
+ 
+ 
+ def supportedCxxCompiler(compiler: str) -> bool:
+@@ -144,7 +144,7 @@ def supportedCxxCompiler(compiler: str) -> bool:
+     Return:
+         If supported True; otherwise, False.
+     """
+-    return _supportedComponent(compiler, ["amdclang++", "clang++", "hipcc"])
++    return _supportedComponent(compiler, ["clang++", "clang++", "hipcc"])
+ 
+ 
+ def supportedOffloadBundler(bundler: str) -> bool:
+-- 
+2.51.0
+

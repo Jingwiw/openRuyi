@@ -1,0 +1,128 @@
+From dfefd5482684998206290e2e62dc0c84dcc7d64e Mon Sep 17 00:00:00 2001
+From: Sakura286 <chenxuan@iscas.ac.cn>
+Date: Fri, 6 Mar 2026 16:49:43 +0800
+Subject: [PATCH 6/6] use system path instead of default
+
+---
+ Tensile/Common.py                           | 2 +-
+ Tensile/Source/CMakeLists.txt               | 4 ++--
+ Tensile/Source/FindHIP.cmake                | 4 ++--
+ Tensile/Source/cmake/FindROCmSMI.cmake      | 2 +-
+ Tensile/Tests/hipModuleLoad_timing/Makefile | 6 +++---
+ Tensile/Utilities/Toolchain.py              | 5 ++---
+ 6 files changed, 11 insertions(+), 12 deletions(-)
+
+diff --git a/Tensile/Common.py b/Tensile/Common.py
+index 90c579e..3589e01 100644
+--- a/Tensile/Common.py
++++ b/Tensile/Common.py
+@@ -2415,7 +2415,7 @@ def assignGlobalParameters( config, capabilitiesCache: Optional[dict] = None ):
+   if "KeepBuildTmp" in config:
+     globalParameters["KeepBuildTmp"] = config["KeepBuildTmp"]
+ 
+-  globalParameters["ROCmPath"] = "/opt/rocm"
++  globalParameters["ROCmPath"] = "/usr"
+   if "ROCM_PATH" in os.environ:
+     globalParameters["ROCmPath"] = os.environ.get("ROCM_PATH")
+   if "TENSILE_ROCM_PATH" in os.environ:
+diff --git a/Tensile/Source/CMakeLists.txt b/Tensile/Source/CMakeLists.txt
+index b96e308..c756756 100644
+--- a/Tensile/Source/CMakeLists.txt
++++ b/Tensile/Source/CMakeLists.txt
+@@ -26,7 +26,7 @@ cmake_minimum_required(VERSION 3.13)
+ 
+ # Override all paths arguments as they do not work properly
+ file(TO_CMAKE_PATH "$ENV{ROCM_PATH}" ROCM_PATH_ENV_VALUE)
+-list(APPEND CMAKE_PREFIX_PATH ${ROCM_PATH_ENV_VALUE} /opt/rocm)
++list(APPEND CMAKE_PREFIX_PATH ${ROCM_PATH_ENV_VALUE} /usr)
+ 
+ project(Tensile)
+ 
+@@ -65,7 +65,7 @@ CMAKE_DEPENDENT_OPTION(TENSILE_BUILD_CLIENT "Build the benchmarking client" ON
+                         "TENSILE_USE_HIP" OFF)
+ 
+ if(TENSILE_USE_HIP)
+-    find_package(HIP REQUIRED CONFIG PATHS ${ROCM_PATH_ENV_VALUE} /opt/rocm)
++    find_package(HIP REQUIRED CONFIG PATHS ${ROCM_PATH_ENV_VALUE} /usr)
+ endif()
+ 
+ if(TENSILE_USE_OPENMP)
+diff --git a/Tensile/Source/FindHIP.cmake b/Tensile/Source/FindHIP.cmake
+index d299357..ba8597f 100644
+--- a/Tensile/Source/FindHIP.cmake
++++ b/Tensile/Source/FindHIP.cmake
+@@ -79,7 +79,7 @@ else()
+         hip/hip_runtime.h
+       PATHS
+         ENV HIP_PATH
+-        /opt/rocm
++        /usr
+       PATH_SUFFIXES
+         /include/hip
+         /include
+@@ -98,7 +98,7 @@ else()
+     NAMES  hipcc
+     PATHS
+       ENV HIP_PATH
+-          /opt/rocm
++          /usr
+     PATH_SUFFIXES
+           /bin
+       )
+diff --git a/Tensile/Source/cmake/FindROCmSMI.cmake b/Tensile/Source/cmake/FindROCmSMI.cmake
+index 0498766..071232a 100644
+--- a/Tensile/Source/cmake/FindROCmSMI.cmake
++++ b/Tensile/Source/cmake/FindROCmSMI.cmake
+@@ -24,7 +24,7 @@
+ 
+ if(NOT ROCM_ROOT)
+     if(NOT ROCM_DIR)
+-        set(ROCM_ROOT "/opt/rocm")
++        set(ROCM_ROOT "/usr")
+     else()
+         set(ROCM_DIR "${ROCM_DIR}/../../..")
+     endif()
+diff --git a/Tensile/Tests/hipModuleLoad_timing/Makefile b/Tensile/Tests/hipModuleLoad_timing/Makefile
+index 671167d..2177143 100644
+--- a/Tensile/Tests/hipModuleLoad_timing/Makefile
++++ b/Tensile/Tests/hipModuleLoad_timing/Makefile
+@@ -22,10 +22,10 @@
+ #
+ ################################################################################
+ 
+-CXX?=/opt/rocm/hip/bin/amdclang++
+-LIBFLAGS=-L/opt/rocm/hip/lib/
++CXX?=/usr/bin/amdclang++
++LIBFLAGS=-L/usr/lib64/
+ LIBS=-lamdhip64
+-INCFLAGS=-I/opt/rocm/hip/include/
++INCFLAGS=-I/usr/include/
+ 
+ hipModuleLoadTiming.out: hipModuleLoadTiming.o
+ 	$(CXX) -o $@ $(LIBFLAGS) $^
+diff --git a/Tensile/Utilities/Toolchain.py b/Tensile/Utilities/Toolchain.py
+index e3de82b..e6ee7f3 100644
+--- a/Tensile/Utilities/Toolchain.py
++++ b/Tensile/Utilities/Toolchain.py
+@@ -29,8 +29,8 @@ from subprocess import PIPE, run
+ from typing import List, NamedTuple, Union
+ from warnings import warn
+ 
+-DEFAULT_ROCM_BIN_PATH_POSIX = Path("/opt/rocm/bin")
+-DEFAULT_ROCM_LLVM_BIN_PATH_POSIX = Path("/opt/rocm/lib/llvm/bin")
++DEFAULT_ROCM_BIN_PATH_POSIX = Path("/usr/bin")
++DEFAULT_ROCM_LLVM_BIN_PATH_POSIX = Path("/usr/bin")
+ DEFAULT_ROCM_BIN_PATH_WINDOWS = Path("C:/Program Files/AMD/ROCm")
+ 
+ 
+@@ -89,7 +89,6 @@ def _posixSearchPaths() -> List[Path]:
+     if os.environ.get("ROCM_PATH"):
+         for p in os.environ["ROCM_PATH"].split(os.pathsep):
+             searchPaths.append(Path(p) / "bin")
+-            searchPaths.append(Path(p) / "lib" / "llvm" / "bin")
+ 
+     searchPaths.extend(
+         [
+-- 
+2.51.0
+

@@ -1,0 +1,25 @@
+From 9d2c031ba924572914b72794f94f1def07aa225c Mon Sep 17 00:00:00 2001
+From: Sakura286 <chenxuan@iscas.ac.cn>
+Date: Fri, 6 Mar 2026 16:37:40 +0800
+Subject: [PATCH 2/6] fix tensile get path
+
+---
+ Tensile/cmake/TensileConfig.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Tensile/cmake/TensileConfig.cmake b/Tensile/cmake/TensileConfig.cmake
+index 62682d7..de275b0 100644
+--- a/Tensile/cmake/TensileConfig.cmake
++++ b/Tensile/cmake/TensileConfig.cmake
+@@ -45,7 +45,7 @@ if(NOT DEFINED Tensile_ROOT)
+     if (WIN32)
+         execute_process(COMMAND "${Tensile_PREFIX}/bin/TensileGetPath.exe" OUTPUT_VARIABLE Tensile_ROOT)
+     else()
+-        execute_process(COMMAND "${Tensile_PREFIX}/bin/TensileGetPath" OUTPUT_VARIABLE Tensile_ROOT)
++        execute_process(COMMAND "TensileGetPath" OUTPUT_VARIABLE Tensile_ROOT)
+     endif()
+ endif()
+ list(APPEND CMAKE_MODULE_PATH "${Tensile_ROOT}/Source/cmake/")
+-- 
+2.51.0
+

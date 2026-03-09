@@ -1,0 +1,25 @@
+From 5e9b360710400fcace517f055edf54da2ff0e076 Mon Sep 17 00:00:00 2001
+From: Sakura286 <chenxuan@iscas.ac.cn>
+Date: Fri, 6 Mar 2026 16:41:52 +0800
+Subject: [PATCH 4/6] ignore asm cap cache
+
+---
+ Tensile/Common.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Tensile/Common.py b/Tensile/Common.py
+index 86c6c57..376afc4 100644
+--- a/Tensile/Common.py
++++ b/Tensile/Common.py
+@@ -307,7 +307,7 @@ globalParameters["SeparateArchitectures"] = False # write Tensile library metada
+ 
+ globalParameters["LazyLibraryLoading"] = False # Load library and code object files when needed instead of at startup
+ 
+-globalParameters["IgnoreAsmCapCache"] = False # Ignore checking for discrepancies between derived and cached asm caps
++globalParameters["IgnoreAsmCapCache"] = True # Ignore checking for discrepancies between derived and cached asm caps
+ 
+ globalParameters["ExperimentalLogicDir"] = "/experimental/"
+ 
+-- 
+2.51.0
+

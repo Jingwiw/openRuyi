@@ -1,0 +1,55 @@
+From 353550790f659b320ea8753b7d4a6fd701bd1a79 Mon Sep 17 00:00:00 2001
+From: Sakura286 <chenxuan@iscas.ac.cn>
+Date: Fri, 6 Mar 2026 16:36:36 +0800
+Subject: [PATCH 1/6] fix python shebang
+
+---
+ Tensile/Configs/miopen/convert_cfg.py | 2 +-
+ Tensile/Tests/create_tests.py         | 2 +-
+ Tensile/bin/Tensile                   | 2 +-
+ Tensile/bin/TensileCreateLibrary      | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Tensile/Configs/miopen/convert_cfg.py b/Tensile/Configs/miopen/convert_cfg.py
+index c62d26f..3b5c114 100644
+--- a/Tensile/Configs/miopen/convert_cfg.py
++++ b/Tensile/Configs/miopen/convert_cfg.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python3
+ 
+ ################################################################################
+ #
+diff --git a/Tensile/Tests/create_tests.py b/Tensile/Tests/create_tests.py
+index 2b08e3f..94f7345 100755
+--- a/Tensile/Tests/create_tests.py
++++ b/Tensile/Tests/create_tests.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python3
+ 
+ ################################################################################
+ #
+diff --git a/Tensile/bin/Tensile b/Tensile/bin/Tensile
+index 1c53682..2ac7d57 100755
+--- a/Tensile/bin/Tensile
++++ b/Tensile/bin/Tensile
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python3
++#!/usr/bin/python3
+ 
+ ################################################################################
+ #
+diff --git a/Tensile/bin/TensileCreateLibrary b/Tensile/bin/TensileCreateLibrary
+index e90be28..8e966c3 100755
+--- a/Tensile/bin/TensileCreateLibrary
++++ b/Tensile/bin/TensileCreateLibrary
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python3
++#!/usr/bin/python3
+ 
+ ################################################################################
+ #
+-- 
+2.51.0
+

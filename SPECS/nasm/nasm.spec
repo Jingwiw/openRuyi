@@ -21,6 +21,7 @@ BuildSystem:    autotools
 BuildRequires:  perl
 BuildRequires:  make
 BuildRequires:  gcc
+BuildRequires:  pkgconfig(zlib)
 
 %description
 NASM is the Netwide Assembler, a free portable assembler for the Intel

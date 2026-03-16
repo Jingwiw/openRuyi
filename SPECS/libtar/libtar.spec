@@ -23,6 +23,7 @@ BuildRequires:  libtool
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  gcc
+BuildRequires:  pkgconfig(zlib)
 
 %description
 Libtar is a C library for manipulating POSIX tar files. It handles adding

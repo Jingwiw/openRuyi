@@ -5,14 +5,7 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%global flavor @BUILD_FLAVOR@%{nil}
-%if "%{flavor}" == "testsuite"
-%define psuffix -testsuite
-%else
-%define psuffix %{nil}
-%endif
-
-Name:           libtool%{psuffix}
+Name:           libtool
 Version:        2.4.7
 Release:        %autorelease
 Summary:        A Tool to Build Shared Libraries
@@ -21,8 +14,6 @@ URL:            https://www.gnu.org/software/libtool/
 VCS:            git:https://git.savannah.gnu.org/git/libtool.git
 #!RemoteAsset
 Source0:        https://ftpmirror.gnu.org/gnu/libtool/libtool-%{version}.tar.xz
-#!RemoteAsset
-Source1:        https://ftpmirror.gnu.org/gnu/libtool/libtool-%{version}.tar.xz.sig
 Buildsystem:    autotools
 
 Patch0:         libtool-reproducible-hostname.patch
@@ -60,23 +51,11 @@ Library needed by programs that use the ltdl interface of GNU libtool.
 %conf -p
 rm -f doc/libtool.info
 
-%if "%{flavor}" == "testsuite"
-%check
-trap 'test $? -ne 0 && cat tests/testsuite.log' EXIT
-%make_build check
-
-%install
-:
-
-%else
-
 %install -a
 chmod +x %{buildroot}%{_datadir}/libtool/build-aux/ltmain.sh
 # Do not add builder's hostname into generated scripts
 sed -i "/uname -n/d" %{buildroot}%{_datadir}/aclocal/libtool.m4
-%endif
 
-%if "%{name}" == "libtool"
 %files
 %license COPYING
 %doc AUTHORS NEWS README THANKS ChangeLog
@@ -96,7 +75,6 @@ sed -i "/uname -n/d" %{buildroot}%{_datadir}/aclocal/libtool.m4
 
 %files -n libltdl
 %{_libdir}/libltdl.so.7*
-%endif
 
 %changelog
 %{?autochangelog}

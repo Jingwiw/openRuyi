@@ -35,6 +35,10 @@ BuildRequires:  make
 # Conflicting libudev.so.1
 Conflicts:      systemd-udev
 
+# Pretend to provide any libudev.so(*)() that systemd-udev provides
+BuildRequires:  systemd-udev
+Provides:       %(rpm -q systemd-udev --provides | grep '^libudev\.so' | tr '\n' ' ')
+
 %description
 %{name} is a drop-in replacement for libudev intended to work with
 different Linux device managers.

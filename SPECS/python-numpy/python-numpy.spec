@@ -16,23 +16,21 @@ URL:            https://github.com/numpy/numpy
 Source:         https://files.pythonhosted.org/packages/source/n/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildSystem:    pyproject
 
-BuildOption(install):  -l %{srcname} -L
-
 BuildOption(build):  -Csetup-args=-Dblas=openblas
 BuildOption(build):  -Csetup-args=-Dlapack=lapack
+BuildOption(install):  -l %{srcname} -L
 
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  pkgconfig(python3)
-BuildRequires:  gcc
 BuildRequires:  gcc-c++
-BuildRequires:  python3-pip
-BuildRequires:  python3-wheel
-BuildRequires:  python3-meson-python >= 0.15.0
-BuildRequires:  python3-Cython >= 3.0.6
+BuildRequires:  python3dist(pip)
+BuildRequires:  python3dist(wheel)
+BuildRequires:  python3dist(meson-python) >= 0.15.0
+BuildRequires:  python3dist(Cython) >= 3.0.6
 BuildRequires:  pkgconfig
 BuildRequires:  openblas-devel
-BuildRequires:  python3-pytest
-BuildRequires:  python3-hypothesis
+BuildRequires:  python3dist(pytest)
+BuildRequires:  python3dist(hypothesis)
 
 Provides:       python3-%{srcname}
 %python_provide python3-%{srcname}

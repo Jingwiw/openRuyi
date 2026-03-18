@@ -21,14 +21,14 @@ BuildSystem:    pyproject
 # https://github.com/bbangert/beaker/issues/242
 Patch0:         0001-Avoid-using-dbm.sqlite3.patch
 
-BuildOption(install): beaker
+BuildOption(install):  beaker
 
 BuildRequires:  pyproject-rpm-macros
-BuildRequires:  python3-devel
+BuildRequires:  pkgconfig(python3)
 # Tests
-BuildRequires:  python3-pytest
-BuildRequires:  python3-pycryptodome
-BuildRequires:  python3-cryptography
+BuildRequires:  python3dist(pytest)
+BuildRequires:  python3dist(pycryptodome)
+BuildRequires:  python3dist(cryptography)
 # unsupported locale setting it_IT.UTF-8
 BuildRequires:  glibc-locale
 

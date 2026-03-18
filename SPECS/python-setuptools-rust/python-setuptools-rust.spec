@@ -17,14 +17,14 @@ Source0:        https://files.pythonhosted.org/packages/source/s/%{srcname}/%{sr
 BuildArch:      noarch
 BuildSystem:    pyproject
 
-BuildOption(install): -l %{srcname}
+BuildOption(install):  -l %{srcname}
 
 BuildRequires:  pyproject-rpm-macros
-BuildRequires:  python3-devel
-BuildRequires:  python3-pip
-BuildRequires:  python3-setuptools
-BuildRequires:  python3-setuptools_scm
-BuildRequires:  python3-semantic-version
+BuildRequires:  pkgconfig(python3)
+BuildRequires:  python3dist(pip)
+BuildRequires:  python3dist(setuptools)
+BuildRequires:  python3dist(setuptools-scm)
+BuildRequires:  python3dist(semantic-version)
 
 Provides:       python3-setuptools-rust
 %python_provide python3-setuptools-rust

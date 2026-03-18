@@ -16,13 +16,13 @@ Summary:        Python bindings to libsodium
 Source0:        https://files.pythonhosted.org/packages/source/P/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildSystem:    pyproject
 
-BuildOption(install): -l nacl +auto
+BuildOption(install):  -l nacl +auto
 
-BuildRequires:  libsodium-devel
+BuildRequires:  pkgconfig(libsodium)
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  pytest
-BuildRequires:  python-hypothesis
-BuildRequires:  python3-devel
+BuildRequires:  python3dist(hypothesis)
+BuildRequires:  pkgconfig(python3)
 
 Provides:       python3-%{srcname}
 %python_provide python3-%{srcname}

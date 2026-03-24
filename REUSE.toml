@@ -1,8 +1,6 @@
 version = 1
 [[annotations]]
 path = [
-	"**.patch",
-        "**.diff",
 	"**.tmpfiles",
 	"**.sysusers",
 	"**.sysconfig",

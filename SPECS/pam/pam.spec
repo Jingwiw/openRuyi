@@ -93,8 +93,6 @@ BuildRequires:  meson
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig
 
-Requires:       setup
-
 %description
 PAM (Pluggable Authentication Modules) is a system security tool that
 allows system administrators to set authentication policy without

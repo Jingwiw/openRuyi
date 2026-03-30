@@ -143,6 +143,7 @@ helper program used for host-based authentication disabled by default.
 Summary:        An open source SSH server daemon
 Requires:       openssh = %{version}-%{release}
 Requires:       pam
+Requires:       systemd-pam
 #Requires:       crypto-policies
 Requires(pre):  systemd-sysusers
 %systemd_requires

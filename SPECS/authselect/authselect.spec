@@ -73,13 +73,12 @@ if [ $1 == 0 ] ; then
 fi
 
 %posttrans
-# If this is a new installation select the default configuration.
-if [ $1 == 1 ] ; then
-    %{_bindir}/authselect select local --force --nobackup &> /dev/null
-    exit 0
+# Respect existing local PAM state. Only refresh systems that are already
+# explicitly managed by authselect.
+if [ -s %{_sysconfdir}/authselect/authselect.conf ] && \
+   %{_bindir}/authselect check &> /dev/null ; then
+    %{_bindir}/authselect apply-changes &> /dev/null || :
 fi
-# Apply any changes to profiles (validates configuration first internally)
-%{_bindir}/authselect apply-changes &> /dev/null
 exit 0
 
 %files

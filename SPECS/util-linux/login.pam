@@ -3,9 +3,11 @@
 #
 # By default, openRuyi uses a central PAM configuration stack.
 # This file simply includes the system-wide policy for local logins.
-# To customize, edit the files included by 'system-auth'.
+# To customize, edit the canonical common-* policy files.
 #
-auth       include      system-auth
-account    include      system-auth
-password   include      system-auth
-session    include      system-auth
+auth       include      common-auth
+account    include      common-account
+password   include      common-password
+session    required     pam_loginuid.so
+session    optional     pam_keyinit.so force revoke
+session    include      common-session

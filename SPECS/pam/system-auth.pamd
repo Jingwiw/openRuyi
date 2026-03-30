@@ -1,12 +1,7 @@
 #%PAM-1.0
-auth      required     pam_env.so
-auth      sufficient   pam_unix.so nullok try_first_pass
-auth      required     pam_deny.so
-
-account   required     pam_unix.so
-
-password  sufficient   pam_unix.so nullok sha512 shadow try_first_pass
-password  required     pam_deny.so
-
-session   required     pam_limits.so
-session   required     pam_unix.so
+# Compatibility wrapper for legacy consumers. The canonical distro policy
+# lives in common-*.
+auth      include      common-auth
+account   include      common-account
+password  include      common-password
+session   include      common-session

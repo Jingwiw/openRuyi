@@ -5,5 +5,4 @@ account   required       pam_permit.so
 password  required       pam_deny.so
 session   required       pam_loginuid.so
 session   optional       pam_keyinit.so revoke
-session   include        system-auth
-session   include        postlogin
+session   include        common-session-nonlogin

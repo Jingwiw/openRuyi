@@ -1,10 +1,9 @@
 #%PAM-1.0
 # Standard user login via sddm
 auth      requisite      pam_nologin.so
-auth      include        system-auth
-account   include        system-auth
-password  include        system-auth
+auth      include        common-auth
+account   include        common-account
+password  include        common-password
 session   required       pam_loginuid.so
 session   optional       pam_keyinit.so revoke force
-session   include        system-auth
-session   include        postlogin
+session   include        common-session

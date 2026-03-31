@@ -113,6 +113,9 @@ rm -f  %{buildroot}%{_pkgdocdir}/contrib/multilevel-init.patch
 rm -rf %{buildroot}%{_pkgdocdir}/contrib/vcpkg-*
 rm -rf %{buildroot}%{_pkgdocdir}/contrib/cmake*
 
+%pre
+%sysusers_create_package %{name} %{SOURCE3}
+
 %post
 %systemd_post openvpn-client@.service openvpn-server@.service
 

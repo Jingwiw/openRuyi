@@ -17,6 +17,7 @@ Source1:        sddm.conf
 Source2:        sddm-greeter.pam
 Source3:        sddm.pam
 Source4:        sddm-autologin.pam
+Source5:        sddm.sysusers
 BuildSystem:    cmake
 
 Patch0:         0001-CMake-Raise-required-version-to-3.5.patch
@@ -81,6 +82,7 @@ install -Dpm 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/pam.d/sddm
 install -Dpm 644 %{SOURCE4} %{buildroot}%{_sysconfdir}/pam.d/sddm-autologin
 install -Dpm 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/pam.d/sddm-greeter
 install -Dpm 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/sddm.conf
+install -Dpm 644 %{SOURCE5} %{buildroot}%{_sysusersdir}/sddm.conf
 mkdir -p %{buildroot}/run/sddm
 mkdir -p %{buildroot}%{_localstatedir}/lib/sddm
 mkdir -p %{buildroot}%{_sysconfdir}/sddm/
@@ -91,6 +93,9 @@ rm -fv %{buildroot}%{_sysconfdir}/sddm/Xsession
 # De-conflict the dbus file
 mv %{buildroot}%{_datadir}/dbus-1/system.d/org.freedesktop.DisplayManager.conf \
    %{buildroot}%{_datadir}/dbus-1/system.d/org.freedesktop.DisplayManager-sddm.conf
+
+%pre
+%sysusers_create_package %{name} %{SOURCE5}
 
 %post
 %systemd_post sddm.service

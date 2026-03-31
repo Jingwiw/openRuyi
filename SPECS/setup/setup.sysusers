@@ -9,7 +9,6 @@ u operator    11:0     "operator"              /root            -
 u games       12:100   "games"                 /usr/games       -
 u ftp         14:50    "FTP User"              /var/ftp         -
 u nobody   65534:65534 "Kernel Overflow User"  -                -
-u messagebus 977:977   "User for D-Bus"        /run/dbus        -
 g root           0
 g sys            3
 g tty            5
@@ -20,5 +19,4 @@ g floppy         19
 g games          20
 g ftp            50
 g lock           54
-g messagebus     977
 g nobody         65534

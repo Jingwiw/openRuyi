@@ -63,7 +63,7 @@ BuildOption(conf):  --with-profiling-data
 %if %{without glusterfs}
 BuildOption(conf):  --disable-glusterfs
 %endif
-BuildOption(check): TEST_OPTIONS=--quick
+BuildOption(check):  TEST_OPTIONS=--quick
 
 BuildRequires:  make
 BuildRequires:  libtool
@@ -281,8 +281,14 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 # TODO: Fix check.
 %check
 
-%post
+%pre
 %sysusers_create_package %{name} %{SOURCE2}
+%sysusers_create_package %{name}-usershares %{SOURCE4}
+
+%pre winbind
+%sysusers_create_package %{name}-winbind %{SOURCE3}
+
+%post
 %tmpfiles_create_package %{name} %{SOURCE5}
 %systemd_post samba-bgqd.service
 %systemd_post smb.service

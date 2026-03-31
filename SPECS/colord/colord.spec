@@ -16,6 +16,7 @@ License:        GPL-2.0-or-later AND LGPL-2.1-or-later
 URL:            https://gitlab.freedesktop.org/colord/colord
 #!RemoteAsset
 Source0:        https://www.freedesktop.org/software/colord/releases/colord-%{version}.tar.xz
+Source1:        colord.sysusers
 BuildSystem:    meson
 
 BuildOption(conf):  -Ddaemon_user=colord
@@ -94,10 +95,14 @@ Data files for installed tests.
 %install -a
 touch %{buildroot}%{_localstatedir}/lib/colord/mapping.db
 touch %{buildroot}%{_localstatedir}/lib/colord/storage.db
+install -Dpm0644 %{SOURCE1} %{buildroot}%{_sysusersdir}/colord-sysusers.conf
 
 # Avoid illegal package names
 rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/*@*
 %find_lang %{name} --generate-subpackages
+
+%pre
+%sysusers_create_package %{name} %{SOURCE1}
 
 %post
 %systemd_post colord.service

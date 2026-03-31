@@ -104,6 +104,10 @@ This package contains the header files and libraries needed for D-Bus developmen
 mv -f %{buildroot}%{_bindir}/dbus-launch %{buildroot}%{_bindir}/dbus-launch.nox11
 install -d %{buildroot}/run/dbus
 mkdir -p %{buildroot}%{_sysconfdir}/alternatives
+%if %{with systemd}
+# messagebus is owned by setup.sysusers; do not ship a duplicate dbus.conf.
+rm -f %{buildroot}%{_sysusersdir}/dbus.conf
+%endif
 
 %post
 if [ "$1" = 1 ]; then
@@ -152,7 +156,6 @@ fi
 %dir %{_userunitdir}/sockets.target.wants
 %{_userunitdir}/sockets.target.wants/dbus.socket
 %{_tmpfilesdir}/dbus.conf
-%{_sysusersdir}/dbus.conf
 %{_unitdir}/dbus.service
 %{_unitdir}/dbus.socket
 %dir %{_unitdir}/multi-user.target.wants

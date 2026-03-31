@@ -14,6 +14,7 @@ License:        LGPL-2.1-or-later
 URL:            https://github.com/libstorage/libstoragemgmt
 #!RemoteAsset
 Source0:        %{url}/releases/download/%{version}/%{name}-%{version}.tar.gz
+Source1:        libstoragemgmt.sysusers
 BuildSystem:    autotools
 
 # Add systemd sysusers support for user/group management
@@ -123,6 +124,10 @@ install -m 644 tools/udev/90-scsi-ua.rules \
     %{buildroot}/%{_udevrulesdir}/90-scsi-ua.rules
 install -m 755 tools/udev/scan-scsi-target \
     %{buildroot}/%{_udevrulesdir}/../scan-scsi-target
+install -Dpm0644 %{SOURCE1} %{buildroot}%{_sysusersdir}/%{name}.conf
+
+%pre
+%sysusers_create_package %{name} %{SOURCE1}
 
 %post
 # Create tmp socket folders.

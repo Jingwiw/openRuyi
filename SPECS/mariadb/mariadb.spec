@@ -444,6 +444,9 @@ mkdir -p '%{buildroot}'%{_localstatedir}/lib/mysql-files
 mkdir -p %{buildroot}%{_sysusersdir}
 install -m 644 %{SOURCE1} %{buildroot}%{_sysusersdir}/mysql-user.conf
 
+%pre
+%sysusers_create_package %{name} %{SOURCE1}
+
 %post
 %systemd_post mariadb.service mariadb@.service mariadb.socket mariadb-extra.socket mariadb.target
 
@@ -473,6 +476,7 @@ chmod 4755 %{_libdir}/mysql/plugin/auth_pam_tool_dir/auth_pam_tool 2>/dev/null |
 %{_unitdir}/mariadb.socket
 %{_unitdir}/mariadb@.socket
 %{_tmpfilesdir}/mariadb.conf
+%{_sysusersdir}/mysql-user.conf
 %{_sbindir}/rcmysql
 %{_sbindir}/rcmariadb
 %dir %{_datadir}/%{name}
@@ -520,7 +524,6 @@ chmod 4755 %{_libdir}/mysql/plugin/auth_pam_tool_dir/auth_pam_tool 2>/dev/null |
 %dir %{_libdir}/mysql
 %dir %{_libdir}/mysql/plugin
 %{_libdir}/mysql/plugin/dialog_examples.so
-%{_sysusersdir}/mysql-user.conf
 
 %files errormessages -f mariadb-errormessages.files
 %{_datadir}/%{name}/*/errmsg.sys

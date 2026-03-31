@@ -17,6 +17,7 @@ URL:            https://github.com/SSSD/sssd
 Source0:        %{url}/releases/download/%{version}/%{name}-%{version}.tar.gz
 #!RemoteAsset
 Source1:        %{url}/releases/download/%{version}/%{name}-%{version}.tar.gz.asc
+Source2:        sssd.sysusers
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-static
@@ -251,14 +252,14 @@ cp %{buildroot}%{_datadir}/sssd/krb5-snippets/enable_sssd_conf_dir \
    %{buildroot}%{_sysconfdir}/krb5.conf.d/enable_sssd_conf_dir
 
 install -Dm0644 contrib/sssd-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
-install -Dpm0644 contrib/sssd.sysusers %{buildroot}%{_sysusersdir}/sssd.conf
+install -Dpm0644 %{SOURCE2} %{buildroot}%{_sysusersdir}/sssd.conf
 
 %find_lang %{name} --generate-subpackages
 
+%pre
+%sysusers_create_package %{name} %{SOURCE2}
+
 %post
-if [ -x /usr/bin/systemd-sysusers ]; then
-   systemd-sysusers %{_sysusersdir}/sssd.conf || :
-fi
 if [ -x /usr/bin/systemd-tmpfiles ]; then
    systemd-tmpfiles --create %{_tmpfilesdir}/sssd.conf || :
 fi

@@ -41,6 +41,9 @@ install -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/%{name}@.service
 install -D -m 644 %{SOURCE3} %{buildroot}%{_sysusersdir}/%{name}.conf
 install -d %{buildroot}%{_localstatedir}/lib/%{name}
 
+%pre
+%sysusers_create_package %{name} %{SOURCE3}
+
 %post
 %systemd_post dhcpcd.service
 

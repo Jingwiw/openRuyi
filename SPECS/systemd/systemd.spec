@@ -1150,6 +1150,8 @@ fi
 %exclude %{system_unit_dir}/systemd-bootctl.socket
 %exclude %{system_unit_dir}/systemd-bootctl@.service
 %exclude %{system_unit_dir}/sockets.target.wants/systemd-bootctl.socket
+%exclude %{system_unit_dir}/systemd-sysusers.service
+%exclude %{system_unit_dir}/sysinit.target.wants/systemd-sysusers.service
 %exclude %{bash_completions_dir}/bootctl
 %exclude %{_datadir}/zsh/site-functions/_bootctl
 
@@ -1213,6 +1215,7 @@ fi
 %{_mandir}/man8/systemd-sysusers.service.8.gz
 %endif
 %{pkgdir}/system/systemd-sysusers.service
+%{pkgdir}/system/sysinit.target.wants/systemd-sysusers.service
 
 %if %{with network}
 %files resolved

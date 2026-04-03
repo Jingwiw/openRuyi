@@ -53,7 +53,7 @@ Summary:        System and service manager
 License:        LGPL-2.1-or-later AND MIT AND GPL-2.0-or-later
 URL:            https://systemd.io
 VCS:            git:https://github.com/systemd/systemd
-#!RemoteAsset
+#!RemoteAsset:  sha256:a84123692d1add7f9c48fd11cdf5f901393008c2d2ade667c18f25a20bf1290d
 Source0:        https://github.com/systemd/systemd/archive/v%{version}/%{name}-%{version}.tar.gz
 # These are essential files
 Source1:        systemd-user.pam
@@ -1153,6 +1153,13 @@ fi
 %exclude %{_sysconfdir}/systemd/journal-upload.conf
 %exclude %{_localstatedir}/lib/systemd/journal-upload
 %endif
+%if %{with journal_remote}
+%exclude %{system_unit_dir}/systemd-journal-gatewayd.service
+%exclude %{system_unit_dir}/systemd-journal-gatewayd.socket
+%exclude %{system_unit_dir}/systemd-journal-remote.service
+%exclude %{system_unit_dir}/systemd-journal-remote.socket
+%exclude %{system_unit_dir}/systemd-journal-upload.service
+%endif
 %exclude %{system_unit_dir}/systemd-boot-update.service
 %exclude %{system_unit_dir}/systemd-bootctl.socket
 %exclude %{system_unit_dir}/systemd-bootctl@.service
@@ -1434,6 +1441,11 @@ fi
 %{pkgdir}/systemd-journal-gatewayd
 %{pkgdir}/systemd-journal-remote
 %{pkgdir}/systemd-journal-upload
+%{pkgdir}/system/systemd-journal-gatewayd.service
+%{pkgdir}/system/systemd-journal-gatewayd.socket
+%{pkgdir}/system/systemd-journal-remote.service
+%{pkgdir}/system/systemd-journal-remote.socket
+%{pkgdir}/system/systemd-journal-upload.service
 %{pkgdir}/journal-remote.conf
 %{_sysconfdir}/systemd/journal-remote.conf
 %{_sysconfdir}/systemd/journal-upload.conf
@@ -1547,4 +1559,4 @@ fi
 %endif
 
 %changelog
-%{?autochangelog}
+%autochangelog

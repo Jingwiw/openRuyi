@@ -1153,6 +1153,13 @@ fi
 %exclude %{_sysconfdir}/systemd/journal-upload.conf
 %exclude %{_localstatedir}/lib/systemd/journal-upload
 %endif
+%if %{with journal_remote}
+%exclude %{system_unit_dir}/systemd-journal-gatewayd.service
+%exclude %{system_unit_dir}/systemd-journal-gatewayd.socket
+%exclude %{system_unit_dir}/systemd-journal-remote.service
+%exclude %{system_unit_dir}/systemd-journal-remote.socket
+%exclude %{system_unit_dir}/systemd-journal-upload.service
+%endif
 %exclude %{system_unit_dir}/systemd-boot-update.service
 %exclude %{system_unit_dir}/systemd-bootctl.socket
 %exclude %{system_unit_dir}/systemd-bootctl@.service
@@ -1434,6 +1441,11 @@ fi
 %{pkgdir}/systemd-journal-gatewayd
 %{pkgdir}/systemd-journal-remote
 %{pkgdir}/systemd-journal-upload
+%{pkgdir}/system/systemd-journal-gatewayd.service
+%{pkgdir}/system/systemd-journal-gatewayd.socket
+%{pkgdir}/system/systemd-journal-remote.service
+%{pkgdir}/system/systemd-journal-remote.socket
+%{pkgdir}/system/systemd-journal-upload.service
 %{pkgdir}/journal-remote.conf
 %{_sysconfdir}/systemd/journal-remote.conf
 %{_sysconfdir}/systemd/journal-upload.conf

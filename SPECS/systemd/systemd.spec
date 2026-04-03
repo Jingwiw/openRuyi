@@ -1161,8 +1161,13 @@ fi
 
 %files libs
 %license LICENSE.LGPL2.1
-%{_libdir}/lib*.so.*
-%exclude %{_libdir}/libudev.so*
+# Avoid broad ELF globs here. RPM still emits build-id links for
+# excluded binaries/libraries, which can cause "File listed twice"
+# warnings and subpackage overlap.
+%{_libdir}/libnss_myhostname.so.2*
+%{_libdir}/libnss_mymachines.so.2*
+%{_libdir}/libnss_systemd.so.2*
+%{_libdir}/libsystemd.so.0*
 
 %files shared
 %license LICENSE.LGPL2.1

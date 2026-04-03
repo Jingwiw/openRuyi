@@ -1146,6 +1146,7 @@ fi
 %exclude %{_sysconfdir}/systemd/journal-upload.conf
 %exclude %{_localstatedir}/lib/systemd/journal-upload
 %endif
+%exclude %{system_unit_dir}/systemd-boot-update.service
 %exclude %{bash_completions_dir}/bootctl
 %exclude %{_datadir}/zsh/site-functions/_bootctl
 

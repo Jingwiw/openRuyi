@@ -22,9 +22,9 @@ Summary:        An extensible library which provides authentication for applicat
 License:        BSD-3-Clause AND GPL-2.0-or-later
 URL:            http://www.linux-pam.org/
 VCS:            git:https://github.com/linux-pam/linux-pam
-#!RemoteAsset
+#!RemoteAsset:  sha256:21dbcec6e01dd578f14789eac9024a18941e6f2702a05cf91b28c232eeb26ab0
 Source0:        https://github.com/linux-pam/linux-pam/releases/download/v%{version}/Linux-PAM-%{version}.tar.xz
-#!RemoteAsset
+#!RemoteAsset:  sha256:6971f4793e38f01c644de0da24f4ab2c2afb934b02b7c273fa1e53b859d36529
 Source1:        https://github.com/linux-pam/linux-pam/releases/download/v%{version}/Linux-PAM-%{version}.tar.xz.asc
 # Macros for us
 Source2:        macros.pam
@@ -85,6 +85,8 @@ BuildRequires:  pkgconfig(libxcrypt)
 BuildRequires:  meson
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig
+
+Requires:       openruyi-authselect-profiles
 
 %description
 PAM (Pluggable Authentication Modules) is a system security tool that
@@ -306,4 +308,4 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/*@*
 %endif
 
 %changelog
-%{?autochangelog}
+%autochangelog

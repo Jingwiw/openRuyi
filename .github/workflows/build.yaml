@@ -177,7 +177,7 @@ jobs:
         TARGET_ARCH: x86_64
         BUILD_PLATFORM: linux/amd64
         UPSTREAM_REPO: https://repo.build.openruyi.cn/openruyi/x86_64/
-        BUILDER_BASE_IMAGE: docker.io/opensuse/tumbleweed@sha256:ef83be77fac5207611adab5407f6c8b0ca5dd4f1924ad30682f53e807dd13f3d
+        BUILDER_BASE_IMAGE: git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e
         KIWI_SOURCE_COMMIT: a602fe1d73adeab4cb17078f5fac7d678ff5269b
       run: |
         set -euo pipefail

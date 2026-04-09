@@ -43,6 +43,7 @@ assert_not_contains() {
 
 build_workflow=$repo_root/.github/workflows/build.yaml
 selftest_workflow=$repo_root/.github/workflows/ci-selftest.yaml
+builder_dockerfile=$repo_root/.github/image-build/kiwi-installiso/Dockerfile.builder
 build_and_inspect=$repo_root/.github/image-build/kiwi-installiso/build-and-inspect.sh
 build_image=$repo_root/.github/image-build/kiwi-installiso/build-image.sh
 make_local_repo=$repo_root/.github/common/make-local-rpm-repo.sh
@@ -53,10 +54,12 @@ assert_not_contains "$build_workflow" ".github/common/**" "build workflow no lon
 assert_contains "$selftest_workflow" ".github/common/**" "selftest workflow watches helper changes"
 assert_contains "$selftest_workflow" ".github/image-build/**" "selftest workflow watches image helper changes"
 assert_contains "$selftest_workflow" ".github/testsuite/**" "selftest workflow watches testsuite changes"
+assert_contains "$builder_dockerfile" "git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e" "builder defaults to openRuyi creek base"
 assert_contains "$build_and_inspect" '-e CONTAINER_NAME="$container_name"' "build-and-inspect passes CONTAINER_NAME into container"
 assert_contains "$build_and_inspect" 'CONTAINER_NAME=$CONTAINER_NAME' "build-and-inspect writes CONTAINER_NAME from container env"
 assert_contains "$build_and_inspect" 'UPSTREAM_REPOMD_SHA256' "build-and-inspect records upstream repomd checksum"
 assert_contains "$build_and_inspect" 'BUILD_PLATFORM=' "build-and-inspect uses explicit build platform"
+assert_contains "$build_image" 'builder_base_image=${BUILDER_BASE_IMAGE:-git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e}' "build-image defaults to openRuyi creek base"
 assert_not_contains "$smoke_verify" "root shell is" "smoke suite no longer contains shell policy checks"
 assert_not_contains "$smoke_verify" "authselect current profile is" "smoke suite no longer contains auth profile policy checks"
 

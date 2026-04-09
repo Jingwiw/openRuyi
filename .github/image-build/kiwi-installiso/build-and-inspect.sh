@@ -24,7 +24,7 @@ fi
 upstream_repo=${UPSTREAM_REPO:-https://repo.build.openruyi.cn/openruyi/x86_64/}
 upstream_repomd_sha256=${UPSTREAM_REPOMD_SHA256:-}
 kiwi_source_commit=${KIWI_SOURCE_COMMIT:-unknown}
-builder_base_image=${BUILDER_BASE_IMAGE:-docker.io/opensuse/tumbleweed@sha256:ef83be77fac5207611adab5407f6c8b0ca5dd4f1924ad30682f53e807dd13f3d}
+builder_base_image=${BUILDER_BASE_IMAGE:-git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e}
 builder_image=${BUILDER_IMAGE:-openruyi-kiwi-builder:ci}
 build_dir_in_container=${BUILD_DIR_IN_CONTAINER:-/var/tmp/openruyi-${profile}-ci}
 container_name=${CONTAINER_NAME:-kiwi-ci-${profile}-${GITHUB_RUN_ID:-$$}}

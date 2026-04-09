@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+name: ci selftest
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main, ci-test]
+    types: [opened, synchronize]
+    paths:
+     - '.github/build/**'
+     - '.github/common/**'
+     - '.github/image-build/**'
+     - '.github/testsuite/**'
+     - '.github/workflows/build.yaml'
+     - '.github/workflows/ci-selftest.yaml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  helper_selftest:
+    runs-on: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Syntax check shell helpers
+      run: |
+        find .github -type f -name '*.sh' -print0 | xargs -0 -n 1 bash -n
+    - name: Validate workflow YAML
+      run: |
+        ruby -e 'require "yaml"; ARGV.each { |path| YAML.safe_load(File.read(path), aliases: true) }' \
+          .github/workflows/build.yaml \
+          .github/workflows/ci-selftest.yaml \
+          .github/workflows/pre-commit.yml \
+          .github/workflows/update-package.yaml
+    - name: Verify helper contracts
+      run: |
+        bash ./.github/testsuite/smoke/helpers/verify-helper-contracts.sh

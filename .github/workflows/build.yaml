@@ -24,6 +24,12 @@ concurrency:
 jobs:
   build:
     runs-on: [ubuntu-latest]
+    outputs:
+      changed_packages: ${{ steps.package-gates.outputs.changed_packages }}
+      kiwi_trigger_packages: ${{ steps.package-gates.outputs.kiwi_trigger_packages }}
+      permission_trigger_packages: ${{ steps.package-gates.outputs.permission_trigger_packages }}
+      needs_kiwi: ${{ steps.package-gates.outputs.needs_kiwi }}
+      needs_permission_check: ${{ steps.package-gates.outputs.needs_permission_check }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -35,6 +41,52 @@ jobs:
         files_yaml: |
           specs:
             - SPECS/**
+    - name: derive package gates
+      id: package-gates
+      env:
+        CHANGED_SPEC_FILES: ${{ steps.changed-files.outputs.specs_all_changed_files }}
+      run: |
+        set -euo pipefail
+
+        changed_packages=''
+        kiwi_trigger_packages=''
+        permission_trigger_packages=''
+
+        if [[ "${{ steps.changed-files.outputs.specs_any_changed }}" == 'true' ]]; then
+          changed_packages="$(
+            printf '%s\n' $CHANGED_SPEC_FILES | bash ./.github/common/list-changed-spec-packages.sh
+          )"
+          kiwi_trigger_packages="$(
+            printf '%s\n' "$changed_packages" | bash ./.github/common/match-package-list.sh ./.github/image-build/kiwi-installiso/trigger-packages.txt || true
+          )"
+          permission_trigger_packages="$(
+            printf '%s\n' "$changed_packages" | bash ./.github/common/match-package-list.sh ./.github/testsuite/policy/auth-model/trigger-packages.txt || true
+          )"
+        fi
+
+        {
+          echo 'changed_packages<<EOF'
+          printf '%s\n' "$changed_packages"
+          echo EOF
+          echo 'kiwi_trigger_packages<<EOF'
+          printf '%s\n' "$kiwi_trigger_packages"
+          echo EOF
+          echo 'permission_trigger_packages<<EOF'
+          printf '%s\n' "$permission_trigger_packages"
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+        if [[ -n "$kiwi_trigger_packages" ]]; then
+          echo 'needs_kiwi=true' >> "$GITHUB_OUTPUT"
+        else
+          echo 'needs_kiwi=false' >> "$GITHUB_OUTPUT"
+        fi
+
+        if [[ -n "$permission_trigger_packages" ]]; then
+          echo 'needs_permission_check=true' >> "$GITHUB_OUTPUT"
+        else
+          echo 'needs_permission_check=false' >> "$GITHUB_OUTPUT"
+        fi
     - name: cache
       id:   cache
       uses: actions/cache@v4
@@ -42,9 +94,20 @@ jobs:
         path: |
           SPECS/.pbuild
           SPECS/_build.x86_64
-        key: ${{ runner.os }}-${{ hashFiles('.github/build/_config') }}
+        key: ${{ runner.os }}-${{ hashFiles('.github/build/**') }}
         restore-keys: |
           ${{ runner.os }}-
+    - name: Reset cached package result directories
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
+      env:
+        CHANGED_PACKAGES: ${{ steps.package-gates.outputs.changed_packages }}
+      run: |
+        set -euo pipefail
+
+        while IFS= read -r package; do
+          [[ -n "$package" ]] || continue
+          rm -rf "SPECS/_build.x86_64/$package"
+        done <<< "$CHANGED_PACKAGES"
     - name: Install tools
       run: |
         echo "deb http://download.opensuse.org/repositories/openSUSE:/Tools/xUbuntu_24.04/ /" | sudo tee /etc/apt/sources.list.d/obs.list
@@ -55,28 +118,31 @@ jobs:
         sudo patch --directory=/usr/lib/build --strip=1 -i $(pwd)/.github/build/pbuild.patch
     - name: Limit the number of compilations
       if: steps.changed-files.outputs.specs_any_changed == 'true'
+      env:
+        CHANGED_PACKAGES: ${{ steps.package-gates.outputs.changed_packages }}
       run: |
         set -x
-        all_file="${{ steps.changed-files.outputs.specs_all_changed_files }}"
-        for i in $all_file; do
-         p=$(basename $(dirname $i))
-         echo $p
-         echo "BuildFlags: onlybuild:$p" >> ./.github/build/_config
-        done
+        while IFS= read -r package; do
+         [[ -n "$package" ]] || continue
+         echo "$package"
+         echo "BuildFlags: onlybuild:$package" >> ./.github/build/_config
+        done <<< "$CHANGED_PACKAGES"
     - name: Build package(s)
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
       run: (cp .github/build/* SPECS && cd SPECS && (sudo pbuild --vm-type=chroot --preset x86_64 --showlog --root=/tmp/b || (sudo pbuild --preset x86_64 --result && exit 1)))
     - name: get result
       id: result
       if: steps.changed-files.outputs.specs_any_changed == 'true'
+      env:
+        CHANGED_PACKAGES: ${{ steps.package-gates.outputs.changed_packages }}
       run: |
         set -x
-        all_file="${{ steps.changed-files.outputs.specs_all_changed_files }}"
         {
           echo 'paths<<EOF'
-          for i in $all_file; do
-           p=$(basename $(dirname $i))
-           echo "SPECS/_build.x86_64/$p"
-          done
+          while IFS= read -r package; do
+           [[ -n "$package" ]] || continue
+           echo "SPECS/_build.x86_64/$package"
+          done <<< "$CHANGED_PACKAGES"
           echo 'EOF'
         } >> "$GITHUB_OUTPUT"
     - uses: actions/upload-artifact@v4
@@ -84,3 +150,92 @@ jobs:
        name: PR${{ github.event.pull_request.number }}-build-packages-results
        path: ${{ steps.result.outputs.paths }}
        if-no-files-found: error
+
+  kiwi_installiso_verify:
+    runs-on: [ubuntu-latest]
+    needs: build
+    if: needs.build.outputs.needs_kiwi == 'true'
+    timeout-minutes: 120
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/download-artifact@v4
+      with:
+        name: PR${{ github.event.pull_request.number }}-build-packages-results
+        path: ./.ci/pbuild-results
+    - name: Install tools
+      run: |
+        sudo apt update
+        sudo apt install createrepo-c qemu-utils file git curl -y
+    - name: Build overlay rpm-md repo
+      run: |
+        bash ./.github/common/make-local-rpm-repo.sh ./.ci/pbuild-results ./.ci/local-rpm-repo
+    - name: Resolve compose inputs
+      env:
+        PROFILE: installiso
+        TARGET_ARCH: x86_64
+        BUILD_PLATFORM: linux/amd64
+        UPSTREAM_REPO: https://repo.build.openruyi.cn/openruyi/x86_64/
+        BUILDER_BASE_IMAGE: docker.io/opensuse/tumbleweed@sha256:ef83be77fac5207611adab5407f6c8b0ca5dd4f1924ad30682f53e807dd13f3d
+        KIWI_SOURCE_COMMIT: a602fe1d73adeab4cb17078f5fac7d678ff5269b
+      run: |
+        set -euo pipefail
+        mkdir -p ./.ci/compose-inputs
+        curl -fsSL "${UPSTREAM_REPO%/}/repodata/repomd.xml" -o ./.ci/compose-inputs/upstream-repomd.xml
+        upstream_repomd_sha256=$(sha256sum ./.ci/compose-inputs/upstream-repomd.xml | awk '{print $1}')
+        {
+          echo "PROFILE=$PROFILE"
+          echo "TARGET_ARCH=$TARGET_ARCH"
+          echo "BUILD_PLATFORM=$BUILD_PLATFORM"
+          echo "UPSTREAM_REPO=$UPSTREAM_REPO"
+          echo "UPSTREAM_REPOMD_URL=${UPSTREAM_REPO%/}/repodata/repomd.xml"
+          echo "UPSTREAM_REPOMD_SHA256=$upstream_repomd_sha256"
+          echo "BUILDER_BASE_IMAGE=$BUILDER_BASE_IMAGE"
+          echo "KIWI_SOURCE_COMMIT=$KIWI_SOURCE_COMMIT"
+        } > ./.ci/compose-inputs/compose-inputs.env
+    - name: Fetch official kiwi image repository
+      env:
+        KIWI_REPO_URL: https://git.openruyi.cn/openRuyi/openruyi-kiwi-image.git
+        KIWI_SOURCE_REF: obs
+        KIWI_SOURCE_COMMIT: a602fe1d73adeab4cb17078f5fac7d678ff5269b
+      run: |
+        set -euo pipefail
+        git clone --depth 1 --branch "$KIWI_SOURCE_REF" "$KIWI_REPO_URL" ./.ci/openruyi-kiwi-image
+        actual_commit=$(git -C ./.ci/openruyi-kiwi-image rev-parse HEAD)
+        if [[ "$actual_commit" != "$KIWI_SOURCE_COMMIT" ]]; then
+          echo "expected KIWI repo commit $KIWI_SOURCE_COMMIT, got $actual_commit from $KIWI_SOURCE_REF" >&2
+          exit 1
+        fi
+    - name: Build and inspect installiso from overlay repo
+      run: |
+        set -euo pipefail
+        # shellcheck disable=SC1091
+        source ./.ci/compose-inputs/compose-inputs.env
+        export PROFILE TARGET_ARCH BUILD_PLATFORM UPSTREAM_REPO UPSTREAM_REPOMD_SHA256 BUILDER_BASE_IMAGE KIWI_SOURCE_COMMIT
+        bash ./.github/image-build/kiwi-installiso/build-and-inspect.sh ./.ci/openruyi-kiwi-image ./.ci/local-rpm-repo ./.ci/out-installiso
+        cp ./.ci/compose-inputs/upstream-repomd.xml ./.ci/out-installiso/upstream-repomd.xml
+    - name: Verify installiso smoke suite
+      run: |
+        bash ./.github/testsuite/smoke/installiso/verify-output.sh ./.ci/out-installiso
+    - name: Initialize auth-model policy report
+      run: |
+        printf 'Policy auth-model verification skipped: no matching package change\n' > ./.ci/out-installiso/POLICY_AUTH_MODEL_SUMMARY.txt
+    - name: Verify auth-model policy suite
+      if: needs.build.outputs.needs_permission_check == 'true'
+      run: |
+        bash ./.github/testsuite/policy/auth-model/verify.sh ./.ci/out-installiso
+    - uses: actions/upload-artifact@v4
+      with:
+        name: PR${{ github.event.pull_request.number }}-kiwi-installiso-verify
+        path: |
+          ./.ci/out-installiso/SMOKE_SUMMARY.txt
+          ./.ci/out-installiso/POLICY_AUTH_MODEL_SUMMARY.txt
+          ./.ci/out-installiso/compose-inputs.env
+          ./.ci/out-installiso/prepared-image.kiwi
+          ./.ci/out-installiso/prepared-config.sh
+          ./.ci/out-installiso/OVERLAY_PROVENANCE.txt
+          ./.ci/out-installiso/upstream-repomd.xml
+          ./.ci/out-installiso/*.packages
+          ./.ci/out-installiso/inspect/
+        if-no-files-found: error

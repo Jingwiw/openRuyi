@@ -54,14 +54,17 @@ assert_not_contains "$build_workflow" ".github/common/**" "build workflow no lon
 assert_contains "$selftest_workflow" ".github/common/**" "selftest workflow watches helper changes"
 assert_contains "$selftest_workflow" ".github/image-build/**" "selftest workflow watches image helper changes"
 assert_contains "$selftest_workflow" ".github/testsuite/**" "selftest workflow watches testsuite changes"
+assert_contains "$build_workflow" "PROFILE: validation" "build workflow uses validation profile"
 assert_contains "$builder_dockerfile" "git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e" "builder defaults to openRuyi creek base"
 assert_contains "$build_and_inspect" '-e CONTAINER_NAME="$container_name"' "build-and-inspect passes CONTAINER_NAME into container"
 assert_contains "$build_and_inspect" 'CONTAINER_NAME=$CONTAINER_NAME' "build-and-inspect writes CONTAINER_NAME from container env"
 assert_contains "$build_and_inspect" 'UPSTREAM_REPOMD_SHA256' "build-and-inspect records upstream repomd checksum"
 assert_contains "$build_and_inspect" 'BUILD_PLATFORM=' "build-and-inspect uses explicit build platform"
+assert_contains "$build_image" 'profile=${PROFILE:-validation}' "build-image defaults to validation profile"
 assert_contains "$build_image" 'builder_base_image=${BUILDER_BASE_IMAGE:-git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e}' "build-image defaults to openRuyi creek base"
 assert_not_contains "$smoke_verify" "root shell is" "smoke suite no longer contains shell policy checks"
 assert_not_contains "$smoke_verify" "authselect current profile is" "smoke suite no longer contains auth profile policy checks"
+assert_not_contains "$smoke_verify" "install ISO" "smoke suite no longer expects install ISO output"
 
 mkdir -p "$tmp_dir/bin" "$tmp_dir/image" "$tmp_dir/target" "$tmp_dir/artifacts/a" "$tmp_dir/artifacts/b"
 
@@ -90,7 +93,7 @@ EOF
 
 PATH="$tmp_dir/bin:$PATH" \
 SUDO= \
-PROFILE=installiso \
+PROFILE=validation \
 TARGET_ARCH=x86_64 \
 BUILD_PLATFORM=linux/amd64 \
 UPSTREAM_REPO=https://repo.build.openruyi.cn/openruyi/x86_64/ \
@@ -106,6 +109,7 @@ assert_contains "$tmp_dir/target/prepared-image.kiwi" 'path="file:///overlay/"' 
 assert_contains "$tmp_dir/target/prepared-image.kiwi" 'name="libudev-zero"' "prepared image injects libudev-zero ignore"
 assert_contains "$tmp_dir/target/prepared-image.kiwi" 'name="systemd-udev"' "prepared image injects systemd-udev bootstrap package"
 assert_contains "$tmp_dir/target/prepared-config.sh" 'openRuyi CI initrd hint' "prepared config appends CI initrd hint"
+assert_contains "$tmp_dir/target/compose-inputs.env" 'PROFILE=validation' "prepared compose inputs record validation profile"
 assert_contains "$tmp_dir/target/compose-inputs.env" 'TARGET_ARCH=x86_64' "prepared compose inputs record x86_64"
 assert_contains "$tmp_dir/target/compose-inputs.env" 'BUILD_PLATFORM=linux/amd64' "prepared compose inputs record build platform"
 

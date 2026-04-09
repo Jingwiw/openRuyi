@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="7.4" name="openRuyi">
+  <description type="system">
+    <author>zheng junjie</author>
+    <contact>zhengjunjie@iscas.ac.cn</contact>
+    <specification>openRuyi validation image</specification>
+  </description>
+
+  <profiles>
+    <profile name="validation" description="minimal KIWI validation image for CI"/>
+  </profiles>
+
+  <users>
+    <user name="root" id="0"
+          password="$1$xyz$bK93SeXkJSOeaFfdbGu9f." pwdformat="encrypted"/>
+    <user name="openruyi" groups="wheel"
+          password="$1$xyz$bK93SeXkJSOeaFfdbGu9f." pwdformat="encrypted"/>
+  </users>
+
+  <preferences>
+    <version>0.0.1</version>
+    <packagemanager>dnf5</packagemanager>
+    <keytable>us</keytable>
+    <timezone>UTC</timezone>
+    <rpm-check-signatures>false</rpm-check-signatures>
+  </preferences>
+
+  <preferences profiles="validation">
+    <type image="oem" format="qcow2" primary="true" firmware="efi" eficsm="false" efiparttable="gpt" filesystem="xfs" kernelcmdline="loglevel=3 audit=0 console=ttyS0" efifatimagesize="20" efipartsize="300" bootpartsize="1024">
+      <bootloader name="grub2" console="console" timeout="1"/>
+      <systemdisk name="vgroup" preferlvm="true">
+        <volume name="@root" size="all"/>
+      </systemdisk>
+    </type>
+  </preferences>
+
+  <repository type="rpm-md" alias="openruyi">
+    <source path="obsrepositories:/"/>
+  </repository>
+
+  <packages type="image">
+    <package name="NetworkManager"/>
+    <package name="authselect"/>
+    <package name="bash"/>
+    <package name="ca-certificates"/>
+    <package name="ca-certificates-mozilla"/>
+    <package name="cracklib"/>
+    <package name="cracklib-dicts"/>
+    <package name="dracut-kiwi-oem-repart"/>
+    <package name="glibc-locale-base"/>
+    <package name="grub"/>
+    <package name="libpwquality"/>
+    <package name="libseccomp"/>
+    <package name="lvm2"/>
+    <package name="linux"/>
+    <package name="openresolv"/>
+    <package name="openruyi-authselect-profiles"/>
+    <package name="openruyi-release"/>
+    <package name="openruyi-repos"/>
+    <package name="openruyi-systemd-default-preset-server"/>
+    <package name="openssh-server"/>
+    <package name="sudo"/>
+    <package name="setup"/>
+    <package name="shadow"/>
+    <package name="system-user-root"/>
+    <package name="systemd"/>
+    <package name="systemd-resolved"/>
+    <package name="systemd-timesyncd"/>
+    <package name="util-linux"/>
+    <package name="which"/>
+    <package name="xfsprogs"/>
+  </packages>
+
+  <packages type="bootstrap">
+    <package name="ca-certificates"/>
+    <package name="ca-certificates-mozilla"/>
+    <package name="coreutils"/>
+    <package name="dnf5"/>
+    <package name="filesystem"/>
+    <package name="glibc"/>
+    <package name="shadow"/>
+  </packages>
+</image>

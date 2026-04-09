@@ -1,18 +1,14 @@
-# Packages whose changes justify rebuilding the installiso image.
+# Packages whose changes justify rebuilding the slim KIWI validation image.
 NetworkManager
 authselect
 bash
 ca-certificates
-cockpit
 cracklib
-dbus
-dnf5
-dracut
 glibc
 grub
-kbd
-kexec-tools
+kiwi
 libpwquality
+lvm2
 linux
 openresolv
 openruyi-release
@@ -20,11 +16,11 @@ openruyi-repos
 openruyi-systemd-default-preset
 openssh
 pam
-procps
 setup
 shadow
 sudo
 system-user-root
 systemd
 util-linux
+which
 xfsprogs

@@ -151,7 +151,7 @@ jobs:
        path: ${{ steps.result.outputs.paths }}
        if-no-files-found: error
 
-  kiwi_installiso_verify:
+  kiwi_validation_verify:
     runs-on: [ubuntu-latest]
     needs: build
     if: needs.build.outputs.needs_kiwi == 'true'
@@ -167,18 +167,18 @@ jobs:
     - name: Install tools
       run: |
         sudo apt update
-        sudo apt install createrepo-c qemu-utils file git curl -y
+        sudo apt install createrepo-c qemu-utils file curl -y
     - name: Build overlay rpm-md repo
       run: |
         bash ./.github/common/make-local-rpm-repo.sh ./.ci/pbuild-results ./.ci/local-rpm-repo
     - name: Resolve compose inputs
       env:
-        PROFILE: installiso
+        PROFILE: validation
         TARGET_ARCH: x86_64
         BUILD_PLATFORM: linux/amd64
         UPSTREAM_REPO: https://repo.build.openruyi.cn/openruyi/x86_64/
         BUILDER_BASE_IMAGE: git.openruyi.cn/openruyi/creek-x86-64@sha256:ca64fcdb246b38a775ee586e8369d4432899a6d30f6c76340f2397d88efb865e
-        KIWI_SOURCE_COMMIT: a602fe1d73adeab4cb17078f5fac7d678ff5269b
+        KIWI_SOURCE_COMMIT: vendored-kiwi-description
       run: |
         set -euo pipefail
         mkdir -p ./.ci/compose-inputs
@@ -194,48 +194,35 @@ jobs:
           echo "BUILDER_BASE_IMAGE=$BUILDER_BASE_IMAGE"
           echo "KIWI_SOURCE_COMMIT=$KIWI_SOURCE_COMMIT"
         } > ./.ci/compose-inputs/compose-inputs.env
-    - name: Fetch official kiwi image repository
-      env:
-        KIWI_REPO_URL: https://git.openruyi.cn/openRuyi/openruyi-kiwi-image.git
-        KIWI_SOURCE_REF: obs
-        KIWI_SOURCE_COMMIT: a602fe1d73adeab4cb17078f5fac7d678ff5269b
-      run: |
-        set -euo pipefail
-        git clone --depth 1 --branch "$KIWI_SOURCE_REF" "$KIWI_REPO_URL" ./.ci/openruyi-kiwi-image
-        actual_commit=$(git -C ./.ci/openruyi-kiwi-image rev-parse HEAD)
-        if [[ "$actual_commit" != "$KIWI_SOURCE_COMMIT" ]]; then
-          echo "expected KIWI repo commit $KIWI_SOURCE_COMMIT, got $actual_commit from $KIWI_SOURCE_REF" >&2
-          exit 1
-        fi
-    - name: Build and inspect installiso from overlay repo
+    - name: Build and inspect validation qcow2 from overlay repo
       run: |
         set -euo pipefail
         # shellcheck disable=SC1091
         source ./.ci/compose-inputs/compose-inputs.env
         export PROFILE TARGET_ARCH BUILD_PLATFORM UPSTREAM_REPO UPSTREAM_REPOMD_SHA256 BUILDER_BASE_IMAGE KIWI_SOURCE_COMMIT
-        bash ./.github/image-build/kiwi-installiso/build-and-inspect.sh ./.ci/openruyi-kiwi-image ./.ci/local-rpm-repo ./.ci/out-installiso
-        cp ./.ci/compose-inputs/upstream-repomd.xml ./.ci/out-installiso/upstream-repomd.xml
-    - name: Verify installiso smoke suite
+        bash ./.github/image-build/kiwi-installiso/build-and-inspect.sh ./.github/image-build/kiwi-installiso/description ./.ci/local-rpm-repo ./.ci/out-kiwi-validation
+        cp ./.ci/compose-inputs/upstream-repomd.xml ./.ci/out-kiwi-validation/upstream-repomd.xml
+    - name: Verify validation smoke suite
       run: |
-        bash ./.github/testsuite/smoke/installiso/verify-output.sh ./.ci/out-installiso
+        bash ./.github/testsuite/smoke/installiso/verify-output.sh ./.ci/out-kiwi-validation
     - name: Initialize auth-model policy report
       run: |
-        printf 'Policy auth-model verification skipped: no matching package change\n' > ./.ci/out-installiso/POLICY_AUTH_MODEL_SUMMARY.txt
+        printf 'Policy auth-model verification skipped: no matching package change\n' > ./.ci/out-kiwi-validation/POLICY_AUTH_MODEL_SUMMARY.txt
     - name: Verify auth-model policy suite
       if: needs.build.outputs.needs_permission_check == 'true'
       run: |
-        bash ./.github/testsuite/policy/auth-model/verify.sh ./.ci/out-installiso
+        bash ./.github/testsuite/policy/auth-model/verify.sh ./.ci/out-kiwi-validation
     - uses: actions/upload-artifact@v4
       with:
-        name: PR${{ github.event.pull_request.number }}-kiwi-installiso-verify
+        name: PR${{ github.event.pull_request.number }}-kiwi-validation-verify
         path: |
-          ./.ci/out-installiso/SMOKE_SUMMARY.txt
-          ./.ci/out-installiso/POLICY_AUTH_MODEL_SUMMARY.txt
-          ./.ci/out-installiso/compose-inputs.env
-          ./.ci/out-installiso/prepared-image.kiwi
-          ./.ci/out-installiso/prepared-config.sh
-          ./.ci/out-installiso/OVERLAY_PROVENANCE.txt
-          ./.ci/out-installiso/upstream-repomd.xml
-          ./.ci/out-installiso/*.packages
-          ./.ci/out-installiso/inspect/
+          ./.ci/out-kiwi-validation/SMOKE_SUMMARY.txt
+          ./.ci/out-kiwi-validation/POLICY_AUTH_MODEL_SUMMARY.txt
+          ./.ci/out-kiwi-validation/compose-inputs.env
+          ./.ci/out-kiwi-validation/prepared-image.kiwi
+          ./.ci/out-kiwi-validation/prepared-config.sh
+          ./.ci/out-kiwi-validation/OVERLAY_PROVENANCE.txt
+          ./.ci/out-kiwi-validation/upstream-repomd.xml
+          ./.ci/out-kiwi-validation/*.packages
+          ./.ci/out-kiwi-validation/inspect/
         if-no-files-found: error

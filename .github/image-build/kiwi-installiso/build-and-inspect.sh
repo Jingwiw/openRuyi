@@ -6,7 +6,7 @@ overlay_repo_dir=${2:?usage: build-and-inspect.sh <image-repo-dir> <overlay-repo
 output_dir=${3:?usage: build-and-inspect.sh <image-repo-dir> <overlay-repo-dir> <output-dir>}
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-profile=${PROFILE:-installiso}
+profile=${PROFILE:-validation}
 target_arch=${TARGET_ARCH:-x86_64}
 build_platform=${BUILD_PLATFORM:-linux/amd64}
 case "$target_arch" in

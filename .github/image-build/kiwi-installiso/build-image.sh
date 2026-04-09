@@ -4,7 +4,7 @@ set -euo pipefail
 image_repo_dir=${1:?usage: build-image.sh <image-repo-dir> <target-dir>}
 target_dir=${2:?usage: build-image.sh <image-repo-dir> <target-dir>}
 
-profile=${PROFILE:-installiso}
+profile=${PROFILE:-validation}
 target_arch=${TARGET_ARCH:-x86_64}
 build_platform=${BUILD_PLATFORM:-linux/amd64}
 case "$target_arch" in

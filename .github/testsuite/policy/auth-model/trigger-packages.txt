@@ -1,0 +1,13 @@
+# Packages whose changes justify running auth/permission model checks
+# on top of the installiso image build.
+authselect
+kbd
+libpwquality
+openssh
+pam
+setup
+shadow
+sudo
+system-user-root
+systemd
+util-linux

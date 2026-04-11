@@ -12,7 +12,11 @@
 %global zig_cache_dir %{_vpath_builddir}/zig-cache
 %global zig_package_dir %{zig_cache_dir}/p
 
-%bcond bootstrap %["%{?flavor}" == "bootstrap"]
+%if %{?flavor}" == "bootstrap"
+%bcond bootstrap 1
+%else
+%bcond bootstrap 0
+%end
 
 Name:           zig
 Version:        0.15.2

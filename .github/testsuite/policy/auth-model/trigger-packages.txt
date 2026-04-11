@@ -1,0 +1,12 @@
+# Packages whose changes justify running auth/permission model checks
+# on top of the slim KIWI validation image build.
+authselect
+libpwquality
+openssh
+pam
+setup
+shadow
+sudo
+system-user-root
+systemd
+util-linux

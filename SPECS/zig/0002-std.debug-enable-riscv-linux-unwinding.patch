@@ -1,0 +1,99 @@
+From 97de46dc16b584f5bd7aa2ae9afb2bb77970cd22 Mon Sep 17 00:00:00 2001
+From: Alex Rønne Petersen <alex@alexrp.com>
+Date: Wed, 1 Oct 2025 23:24:53 +0200
+Subject: [PATCH] std.debug: enable RISC-V Linux unwinding
+
+Backport and adapt upstream RISC-V unwind support to the Zig 0.15.2 debug
+layout. This patch combines the effect of:
+
+- 97de46dc16b5 ("std.debug: add riscv32-linux and riscv64-linux unwind support")
+- feba8a83a7c4 ("std.debug.Dwarf: use 65 as the (fake) RISC-V PC register")
+
+---
+ lib/std/debug/Dwarf/abi.zig | 17 +++++++++++++++++
+ lib/std/debug/SelfInfo.zig  |  4 ++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/lib/std/debug/Dwarf/abi.zig b/lib/std/debug/Dwarf/abi.zig
+index 403f2d0..c5ba7a1 100644
+--- a/lib/std/debug/Dwarf/abi.zig
++++ b/lib/std/debug/Dwarf/abi.zig
+@@ -5,6 +5,8 @@ const mem = std.mem;
+ const posix = std.posix;
+ const Arch = std.Target.Cpu.Arch;
+ 
++var riscv_zero: usize = 0;
++
+ /// Tells whether unwinding for this target is supported by the Dwarf standard.
+ ///
+ /// See also `std.debug.SelfInfo.supportsUnwinding` which tells whether the Zig
+@@ -17,11 +19,6 @@ pub fn supportsUnwinding(target: *const std.Target) bool {
+         .spirv32,
+         .spirv64,
+         => false,
+-
+-        // Enabling this causes relocation errors such as:
+-        // error: invalid relocation type R_RISCV_SUB32 at offset 0x20
+-        .riscv64, .riscv32 => false,
+-
+         // Conservative guess. Feel free to update this logic with any targets
+         // that are known to not support Dwarf unwinding.
+         else => true,
+@@ -35,6 +32,7 @@ pub fn ipRegNum(arch: Arch) ?u8 {
+         .x86_64 => 16,
+         .arm, .armeb, .thumb, .thumbeb => 15,
+         .aarch64, .aarch64_be => 32,
++        .riscv32, .riscv64 => 65,
+         else => null,
+     };
+ }
+@@ -47,6 +45,7 @@ pub fn fpRegNum(arch: Arch, reg_context: RegisterContext) u8 {
+         .x86_64 => 6,
+         .arm, .armeb, .thumb, .thumbeb => 11,
+         .aarch64, .aarch64_be => 29,
++        .riscv32, .riscv64 => 8,
+         else => unreachable,
+     };
+ }
+@@ -57,6 +56,7 @@ pub fn spRegNum(arch: Arch, reg_context: RegisterContext) u8 {
+         .x86_64 => 7,
+         .arm, .armeb, .thumb, .thumbeb => 13,
+         .aarch64, .aarch64_be => 31,
++        .riscv32, .riscv64 => 2,
+         else => unreachable,
+     };
+ }
+@@ -334,6 +334,15 @@ pub fn regBytes(
+                 else => error.InvalidRegister,
+             },
+         },
++        .riscv32, .riscv64 => switch (builtin.os.tag) {
++            .linux => switch (reg_number) {
++                0 => mem.asBytes(&riscv_zero),
++                1...31 => mem.asBytes(&ucontext_ptr.mcontext.gregs[reg_number]),
++                65 => mem.asBytes(&ucontext_ptr.mcontext.gregs[0]),
++                else => error.InvalidRegister,
++            },
++            else => error.UnimplementedOs,
++        },
+         else => error.UnimplementedArch,
+     };
+ }
+
+diff --git a/lib/std/debug/SelfInfo.zig b/lib/std/debug/SelfInfo.zig
+index 9c57ef8..bbb675f 100644
+--- a/lib/std/debug/SelfInfo.zig
++++ b/lib/std/debug/SelfInfo.zig
+@@ -1823,6 +1823,10 @@ pub fn supportsUnwinding(target: *const std.Target) bool {
+             .linux, .netbsd, .freebsd, .macos, .ios => true,
+             else => false,
+         },
++        .riscv32, .riscv64 => switch (target.os.tag) {
++            .linux => true,
++            else => false,
++        },
+         // Unwinding is possible on other targets but this implementation does
+         // not support them...yet!
+         else => false,
+-- 
+2.52.0

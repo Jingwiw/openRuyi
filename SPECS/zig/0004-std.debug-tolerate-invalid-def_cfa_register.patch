@@ -1,0 +1,41 @@
+From a4f95b1e619656b0306744177dc4f8662ae4879b Mon Sep 17 00:00:00 2001
+From: Alex Rønne Petersen <alex@alexrp.com>
+Date: Thu, 2 Oct 2025 03:05:33 +0200
+Subject: [PATCH] std.debug: tolerate invalid def_cfa_register
+
+Adapt the upstream fix from
+a4f95b1e619656b0306744177dc4f8662ae4879b to the Zig 0.15.2 debug
+implementation. Some GNU toolchains emit `DW_CFA_def_cfa_register`
+without a preceding `DW_CFA_def_cfa`; treat that as an offset-0 CFA
+definition instead of failing unwinding.
+
+---
+ lib/std/debug/SelfInfo.zig | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/lib/std/debug/SelfInfo.zig b/lib/std/debug/SelfInfo.zig
+index bbb675f..08c199f 100644
+--- a/lib/std/debug/SelfInfo.zig
++++ b/lib/std/debug/SelfInfo.zig
+@@ -2161,8 +2161,17 @@ pub const VirtualMachine = struct {
+             },
+             .def_cfa_register => |i| {
+                 try self.resolveCopyOnWrite(allocator);
+-                if (self.current_row.cfa.register == null or self.current_row.cfa.rule != .val_offset) return error.InvalidOperation;
+-                self.current_row.cfa.register = i.register;
++                if (self.current_row.cfa.register == null) {
++                    if (self.current_row.cfa.rule == .expression) return error.InvalidOperation;
++
++                    self.current_row.cfa = .{
++                        .register = i.register,
++                        .rule = .{ .val_offset = 0 },
++                    };
++                } else {
++                    if (self.current_row.cfa.rule != .val_offset) return error.InvalidOperation;
++                    self.current_row.cfa.register = i.register;
++                }
+             },
+             .def_cfa_offset => |i| {
+                 try self.resolveCopyOnWrite(allocator);
+-- 
+2.52.0

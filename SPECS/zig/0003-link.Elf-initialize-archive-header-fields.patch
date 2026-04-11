@@ -1,0 +1,43 @@
+From 43eb9b52ccac894023800115e8395cdb413be14a Mon Sep 17 00:00:00 2001
+From: Carl Åstholm <carl@astholm.se>
+Date: Wed, 5 Nov 2025 16:34:07 +0100
+Subject: [PATCH] link.Elf: initialize archive header fields
+
+Backport upstream commit 43eb9b52ccac894023800115e8395cdb413be14a to
+ensure generated ELF archive headers do not leave numeric fields blank.
+This avoids ld.lld rejecting archives as malformed.
+
+---
+ src/link/Elf/Archive.zig | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/link/Elf/Archive.zig b/src/link/Elf/Archive.zig
+index 95f3860..e104cd6 100644
+--- a/src/link/Elf/Archive.zig
++++ b/src/link/Elf/Archive.zig
+@@ -120,7 +120,6 @@ pub fn setArHdr(opts: struct {
+         .ar_fmag = undefined,
+     };
+     @memset(mem.asBytes(&hdr), 0x20);
+-    @memcpy(&hdr.ar_fmag, elf.ARFMAG);
+ 
+     {
+         var stream = std.io.fixedBufferStream(&hdr.ar_name);
+@@ -131,10 +130,15 @@ pub fn setArHdr(opts: struct {
+             .name_off => |x| writer.print("/{d}", .{x}) catch unreachable,
+         }
+     }
++    hdr.ar_date[0] = '0';
++    hdr.ar_uid[0] = '0';
++    hdr.ar_gid[0] = '0';
++    hdr.ar_mode[0] = '0';
+     {
+         var stream = std.io.fixedBufferStream(&hdr.ar_size);
+         stream.writer().print("{d}", .{opts.size}) catch unreachable;
+     }
++    hdr.ar_fmag = elf.ARFMAG.*;
+ 
+     return hdr;
+ }
+-- 
+2.50.1 (Apple Git-155)

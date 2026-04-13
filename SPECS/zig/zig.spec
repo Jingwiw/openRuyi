@@ -12,17 +12,17 @@
 %global zig_cache_dir %{_vpath_builddir}/zig-cache
 %global zig_package_dir %{zig_cache_dir}/p
 
-%if %{?flavor}" == "bootstrap"
+%if "%{?flavor}" == "bootstrap"
 %bcond bootstrap 1
 %else
 %bcond bootstrap 0
-%end
+%endif
 
 Name:           zig
 Version:        0.15.2
 Release:        %autorelease
 Summary:        Programming language and toolchain for robust and reusable software
-License:        MIT AND NCSA AND LGPL-2.1-or-later AND LGPL-2.1-or-later WITH GCC-exception-2.0 AND GPL-2.0-or-later AND GPL-2.0-or-later WITH GCC-exception-2.0 AND BSD-3-Clause AND Inner-Net-2.0 AND ISC AND LicenseRef-openRuyi-Public-Domain AND GFDL-1.1-or-later AND ZPL-2.1 AND Apache-2.0 WITH LLVM-exception AND Apache-2.0 AND BSD-2-Clause AND Zlib
+License:        LicenseRef-openRuyi-Public-Domain
 URL:            https://ziglang.org
 VCS:            git:https://codeberg.org/ziglang/zig.git
 
@@ -97,13 +97,13 @@ This package contains helper RPM macros for building Zig projects.
 
 %prep
 %if %{with bootstrap}
-%autosetup -N -T -D -b 1 -n zig-bootstrap-%{version}
+%autosetup -N -T -D -b 1 -n %{name}-bootstrap-%{version}
 # Keep the embedded stage1 Zig sources aligned with the final source tree fixes.
 pushd zig
 %autopatch -p1
 popd
 %else
-%autosetup -p1 -n zig-%{version}
+%autosetup -p1 -n %{name}-%{version}
 %endif
 
 %build

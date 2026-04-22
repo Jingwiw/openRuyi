@@ -6,13 +6,13 @@
 
 %global srcname curl_cffi
 
-Name:           python-curl_cffi
+Name:           python-curl-cffi
 Version:        0.14.0
 Release:        %autorelease
 Summary:        Python binding for curl-impersonate fork via cffi
 License:        MIT
 URL:            https://github.com/lexiforest/curl_cffi
-#!RemoteAsset
+#!RemoteAsset:  sha256:5ffbc82e59f05008ec08ea432f0e535418823cda44178ee518906a54f27a5f0f
 Source:         https://files.pythonhosted.org/packages/source/c/%{srcname}/%{srcname}-%{version}.tar.gz
 # it is arch specific since it depends on C FFI lib
 BuildSystem:    pyproject
@@ -30,6 +30,10 @@ BuildRequires:  python3dist(setuptools)
 BuildRequires:  python3dist(wheel)
 BuildRequires:  python3dist(certifi)
 
+Provides:       python3-curl-cffi = %{version}-%{release}
+Provides:       python3-curl-cffi%{?_isa} = %{version}-%{release}
+%python_provide python3-curl-cffi
+
 Requires:       curl-impersonate-chrome
 
 %description
@@ -43,4 +47,4 @@ Requires:       curl-impersonate-chrome
 %{_bindir}/curl-cffi
 
 %changelog
-%{?autochangelog}
+%autochangelog

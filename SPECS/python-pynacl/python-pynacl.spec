@@ -6,13 +6,13 @@
 
 %global srcname PyNaCl
 
-Name:           python-%{srcname}
+Name:           python-pynacl
 Version:        1.5.0
 Release:        %autorelease
 License:        Apache-2.0
 URL:            https://github.com/pyca/pynacl/
 Summary:        Python bindings to libsodium
-#!RemoteAsset
+#!RemoteAsset:  sha256:8ac7448f09ab85811607bdd21ec2464495ac8b7c66d146bf545b0f08fb9220ba
 Source0:        https://files.pythonhosted.org/packages/source/P/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildSystem:    pyproject
 
@@ -20,12 +20,13 @@ BuildOption(install):  -l nacl +auto
 
 BuildRequires:  pkgconfig(libsodium)
 BuildRequires:  pyproject-rpm-macros
-BuildRequires:  pytest
+BuildRequires:  python3dist(pytest)
 BuildRequires:  python3dist(hypothesis)
 BuildRequires:  pkgconfig(python3)
 
-Provides:       python3-%{srcname}
-%python_provide python3-%{srcname}
+Provides:       python3-pynacl = %{version}-%{release}
+Provides:       python3-pynacl%{?_isa} = %{version}-%{release}
+%python_provide python3-pynacl
 
 %description
 PyNaCl is a Python binding to libsodium, which is a fork of the
@@ -48,4 +49,4 @@ export SODIUM_INSTALL=system
 %doc README.rst
 
 %changelog
-%{?autochangelog}
+%autochangelog

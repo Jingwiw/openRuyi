@@ -9,7 +9,7 @@
 # For some stupid reasons, we decided to name the package python-pygobject instead of PyGObject
 # which is really bad. Like, wtf is this naming convention? It doesn't make any sense.
 # We should really consider rename the package to PyGObject in the future. - 251
-Name:           python-PyGObject
+Name:           python-pygobject
 Version:        3.56.0
 Release:        %autorelease
 Summary:        Python bindings for GObject Introspection
@@ -33,8 +33,8 @@ BuildRequires:  meson
 BuildRequires:  pkgconfig(python3)
 BuildRequires:  python3dist(setuptools)
 
-Provides:       python3-gobject
-Provides:       python3-gobject%{?_isa}
+Provides:       python3-gobject = %{version}-%{release}
+Provides:       python3-gobject%{?_isa} = %{version}-%{release}
 %python_provide python3-gobject
 
 %description

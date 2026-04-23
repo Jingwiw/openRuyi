@@ -7,7 +7,7 @@
 
 %global srcname setuptools_scm
 
-Name:           python-%{srcname}
+Name:           python-setuptools-scm
 Version:        8.3.1
 Release:        %autorelease
 Summary:        Blessed package to manage your versions by SCM tags
@@ -25,14 +25,14 @@ BuildOption(install):  setuptools_scm
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  pkgconfig(python3)
 
-Provides:       python3-%{srcname}
-%python_provide python3-%{srcname}
+Provides:       python3-setuptools-scm = %{version}-%{release}
+%python_provide python3-setuptools-scm
 
 %description
 Setuptools_scm handles managing your Python package versions in SCM metadata.
 It also handles file finders for the supported SCMs.
 
-%pyproject_extras_subpkg -n python%{python3_pkgversion}-setuptools_scm toml,rich
+%pyproject_extras_subpkg -n python-setuptools-scm toml,rich
 
 %prep
 %autosetup -p1 -n setuptools_scm-%{version}

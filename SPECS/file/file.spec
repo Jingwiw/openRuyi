@@ -5,6 +5,11 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%bcond bootstrap 0
+%bcond seccomp 1
+%bcond compression 1
+%bcond autoreconf 1
+
 Name:           file
 Version:        5.46
 Release:        %autorelease
@@ -19,10 +24,47 @@ Buildsystem:    autotools
 BuildOption(conf):  --disable-silent-rules
 BuildOption(conf):  --enable-fsect-man5
 
-BuildRequires:  bash
-BuildRequires:  libtool
-BuildRequires:  autoconf
+%if %{with seccomp}
+BuildOption(conf):  --enable-libseccomp
+%else
+BuildOption(conf):  --disable-libseccomp
+%endif
+
+%if %{with compression}
+BuildOption(conf):  --enable-zlib
+BuildOption(conf):  --enable-bzlib
+BuildOption(conf):  --enable-xzlib
+BuildOption(conf):  --enable-zstdlib
+BuildOption(conf):  --disable-lzlib
+BuildOption(conf):  --disable-lrziplib
+%else
+BuildOption(conf):  --disable-zlib
+BuildOption(conf):  --disable-bzlib
+BuildOption(conf):  --disable-xzlib
+BuildOption(conf):  --disable-zstdlib
+BuildOption(conf):  --disable-lzlib
+BuildOption(conf):  --disable-lrziplib
+%endif
+
 BuildRequires:  make
+BuildRequires:  gcc
+
+%if %{with autoreconf}
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+%endif
+
+%if %{with seccomp}
+BuildRequires:  pkgconfig(libseccomp)
+%endif
+
+%if %{with compression}
+BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(bzip2)
+BuildRequires:  pkgconfig(liblzma)
+BuildRequires:  pkgconfig(libzstd)
+%endif
 
 %description
 With the file command, you can obtain information on the file type of a
@@ -39,8 +81,13 @@ Requires:       glibc-devel
 This package contains all necessary include files and libraries needed
 to develop applications that require the magic "file" interface.
 
+%if %{with autoreconf}
 %conf -p
 autoreconf -fiv
+%endif
+
+%install -a
+rm -f %{buildroot}%{_libdir}/libmagic.la
 
 %files
 %defattr (-,root,root)

@@ -8,13 +8,13 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           cmake
-Version:        4.3.1
+Version:        4.3.2
 Release:        %autorelease
 Summary:        Cross-platform make system
 License:        BSD and MIT and zlib
 URL:            http://www.cmake.org
 VCS:            git:https://gitlab.kitware.com/cmake/cmake
-#!RemoteAsset:  sha256:0798f4be7a1a406a419ac32db90c2956936fecbf50db3057d7af47d69a2d7edb
+#!RemoteAsset:  sha256:b0231eb39b3c3cabdc568c619df78208a7bd95ea10c9b2236d61218bac1b367d
 Source0:        https://www.cmake.org/files/v4.3/cmake-%{version}.tar.gz
 Source1:        macros.cmake
 Source2:        macros.buildsystem.cmake
@@ -155,4 +155,4 @@ bin/ctest %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
 %{_rpmmacrodir}/macros.buildsystem.cmake
 
 %changelog
-%{?autochangelog}
+%autochangelog

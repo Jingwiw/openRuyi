@@ -29,7 +29,6 @@ BuildOption(conf):  -DENABLE_DOCUMENTATION:BOOL=OFF
 
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(fmt)
-BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig

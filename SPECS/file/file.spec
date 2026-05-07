@@ -12,10 +12,8 @@ Summary:        A Tool to Determine File Types
 License:        BSD-2-Clause
 URL:            http://www.darwinsys.com/file/
 VCS:            git:https://github.com/file/file
-#!RemoteAsset
+#!RemoteAsset:  sha256:c9cc77c7c560c543135edc555af609d5619dbef011997e988ce40a3d75d86088
 Source0:        https://www.astron.com/pub/file/file-%{version}.tar.gz
-#!RemoteAsset
-Source1:        https://www.astron.com/pub/file/file-%{version}.tar.gz.asc
 Buildsystem:    autotools
 
 BuildOption(conf):  --disable-silent-rules
@@ -65,4 +63,4 @@ autoreconf -fiv
 %doc README.DEVELOPER AUTHORS NEWS ChangeLog
 
 %changelog
-%{?autochangelog}
+%autochangelog

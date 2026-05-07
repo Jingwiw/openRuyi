@@ -27,13 +27,13 @@
 %endif
 
 Name:           ffmpeg
-Version:        8.0.1
+Version:        8.1.1
 Release:        %autorelease
 Summary:        A complete solution to record, convert and stream audio and video
 License:        GPL-3.0-or-later
 URL:            https://ffmpeg.org/
 VCS:            git:https://git.ffmpeg.org/ffmpeg.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:b6863adde98898f42602017462871b5f6333e65aec803fdd7a6308639c52edf3
 Source0:        https://ffmpeg.org/releases/ffmpeg-%{version}.tar.xz
 Source1:        enable_decoders
 Source2:        enable_encoders
@@ -44,8 +44,6 @@ Patch1:         0001-ffmpeg-codec-choice.patch
 # Allow to build with fdk-aac-free
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1501522#c112
 Patch2:         0002-ffmpeg-allow-fdk-aac-free.patch
-# Support building with EVC base profile libraries
-Patch3:         0003-ffmpeg-support-evc-base-libraries.patch
 # Add first_dts getter to libavformat for Chromium
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=2240127
 # Reference: https://crbug.com/1306560
@@ -395,4 +393,4 @@ make alltools
 %{_mandir}/man3/libswscale.3*
 
 %changelog
-%{?autochangelog}
+%autochangelog

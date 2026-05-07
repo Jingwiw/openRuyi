@@ -9,13 +9,13 @@
 %bcond deprecated 0
 
 Name:           bluez
-Version:        5.84
+Version:        5.86
 Release:        %autorelease
 Summary:        Bluetooth tools and daemons
 License:        GPL-2.0-or-later
 URL:            http://www.bluez.org/
 VCS:            git:https://git.kernel.org/pub/scm/bluetooth/bluez.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:99f144540c6070591e4c53bcb977eb42664c62b7b36cb35a29cf72ded339621d
 Source:         https://www.kernel.org/pub/linux/bluetooth/%{name}-%{version}.tar.xz
 BuildSystem:    autotools
 
@@ -249,4 +249,4 @@ install emulator/btvirt %{buildroot}/%{_libexecdir}/bluetooth/
 %{_userunitdir}/obex.service
 
 %changelog
-%{?autochangelog}
+%autochangelog

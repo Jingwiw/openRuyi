@@ -20,7 +20,6 @@ BuildSystem:    meson
 # Temporarily disable man page build since no doc tools are available
 BuildOption(conf):  -Dman=disabled
 
-BuildRequires:  gcc
 BuildRequires:  meson
 BuildRequires:  pkgconfig(libcap)
 BuildRequires:  pkgconfig(libselinux)

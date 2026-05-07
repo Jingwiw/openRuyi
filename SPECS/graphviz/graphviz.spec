@@ -7,12 +7,12 @@
 
 Name:           graphviz
 Summary:        Graph Visualization Tools
-Version:        14.0.4
+Version:        14.1.5
 Release:        %autorelease
 License:        EPL-1.0 AND CPL-1.0 AND BSD-3-Clause AND MIT AND GPL-3.0-or-later
 URL:            http://www.graphviz.org/
 VCS:            git:https://gitlab.com/graphviz/graphviz
-#!RemoteAsset
+#!RemoteAsset:  sha256:2cb3136bffb335346e9c5c99a7c615df32295839a6498df44f576adfc2937a93
 Source:         https://gitlab.com/graphviz/graphviz/-/archive/%{version}/graphviz-%{version}.tar.gz
 BuildSystem:    autotools
 
@@ -98,8 +98,6 @@ Python 3 extension for graphviz.
 ./autogen.sh
 
 %install -a
-install -m0644 README %{buildroot}%{_docdir}/%{name}
-
 find %{buildroot}%{_datadir}/%{name}/demo -type f -exec chmod a-x {} ';'
 mv %{buildroot}%{_datadir}/%{name}/demo %{buildroot}%{_docdir}/%{name}/
 find %{buildroot}%{_docdir}/%{name}/demo -type f -name "*.py" -exec mv {} {}.demo ';'
@@ -120,6 +118,7 @@ mkdir -p %{buildroot}%{_datadir}/%{name}/examples
 
 %files
 %license COPYING
+%doc README.md
 %doc %{_docdir}/graphviz
 %{_bindir}/*
 %dir %{_libdir}/graphviz
@@ -164,4 +163,4 @@ mkdir -p %{buildroot}%{_datadir}/%{name}/examples
 %{_mandir}/man3/gv.3python*
 
 %changelog
-%{?autochangelog}
+%autochangelog

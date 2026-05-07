@@ -37,6 +37,9 @@ BuildRequires:  glibc-static
 BuildRequires:  zlib-ng-compat-static
 BuildRequires:  dejagnu
 %endif
+%if %{without bootstrap}
+BuildRequires:  pkgconfig(libdebuginfod)
+%endif
 
 %if %{without bootstrap}
 Requires(post):  update-alternatives
@@ -71,10 +74,10 @@ cd build-dir
       --with-pic --with-system-zlib \
       --enable-plugins \
       --enable-threads \
-      --enable-compressed-debug-sections=gas \
       --enable-new-dtags \
-      --enable-default-hash-style=both \
-    --enable-compressed-debug-sections=all \
+      --enable-default-hash-style=gnu \
+      --enable-compressed-debug-sections=all \
+      --enable-64-bit-bfd \
       --enable-shared \
       --enable-lto \
 %if %{without bootstrap} && 0%{?do_profiling}
@@ -83,6 +86,9 @@ cd build-dir
 %if %{with bootstrap}
       --without-debuginfod \
 %endif
+      --enable-relro=yes \
+      --enable-warn-execstack=yes \
+      --enable-warn-rwx-segments=yes \
       --disable-gprofng \
       --enable-colored-disassembly \
       --disable-werror

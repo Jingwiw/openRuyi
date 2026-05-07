@@ -23,7 +23,6 @@ BuildOption(install):  DESTDIR=%{buildroot}
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  libtool
-BuildRequires:  gcc
 BuildRequires:  pkgconfig(libcap-ng)
 BuildRequires:  pkgconfig(talloc)
 BuildRequires:  pkgconfig(krb5)

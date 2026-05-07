@@ -7,12 +7,12 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           samurai
-Version:        1.2
+Version:        1.3
 Release:        %autorelease
 Summary:        ninja-compatible build tool written in C
 License:        Apache-2.0
 URL:            https://github.com/michaelforney/samurai
-#!RemoteAsset
+#!RemoteAsset:  sha256:44ff119a27b343ec47a797fa8701c19b9e672230bc15f3c6a6cede9641ea6332
 Source:         https://github.com/michaelforney/samurai/archive/refs/tags/%{version}.tar.gz
 BuildSystem:    autotools
 
@@ -21,7 +21,6 @@ BuildOption(install):  PREFIX=%{_prefix}
 BuildOption(install):  MANDIR=%{_mandir}
 
 BuildRequires:  make
-BuildRequires:  gcc
 
 %description
 samurai is a ninja-compatible build tool written in C99
@@ -53,11 +52,11 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 This package provides ninja command, implemented as a symbolic link to the samu command
 of samurai package.
 
-%files    ninja
+%files ninja
 %license LICENSE
 %doc README.md
 %{_bindir}/ninja
 
 
 %changelog
-%{?autochangelog}
+%autochangelog

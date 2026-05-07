@@ -5,6 +5,14 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%bcond bootstrap 0
+%bcond openssl 1
+%bcond gmp 1
+%bcond acl 1
+%bcond xattr 1
+%bcond libcap 1
+%bcond docs 1
+
 Summary:        GNU Core Utilities
 Name:           coreutils
 Version:        9.10
@@ -19,13 +27,59 @@ BuildSystem:    autotools
 BuildOption(conf):  DEFAULT_POSIX2_VERSION=200112
 BuildOption(conf):  --enable-no-install-program=kill
 
+%if %{with openssl}
+BuildOption(conf):  --with-openssl=yes
+%else
+BuildOption(conf):  --with-openssl=no
+%endif
+
+%if %{without gmp}
+BuildOption(conf):  --without-gmp
+%endif
+
+%if %{without acl}
+BuildOption(conf):  --disable-acl
+%endif
+
+%if %{without xattr}
+BuildOption(conf):  --disable-xattr
+%endif
+
+%if %{without libcap}
+BuildOption(conf):  --disable-libcap
+%endif
+
+BuildRequires:  gcc
+BuildRequires:  make
+
+%if %{with gmp}
 BuildRequires:  pkgconfig(gmp)
+%endif
+
+%if %{with acl}
 BuildRequires:  pkgconfig(libacl)
+%endif
+
+%if %{with xattr}
 BuildRequires:  pkgconfig(libattr)
+%endif
+
+%if %{with libcap}
 BuildRequires:  pkgconfig(libcap)
+%endif
+
+%if %{with openssl}
+BuildRequires:  pkgconfig(openssl)
+%endif
+
+%if %{with docs}
 BuildRequires:  texinfo
+%endif
+
+%if %{without bootstrap}
 BuildRequires:  autoconf
 BuildRequires:  automake
+%endif
 
 Provides:       /bin/rm
 
@@ -53,7 +107,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/*@*
 %{_bindir}/*
 %{_libexecdir}/coreutils/libstdbuf.so
 %{_mandir}/man1/*
+%if %{with docs}
 %{_infodir}/coreutils.info*
+%endif
 
 %changelog
-%{?autochangelog}
+%autochangelog

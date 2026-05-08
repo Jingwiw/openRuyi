@@ -12,12 +12,8 @@ Summary:        The GNU versions of find utilities (find and xargs)
 License:        GPL-3.0-or-later
 URL:            https://www.gnu.org/software/findutils/
 VCS:            git:https://https.git.savannah.gnu.org/git/findutils.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5
 Source0:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-#!RemoteAsset
-Source1:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
-#!RemoteAsset
-Source2:        https://savannah.gnu.org/project/release-gpgkeys.php?group=%{name}&download=1&file=./%{name}.keyring
 BuildSystem:    autotools
 
 # adds a new option -xautofs to find to not descend into directories on autofs file systems
@@ -25,8 +21,8 @@ Patch0:         findutils-xautofs.patch
 # https://git.savannah.gnu.org/cgit/findutils.git/commit/?id=e5d6eb919b9
 Patch1:         findutils-avoid-crash-system-loop.patch
 
-BuildOption(conf): --libexecdir=%{_libdir}/find
-BuildOption(conf): --localstatedir=%{_localstatedir}/lib
+BuildOption(conf):  --libexecdir=%{_libdir}/find
+BuildOption(conf):  --localstatedir=%{_localstatedir}/lib
 
 BuildRequires:  automake
 # BuildRequire dejagnu for 'runtest' to execute all tests.
@@ -68,4 +64,4 @@ rm %{buildroot}%{_mandir}/man5/locatedb.5*
 %{_mandir}/man1/xargs.1%{?ext_man}
 
 %changelog
-%{?autochangelog}
+%autochangelog

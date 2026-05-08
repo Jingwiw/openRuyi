@@ -16,6 +16,9 @@ VCS:            git:https://github.com/hughsie/appstream-glib
 Source0:        http://people.freedesktop.org/~hughsient/appstream-glib/releases/appstream-glib-%{version}.tar.xz
 BuildSystem:    meson
 
+# https://github.com/hughsie/appstream-glib/pull/501
+Patch0:         0001-Use-memmove-for-update_contact-demunging-to-fix-risc-v-test-failure.patch
+
 BuildOption(conf):  -Ddep11=false
 BuildOption(conf):  -Dgtk-doc=false
 BuildOption(conf):  -Dman=false
@@ -89,4 +92,4 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/*@*
 %{_libdir}/asb-plugins-*/
 
 %changelog
-%{?autochangelog}
+%autochangelog

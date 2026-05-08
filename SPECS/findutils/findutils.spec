@@ -5,6 +5,11 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%bcond bootstrap 0
+%bcond selinux 1
+%bcond nls 1
+%bcond tests 1
+
 Name:           findutils
 Version:        4.10.0
 Release:        %autorelease
@@ -23,12 +28,28 @@ Patch1:         findutils-avoid-crash-system-loop.patch
 
 BuildOption(conf):  --libexecdir=%{_libdir}/find
 BuildOption(conf):  --localstatedir=%{_localstatedir}/lib
+%if %{without selinux}
+BuildOption(conf):  --without-selinux
+%endif
+%if %{without nls}
+BuildOption(conf):  --disable-nls
+%endif
 
 BuildRequires:  automake
+BuildRequires:  texinfo
+
+%if %{with nls}
+BuildRequires:  gettext
+%endif
+
+%if %{with tests}
 # BuildRequire dejagnu for 'runtest' to execute all tests.
 BuildRequires:  dejagnu
-BuildRequires:  texinfo
+%endif
+
+%if %{with selinux}
 BuildRequires:  libselinux-devel
+%endif
 
 Provides:       find = %{version}-%{release}
 
@@ -44,17 +65,29 @@ You should install findutils because it includes tools that are very
 useful for finding things on your system.
 
 %install -a
+: > %{name}.files
 rm -f %{buildroot}%{_infodir}/find-maint*
 
-rm %{buildroot}%{_bindir}/locate
-rm %{buildroot}%{_bindir}/updatedb
-rm -r %{buildroot}%{_libdir}/find
-rm %{buildroot}%{_mandir}/man1/locate.1*
-rm %{buildroot}%{_mandir}/man1/updatedb.1*
-rm %{buildroot}%{_mandir}/man5/locatedb.5*
+rm -f %{buildroot}%{_bindir}/locate
+rm -f %{buildroot}%{_bindir}/updatedb
+rm -rf %{buildroot}%{_libdir}/find
+rm -f %{buildroot}%{_mandir}/man1/locate.1*
+rm -f %{buildroot}%{_mandir}/man1/updatedb.1*
+rm -f %{buildroot}%{_mandir}/man5/locatedb.5*
+%if %{with nls}
+%if %{with bootstrap}
+%find_lang %{name}
+cat %{name}.lang >> %{name}.files
+%else
 %find_lang %{name} --generate-subpackages
+%endif
+%endif
 
-%files
+%if %{without tests}
+%check
+%endif
+
+%files -f %{name}.files
 %license COPYING
 %doc AUTHORS NEWS README THANKS TODO
 %{_bindir}/find

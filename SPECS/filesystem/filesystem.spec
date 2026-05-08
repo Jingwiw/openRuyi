@@ -6,19 +6,35 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%bcond bootstrap 0
+%bcond nls 1
+
+# TODO: Drop the numeric GID workaround after setup provides group(mail)
+# through a minimal base-identities subpackage. mail is GID 12 in setup.sysusers.
+%if %{with bootstrap}
+%global filesystem_mail_group 12
+%global _use_weak_usergroup_deps 1
+%else
+%global filesystem_mail_group mail
+%endif
+
 Name:           filesystem
 Version:        3.18
 Release:        %autorelease
 Summary:        The basic directory layout for a Linux system
 License:        LicenseRef-openRuyi-Public-Domain
 URL:            https://pagure.io/filesystem
+%if %{with nls}
 # https://pagure.io/filesystem/raw/master/f/lang-exceptions
 Source0:        lang-exceptions
 Source1:        iso_639.sed
 Source2:        iso_3166.sed
 
 BuildRequires:  iso-codes
+%endif
+%if %{without bootstrap}
 Requires(pre):  setup
+%endif
 
 Provides:       filesystem-afs = %{version}-%{release}
 
@@ -39,14 +55,17 @@ during the build process instead of calling rpm -ql filesystem.
 
 %prep
 rm -f $RPM_BUILD_DIR/filelist
+: > $RPM_BUILD_DIR/filelist
 
 %build
 
 %install
 rm -rf %{buildroot}
 mkdir %{buildroot}
+%if %{with nls}
 install -p -c -m755 %SOURCE1 %{buildroot}/iso_639.sed
 install -p -c -m755 %SOURCE2 %{buildroot}/iso_3166.sed
+%endif
 
 cd %{buildroot}
 
@@ -54,7 +73,7 @@ Paths=(
         afs boot dev \
         etc/{X11/{applnk,fontpath.d,xinit/{xinitrc,xinput}.d},xdg/autostart,opt,pm/{config.d,power.d,sleep.d},skel,sysconfig,pki,bash_completion.d,rwtab.d,statetab.d} \
         home media mnt opt root run srv tmp \
-        usr/{bin,games,include,lib/{,tmpfiles.d,sysusers.d,systemd,udev{,/rules.d}},libexec,%{_lib}/{bpf,games,X11,pm-utils/{module.d,power.d,sleep.d},debug/{.dwz,usr},games,locale,modules,sysimage},local/{bin,etc,games,lib,%{_lib}/bpf,sbin,src,share/{applications,man/man{1,2,3,4,5,6,7,8,9,n,1x,2x,3x,4x,5x,6x,7x,8x,9x},info},libexec,include,},share/{aclocal,appdata,applications,augeas/lenses,backgrounds,bash-completion{,/completions,/helpers},desktop-directories,dict,doc,empty,fish/vendor_completions.d,games,gnome,help,icons,idl,info,licenses,man/man{1,2,3,4,5,6,7,8,9,n,1x,2x,3x,4x,5x,6x,7x,8x,9x,0p,1p,3p},metainfo,mime-info,misc,omf,pixmaps,sounds,themes,xsessions,X11/fonts,wayland-sessions,zsh/site-functions},src,src/kernels,src/debug} \
+        usr/{bin,games,include,lib/{,tmpfiles.d,sysusers.d,systemd,udev{,/rules.d}},libexec,%{_lib}/{bpf,games,X11,pm-utils/{module.d,power.d,sleep.d},debug/{.dwz,usr},games,locale,modules,sysimage},local/{bin,etc,games,lib,%{_lib}/bpf,sbin,src,share/{applications,man/man{1,2,3,4,5,6,7,8,9,n,1x,2x,3x,4x,5x,6x,7x,8x,9x},info},libexec,include,},share/{aclocal,appdata,applications,augeas/lenses,backgrounds,bash-completion{,/completions,/helpers},desktop-directories,dict,doc,empty,fish/vendor_completions.d,games,gnome,help,icons,idl,info,licenses,locale,man/man{1,2,3,4,5,6,7,8,9,n,1x,2x,3x,4x,5x,6x,7x,8x,9x,0p,1p,3p},metainfo,mime-info,misc,omf,pixmaps,sounds,themes,xsessions,X11/fonts,wayland-sessions,zsh/site-functions},src,src/kernels,src/debug} \
         var/{adm,empty,ftp,lib/{games,misc,rpm-state},local,log,nis,preserve,spool/{mail,lpd},tmp,db,cache/bpf,opt,games,yp}
 )
 for i in "${Paths[@]}"; do
@@ -75,6 +94,7 @@ ln -snf usr/lib usr/%{_lib}/debug/lib
 ln -snf ../.dwz usr/%{_lib}/debug/usr/.dwz
 ln -snf usr/sbin usr/%{_lib}/debug/sbin
 
+%if %{with nls}
 sed -n -f %{buildroot}/iso_639.sed /usr/share/xml/iso-codes/iso_639.xml \
   >%{buildroot}/iso_639.tab
 sed -n -f %{buildroot}/iso_3166.sed /usr/share/xml/iso-codes/iso_3166.xml \
@@ -129,6 +149,7 @@ done
 for i in man{1,2,3,4,5,6,7,8,9,n,1x,2x,3x,4x,5x,6x,7x,8x,9x,0p,1p,3p}; do
    echo "/usr/share/man/$i" >>$RPM_BUILD_DIR/filelist
 done
+%endif
 
 mkdir -p %{buildroot}/usr/share/filesystem
 #find all dirs in the buildroot owned by filesystem and store them
@@ -191,7 +212,6 @@ end
 %files content
 %dir %{_datadir}/filesystem
 %{_datadir}/filesystem/paths
-
 
 
 %files -f filelist
@@ -318,7 +338,7 @@ end
 %ghost /var/run
 %dir /var/spool
 %attr(755,root,root) /var/spool/lpd
-%attr(775,root,mail) /var/spool/mail
+%attr(775,root,%{filesystem_mail_group}) /var/spool/mail
 %attr(1777,root,root) /var/tmp
 /var/yp
 

@@ -28,6 +28,8 @@ BuildSystem:    autotools
 # https://src.fedoraproject.org/rpms/binutils/blob/f44/f/binutils-riscv-testsuite-fixes.patch
 # f3398aab: allow data-reloc tests when text relocations are rejected
 Patch2000:      2000-ld-riscv-data-reloc-allow-textrels-in-tests.patch
+# a8edbcb: accept signed RISC-V relaxation immediates without full wildcarding
+Patch2001:      2001-ld-riscv-relax-tests-accept-signed-immediates.patch
 %endif
 
 BuildOption(build):  -C build-dir

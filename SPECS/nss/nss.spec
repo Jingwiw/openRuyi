@@ -6,16 +6,27 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%define major_version 3
+%define minor_version 123
+%define patch_version 1
+
+# Check https://searchfox.org/nss/source/automation/release/nspr-version.txt
+%define nspr_version 4.38.2
+
 Name:           nss
-Version:        3.115
+Version:        %{major_version}.%{minor_version}.%{patch_version}
 Release:        %autorelease
 Summary:        Network Security Services
 License:        MPL-2.0
 URL:            https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS
 VCS:            hg:https://hg.mozilla.org/projects/nss
-#!RemoteAsset
-Source:         https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_115_RTM/src/nss-3.115-with-nspr-4.37.tar.gz
+#!RemoteAsset:  sha256:6f5acfed6b76ce29ef2b8d44515f08d0e122500ddc03e16d060f4693a004d500
+Source:         https://ftp.mozilla.org/pub/security/nss/releases/NSS_%{major_version}_%{minor_version}_%{patch_version}_RTM/src/nss-%{version}-with-nspr-%{nspr_version}.tar.gz
 BuildSystem:    autotools
+
+# We don't have network in our build environment
+Patch2000:      2000-skip-ocsp-policy-check-in-offline-build.patch
+Patch2001:      2001-Make-dbtests-certutil-K-timeout-configurable.patch
 
 BuildOption(build):  -C nss
 BuildOption(build):  nss_build_all
@@ -79,7 +90,7 @@ includedir=%{_includedir}/nss3
 
 Name: NSS-UTIL
 Description: Network Security Services Utility Library
-Version: 4.37
+Version: %{nspr_version}
 Requires: nspr
 Libs: -L\${libdir} -lnssutil3
 Cflags: -I\${includedir}
@@ -93,14 +104,28 @@ includedir=%{_includedir}/nss3
 
 Name: NSS
 Description: Network Security Services
-Version: 3.115
+Version: %{version}
 Requires: nspr,nss-util
 Libs: -L\${libdir} -lssl3 -lsmime3 -lnss3
 Cflags: -I\${includedir}
 EOF
 
-# TODO: Add tests
 %check
+export BUILD_OPT=1
+export HOST="localhost"
+export DOMSUF="localdomain"
+export USE_IP=TRUE
+export IP_ADDRESS="127.0.0.1"
+export NSS_IGNORE_SYSTEM_POLICY=1
+cd nss/tests
+%ifarch riscv64
+export NSS_DBTESTS_CERTUTIL_K_TIMEOUT=10
+%endif
+# 'tools' will take so long it's not worth it...
+export NSS_TESTS="cipher lowhash cert dbtests sdr crmf smime ssl ocsp merge ec gtests ssl_gtests policy chains"
+# And we don't have network in our build environment
+export NSS_SKIP_BADSSL_OCSP=1
+./all.sh
 
 %files
 %license nss/COPYING
@@ -114,4 +139,4 @@ EOF
 %{_libdir}/pkgconfig/nss.pc
 
 %changelog
-%{?autochangelog}
+%autochangelog

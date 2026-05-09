@@ -30,6 +30,8 @@ BuildSystem:    autotools
 Patch2000:      2000-ld-riscv-data-reloc-allow-textrels-in-tests.patch
 # a8edbcb: accept signed RISC-V relaxation immediates without full wildcarding
 Patch2001:      2001-ld-riscv-relax-tests-accept-signed-immediates.patch
+# f6c1766: accept layout-dependent RISC-V Zicfilp PLT offsets
+Patch2002:      2002-ld-riscv-zicfilp-accept-variable-plt-offset.patch
 %endif
 
 BuildOption(build):  -C build-dir

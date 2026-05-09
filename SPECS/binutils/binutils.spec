@@ -23,22 +23,20 @@ VCS:            git:https://sourceware.org/git/binutils-gdb.git
 Source0:        https://ftpmirror.gnu.org/gnu/binutils/binutils-%{version}.tar.bz2
 BuildSystem:    autotools
 
-%ifarch riscv64
 # Backports from Fedora f44 binutils-riscv-testsuite-fixes.patch:
 # https://src.fedoraproject.org/rpms/binutils/blob/f44/f/binutils-riscv-testsuite-fixes.patch
-# f3398aab: allow data-reloc tests when text relocations are rejected
+# https://src.fedoraproject.org/rpms/binutils/c/f3398aab: allow data-reloc tests when text relocations are rejected
 Patch2000:      2000-ld-riscv-data-reloc-allow-textrels-in-tests.patch
-# a8edbcb: accept signed RISC-V relaxation immediates without full wildcarding
+# https://src.fedoraproject.org/rpms/binutils/c/a8edbcb: accept signed RISC-V relaxation immediates without full wildcarding
 Patch2001:      2001-ld-riscv-relax-tests-accept-signed-immediates.patch
-# f6c1766: accept layout-dependent RISC-V Zicfilp PLT offsets
+# https://src.fedoraproject.org/rpms/binutils/c/f6c1766: accept layout-dependent RISC-V Zicfilp PLT offsets
 Patch2002:      2002-ld-riscv-zicfilp-accept-variable-plt-offset.patch
-# 9e81b24: xfail RISC-V strip test where annotation symbols remain
+# https://src.fedoraproject.org/rpms/binutils/c/9e81b24: xfail RISC-V strip test where annotation symbols remain
 Patch2003:      2003-binutils-riscv-xfail-strip-annotation-symbol-tests.patch
 # openRuyi: default PIE on RISC-V emits this diagnostic before the second
 # undefined reference expected by upstream:
 # relocation R_RISCV_CALL_PLT against `bar' which may bind externally can not be used when making a shared object; recompile with -fPIC
 Patch2004:      2004-ld-elf-dwarf3-accept-riscv-pie-output.patch
-%endif
 
 BuildOption(build):  -C build-dir
 
@@ -123,13 +121,23 @@ cd ..
 %find_lang %{name} --all-name --generate-subpackages
 
 %check
-# Delete upsteam known failure. https://sourceware.org/bugzilla//show_bug.cgi?id=32983
+# Drop upstream-known pr19719 tests pending ld/32983.
+# https://sourceware.org/bugzilla/show_bug.cgi?id=32983
 sed -i '/"pr19719/d' ld/testsuite/ld-elf/shared.exp
 
 cd build-dir
 
-# Increase timeout to fit slow qemu-system builder.
-make RUNTESTFLAGS='TEST_TIMEOUT=600' check
+# Keep successful builds quiet, but print concise DejaGnu context on failure.
+make RUNTESTFLAGS='TEST_TIMEOUT=600' check || {
+  rc=$?
+  dejagnu_sum_regex='^(FAIL|XPASS|ERROR|UNRESOLVED):'
+  dejagnu_log_regex='^(FAIL|XPASS|ERROR|UNRESOLVED):|^expected:|^actual:|^output is|^returned with:|ld\.messages has'
+  echo "===== DejaGnu unexpected results ====="
+  find . -name '*.sum' -exec grep -HnE "$dejagnu_sum_regex" {} + || :
+  echo "===== DejaGnu failure context ====="
+  find . -name '*.log' -exec grep -HnE -C 5 "$dejagnu_log_regex" {} + || :
+  exit $rc
+}
 
 %post
 if [ "$1" = 1 ]; then

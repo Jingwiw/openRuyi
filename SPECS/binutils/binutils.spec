@@ -23,6 +23,13 @@ VCS:            git:https://sourceware.org/git/binutils-gdb.git
 Source0:        https://ftpmirror.gnu.org/gnu/binutils/binutils-%{version}.tar.bz2
 BuildSystem:    autotools
 
+%ifarch riscv64
+# Backports from Fedora f44 binutils-riscv-testsuite-fixes.patch:
+# https://src.fedoraproject.org/rpms/binutils/blob/f44/f/binutils-riscv-testsuite-fixes.patch
+# f3398aab: allow data-reloc tests when text relocations are rejected
+Patch2000:      2000-ld-riscv-data-reloc-allow-textrels-in-tests.patch
+%endif
+
 BuildOption(build):  -C build-dir
 
 BuildRequires:  gcc-c++

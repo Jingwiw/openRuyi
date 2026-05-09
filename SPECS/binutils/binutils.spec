@@ -34,6 +34,10 @@ Patch2001:      2001-ld-riscv-relax-tests-accept-signed-immediates.patch
 Patch2002:      2002-ld-riscv-zicfilp-accept-variable-plt-offset.patch
 # 9e81b24: xfail RISC-V strip test where annotation symbols remain
 Patch2003:      2003-binutils-riscv-xfail-strip-annotation-symbol-tests.patch
+# openRuyi: default PIE on RISC-V emits this diagnostic before the second
+# undefined reference expected by upstream:
+# relocation R_RISCV_CALL_PLT against `bar' which may bind externally can not be used when making a shared object; recompile with -fPIC
+Patch2004:      2004-ld-elf-dwarf3-accept-riscv-pie-output.patch
 %endif
 
 BuildOption(build):  -C build-dir

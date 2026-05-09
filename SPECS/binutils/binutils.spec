@@ -32,6 +32,8 @@ Patch2000:      2000-ld-riscv-data-reloc-allow-textrels-in-tests.patch
 Patch2001:      2001-ld-riscv-relax-tests-accept-signed-immediates.patch
 # f6c1766: accept layout-dependent RISC-V Zicfilp PLT offsets
 Patch2002:      2002-ld-riscv-zicfilp-accept-variable-plt-offset.patch
+# 9e81b24: xfail RISC-V strip test where annotation symbols remain
+Patch2003:      2003-binutils-riscv-xfail-strip-annotation-symbol-tests.patch
 %endif
 
 BuildOption(build):  -C build-dir

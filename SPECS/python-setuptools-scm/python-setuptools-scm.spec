@@ -8,14 +8,14 @@
 %global srcname setuptools_scm
 
 Name:           python-setuptools-scm
-Version:        8.3.1
+Version:        10.0.5
 Release:        %autorelease
 Summary:        Blessed package to manage your versions by SCM tags
 License:        MIT
-URL:            https://github.com/pypa/setuptools_scm/
+URL:            https://github.com/pypa/setuptools-scm/
 # TODO: Use %%{pypi_source %%{srcname} %%{version}} in the future - 251
 #       Otherwise https://files.pythonhosted.org/packages/source/a/abc/%%{srcname}-%%{version}.tar.gz
-#!RemoteAsset:  sha256:3d555e92b75dacd037d32bafdf94f97af51ea29ae8c7b234cf94b7a5bd242a63
+#!RemoteAsset:  sha256:bbba8fe754516cdefd017f4456721775e6ef9662bd7887fb52ae26813d4838c3
 Source0:        https://files.pythonhosted.org/packages/source/s/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    pyproject
@@ -24,6 +24,8 @@ BuildOption(install):  setuptools_scm
 
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  pkgconfig(python3)
+BuildRequires:  python3dist(setuptools) >= 77.0.3
+BuildRequires:  python3dist(vcs-versioning)
 
 Provides:       python3-setuptools-scm = %{version}-%{release}
 %python_provide python3-setuptools-scm
@@ -42,6 +44,8 @@ It also handles file finders for the supported SCMs.
 
 %files -f %{pyproject_files}
 %doc README.md
+%license LICENSE
+%{_bindir}/setuptools-scm
 
 %changelog
 %autochangelog

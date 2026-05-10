@@ -76,10 +76,13 @@ BuildRequires:  pyproject-rpm-macros
 
 %if %{without bootstrap}
 # Not to use the pre-generated egg-info, we use setuptools from previous build to generate it
-BuildRequires:  python3-setuptools
+BuildRequires:  python-setuptools
 %endif
 
 %{bundled}
+
+# It can't self provide this...
+Provides:       python3-setuptools = %{version}-%{release}
 
 # For users who might see ModuleNotFoundError: No module named 'pkg_resoureces'
 # NB: Those are two different provides: one contains underscore, the other hyphen

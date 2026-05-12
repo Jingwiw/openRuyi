@@ -7,6 +7,17 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%bcond lto 1
+
+%if %{without lto}
+%global _lto_cflags %{nil}
+%endif
+
+%ifarch riscv64
+# The shared library link can fail during LTO on riscv64.
+%global _lto_cflags %{nil}
+%endif
+
 Name:           libgcrypt
 Version:        1.11.2
 Release:        %autorelease
@@ -38,6 +49,9 @@ understanding of applied cryptography is required to use Libgcrypt.
 
 This package contains needed files to compile and link against the
 library.
+
+%install -a
+rm -f %{buildroot}%{_bindir}/libgcrypt-config
 
 %files
 %license COPYING COPYING.LIB LICENSES

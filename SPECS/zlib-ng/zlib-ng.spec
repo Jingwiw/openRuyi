@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
@@ -7,6 +8,7 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %bcond systemtap 0
+%bcond tests 0
 
 # defining BUILD_SHARED_LIBS disables the static library
 %undefine _cmake_shared_libs
@@ -17,7 +19,7 @@ Release:        %autorelease
 Summary:        Zlib replacement with optimizations
 License:        Zlib
 URL:            https://github.com/zlib-ng/zlib-ng
-#!RemoteAsset
+#!RemoteAsset:  sha256:f9c65aa9c852eb8255b636fd9f07ce1c406f061ec19a2e7d508b318ca0c907d1
 Source:         https://github.com/zlib-ng/zlib-ng/archive/refs/tags/%{version}.tar.gz
 BuildSystem:    cmake
 
@@ -26,10 +28,14 @@ Patch0:         zlib-ng-2.3.2-riscv-hwprobe.patch
 
 BuildOption(conf):  -DINSTALL_LIB_DIR=%{_libdir}
 BuildOption(conf):  -DWITH_RVV:BOOL=ON
-BuildOption(conf):  -DWITH_GTEST:BOOL=OFF
-BuildOption(conf):  -DWITH_NEW_STRATEGIES:BOOL=OFF
 BuildOption(conf):  -DWITH_ARMV6:BOOL=OFF
 BuildOption(conf):  -DZLIB_COMPAT:BOOL=ON
+BuildOption(conf):  -DBUILD_TESTING:BOOL=%{?with_tests:ON}%{!?with_tests:OFF}
+BuildOption(conf):  -DWITH_GTEST:BOOL=%{?with_tests:ON}%{!?with_tests:OFF}
+BuildOption(conf):  -DWITH_FUZZERS:BOOL=OFF
+BuildOption(conf):  -DWITH_NEW_STRATEGIES:BOOL=OFF
+BuildOption(conf):  -DWITH_BENCHMARKS:BOOL=OFF
+BuildOption(conf):  -DWITH_BENCHMARK_APPS:BOOL=OFF
 
 BuildRequires:  cmake
 BuildRequires:  gcc
@@ -84,4 +90,4 @@ The %{name}-static package contains static libraries for zlib-ng-compat.
 %{_libdir}/libz.a
 
 %changelog
-%{?autochangelog}
+%autochangelog

@@ -1,9 +1,13 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond mpfr 1
+%bcond readline 0
 
 Name:           gawk
 Version:        5.4.0
@@ -16,7 +20,19 @@ VCS:            git:https://https.git.savannah.gnu.org/git/gawk.git
 Source:         http://ftpmirror.gnu.org/gnu/gawk/gawk-%{version}.tar.xz
 BuildSystem:    autotools
 
+%if %{without readline}
+BuildOption(conf):  --without-readline
+%endif
+%if %{without mpfr}
+BuildOption(conf):  --disable-mpfr
+%endif
+
+%if %{with mpfr}
 BuildRequires:  pkgconfig(mpfr)
+%endif
+%if %{with readline}
+BuildRequires:  pkgconfig(readline)
+%endif
 
 Provides:       awk
 Provides:       /bin/gawk

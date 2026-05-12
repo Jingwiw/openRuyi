@@ -9,6 +9,12 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %bcond docs 1
+%bcond lto 1
+
+%if %{with lto}
+# Needed for symbol versioning.
+%global _lto_cflags -flto -ffat-lto-objects -flto-partition=none
+%endif
 
 Name:           alsa-lib
 Version:        1.2.15.3
@@ -66,9 +72,6 @@ against the ALSA libraries and interfaces.
 autoreconf -vif
 
 %build -p
-# Set custom LTO flags (needed for symbol versioning)
-%define _lto_cflags -flto -ffat-lto-objects -flto-partition=none
-
 # fix libtool rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool || :
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool || :

@@ -5,19 +5,15 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global srcname pyvex
-# libvexversion from pyvex's subdirectory called `vex @ xxxxx`(xxxxx is the libvexversion)
-%global libvexversion 421bf0d9ec800df09fe4f8d90a8c13a0c63325e3
 
 Name:           python-%{srcname}
-Version:        9.2.193
+Version:        9.2.214
 Release:        %autorelease
 Summary:        A Python interface to libvex and VEX IR
 License:        BSD-2-Clause AND GPL-3.0-or-later AND LGPL-2.0-only
 URL:            https://github.com/angr/pyvex
-#!RemoteAsset:  sha256:f097bf9aac73cc7e9d1fa1480375b11300bfa9f6b7740a953d3a036ea1b7a944
+#!RemoteAsset:  sha256:4e2e1220de8b8cb163d8e500c8eb6eca964184d78aefad392526488cdfb64416
 Source0:        https://files.pythonhosted.org/packages/source/p/%{srcname}/%{srcname}-%{version}.tar.gz
-#!RemoteAsset:  sha256:535900642805fa8795196a0f9b1e1cb22c663c6d1dac828d8f3e404605ff2468
-Source1:        https://github.com/angr/vex/archive/%{libvexversion}/vex-%{libvexversion}.tar.gz
 BuildSystem:    pyproject
 
 BuildOption(install):  -l %{srcname}
@@ -39,15 +35,6 @@ Provides:       python3-%{srcname}%{?_isa} = %{version}-%{release}
 
 %description
 A Python interface to libVEX and the VEX intermediate representation.
-
-%prep -a
-# on riscv64 test_pyvex.py need more mem for test
-%ifarch riscv64
-sed -i 's/assert kb_end - kb_start < 5000/assert kb_end - kb_start < 50000/' tests/test_pyvex.py
-%endif
-tar xvf %{SOURCE1}
-rm -rf vex
-mv vex-%{libvexversion} vex
 
 %generate_buildrequires
 %pyproject_buildrequires

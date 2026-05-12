@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: jchzhou <zhoujiacheng@iscas.ac.cn>
 #
@@ -14,8 +15,18 @@
 %define slibdir64 %{_prefix}/lib64
 %define usrmerged 1
 
-%bcond_without bootstrap
+%bcond bootstrap 0
 
+%if %{with bootstrap}
+%define quadmath_arch __openruyi_disabled_arch
+%define tsan_arch __openruyi_disabled_arch
+%define asan_arch __openruyi_disabled_arch
+%define hwasan_arch __openruyi_disabled_arch
+%define itm_arch __openruyi_disabled_arch
+%define atomic_arch __openruyi_disabled_arch
+%define lsan_arch __openruyi_disabled_arch
+%define ubsan_arch __openruyi_disabled_arch
+%else
 %define quadmath_arch x86_64
 %define tsan_arch x86_64 riscv64
 %define asan_arch x86_64 riscv64
@@ -24,12 +35,22 @@
 %define atomic_arch x86_64 riscv64
 %define lsan_arch x86_64 riscv64
 %define ubsan_arch x86_64 riscv64
+%endif
 
 # If we want to enable this we need to explicitly enable it
 %if 0%{?build_libvtv:1}
 %define vtv_arch x86_64
 %endif
 
+%if %{with bootstrap}
+%define build_fortran 0
+%define build_cp 1
+%define build_objc 0
+%define build_objcp 0
+%define build_go 0
+%define build_d 0
+%define build_m2 0
+%else
 %define build_fortran 1
 %define build_objcp 1
 %define build_go 1
@@ -39,6 +60,7 @@
 %define build_cp 1
 %define build_objc 1
 %endif
+%endif
 
 # rust is still experimental
 %define build_rust 0
@@ -47,11 +69,18 @@
 %ifarch x86_64
 %define use_lto_bootstrap %{with bootstrap}
 %endif
+%if %{with bootstrap}
+%define use_lto_bootstrap 0
+%endif
 
 # Bruh please make it work in the future?
 %define build_ada 0
 
+%if %{with bootstrap}
+%define enable_plugins 0
+%else
 %define enable_plugins 1
+%endif
 %define build_jit 0
 
 %define hostsuffix %{nil}
@@ -73,7 +102,7 @@ Version:        15.2.0
 Release:        %autorelease
 License:        GPL-3.0-or-later
 Summary:        The GNU C Compiler and Support Files
-#!RemoteAsset
+#!RemoteAsset:  sha256:438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e
 Source:         https://ftpmirror.gnu.org/gnu/gcc/gcc-%{version}/gcc-%{version}.tar.xz
 
 BuildRequires:  xz
@@ -519,6 +548,14 @@ Runtime library for the GNU Modula-2 language.
 
 #test patching end
 
+%if %{with bootstrap}
+# c++tools links against the PIC libiberty archive, but its Makefile does
+# not model that file as a dependency. The seed profile links correctly with
+# the regular libiberty archive produced in this build.
+sed -i 's#../libiberty/pic/libiberty.a#../libiberty/libiberty.a#g' c++tools/Makefile.in
+sed -i 's/^g++-mapper-server$(exeext): $(MAPPER.O) $(CODYLIB)$/g++-mapper-server$(exeext): $(MAPPER.O) $(CODYLIB) $(LIBIBERTY)/' c++tools/Makefile.in
+%endif
+
 %build
 %define _lto_cflags %{nil}
 # Avoid rebuilding of generated files
@@ -606,6 +643,13 @@ export PATH="`pwd`/host-tools/bin:$PATH"
 
 export CARGO=/bin/true
 
+%if %{with bootstrap}
+# Bootstrap builds can run under newer host compilers whose default C++
+# dialect is C++20 or later. Keep GCC's host tools on a pre-char8_t dialect.
+: "${CXX:=g++}"
+export CXX="$CXX -std=gnu++17"
+%endif
+
 ../configure \
   CFLAGS="$optflags" \
   CXXFLAGS="$optflags" \
@@ -627,6 +671,16 @@ export CARGO=/bin/true
   --with-libstdcxx-zoneinfo=%{_datadir}/zoneinfo \
   --enable-ssp \
   --disable-libssp \
+%if %{with bootstrap}
+  --disable-analyzer \
+  --disable-lto \
+  --without-isl \
+  --without-zstd \
+  --disable-libatomic \
+  --disable-libitm \
+  --disable-libquadmath \
+  --disable-libsanitizer \
+%endif
 %if 0%{!?build_libvtv:1}
   --disable-libvtv \
 %endif
@@ -668,13 +722,7 @@ export CARGO=/bin/true
 %if "%{TARGET_ARCH}" == "riscv64"
   --disable-multilib \
 %endif
-%if %{with bootstrap}
-%if %{use_lto_bootstrap} && !0%{?building_testsuite:1}
-  --with-build-config=bootstrap-lto-lean \
-%endif
-%else
   --disable-bootstrap \
-%endif
   --enable-link-serialization \
   $CONFARGS \
   --build=%{GCCDIST} \
@@ -893,6 +941,16 @@ if test -f %{buildroot}/%{libsubdir}/include-fixed/bits/floatn-common.h; then
 %{libsubdir}/include-fixed/bits/floatn-common.h
 EOF
 fi
+%if %{with bootstrap}
+find %{buildroot}/%{libsubdir}/include-fixed -depth -mindepth 1 ! -name README -exec rm -rf '{}' +
+: > ../floatn-fixes.list
+rm -f %{buildroot}/%{_prefix}/bin/lto-dump%{binsuffix}
+rm -f %{buildroot}/%{libsubdir}/lto1
+rm -f %{buildroot}/%{libsubdir}/lto-wrapper
+rm -f %{buildroot}/%{libsubdir}/liblto_plugin.so*
+rm -f %{buildroot}/%{_mandir}/man1/lto-dump%{binsuffix}.1.gz
+rm -f %{buildroot}/%{_infodir}/libquadmath.info*
+%endif
 
 %if !%{enable_plugins}
 # no plugins
@@ -940,7 +998,11 @@ cd ..
 %find_lang cpplib%{binsuffix}
 %find_lang libstdc++
 
+%if %{with bootstrap}
+%files
+%else
 %files -f floatn-fixes.list
+%endif
 %defattr(-,root,root)
 %dir %{_libdir}/gcc
 %dir %{_libdir}/gcc/%{GCCDIST}
@@ -955,11 +1017,15 @@ cd ..
 %{_prefix}/bin/gcc-ar%{binsuffix}
 %{_prefix}/bin/gcc-nm%{binsuffix}
 %{_prefix}/bin/gcc-ranlib%{binsuffix}
+%if %{without bootstrap}
 %{_prefix}/bin/lto-dump%{binsuffix}
+%endif
 %{libsubdir}/collect2
+%if %{without bootstrap}
 %{libsubdir}/lto1
 %{libsubdir}/lto-wrapper
 %{libsubdir}/liblto_plugin.so*
+%endif
 %{libsubdir}/include/limits.h
 %{libsubdir}/include/syslimits.h
 %{libsubdir}/include-fixed/README
@@ -1183,7 +1249,9 @@ cd ..
 %doc %{_mandir}/man1/gcov%{binsuffix}.1.gz
 %doc %{_mandir}/man1/gcov-dump%{binsuffix}.1.gz
 %doc %{_mandir}/man1/gcov-tool%{binsuffix}.1.gz
+%if %{without bootstrap}
 %doc %{_mandir}/man1/lto-dump%{binsuffix}.1.gz
+%endif
 
 %if %{enable_plugins}
 %files devel
@@ -1490,4 +1558,4 @@ cd ..
 %endif
 
 %changelog
-%{?autochangelog}
+%autochangelog

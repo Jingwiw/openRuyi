@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Suyun114 <ziyu.oerv@isrc.iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
@@ -13,10 +14,8 @@ Summary:        The GNU Crypto Library
 License:        GPL-2.0-or-later AND LGPL-2.1-or-later AND GPL-3.0-or-later
 URL:            https://gnupg.org/software/libgcrypt
 VCS:            git:https://git.gnupg.org/libgcrypt.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:6ba59dd192270e8c1d22ddb41a07d95dcdbc1f0fb02d03c4b54b235814330aac
 Source:         https://gnupg.org/ftp/gcrypt/libgcrypt/%{name}-%{version}.tar.bz2
-#!RemoteAsset
-Source1:        https://gnupg.org/ftp/gcrypt/libgcrypt/%{name}-%{version}.tar.bz2.sig
 BuildSystem:    autotools
 
 BuildRequires:  pkgconfig(gpg-error)
@@ -50,7 +49,6 @@ library.
 %{_bindir}/dumpsexp
 %{_bindir}/hmac256
 %{_bindir}/mpicalc
-%{_bindir}/libgcrypt-config
 %{_libdir}/libgcrypt.so
 %{_libdir}/pkgconfig/libgcrypt.pc
 %{_datadir}/aclocal/libgcrypt.m4
@@ -59,4 +57,4 @@ library.
 %{_mandir}/man1/*
 
 %changelog
-%{?autochangelog}
+%autochangelog

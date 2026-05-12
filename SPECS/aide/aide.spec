@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: BH1SCW <kongfanjun@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond selinux 1
 
 Name:           aide
 Version:        0.19.2
@@ -10,7 +13,7 @@ Release:        %autorelease
 Summary:        Intrusion detection environment
 License:        GPL-2.0-or-later
 URL:            https://github.com/aide/aide
-#!RemoteAsset
+#!RemoteAsset:  sha256:23762b05f46111edeb3c8a05016c8731c01bdb8c1f91be48c156c31ab85e74c4
 Source0:        https://github.com/aide/aide/releases/download/v%{version}/%{name}-%{version}.tar.gz
 Source1:        aide.conf
 Source2:        README.quickstart
@@ -25,11 +28,15 @@ BuildOption(conf):  --with-nettle
 BuildOption(conf):  --with-zlib
 BuildOption(conf):  --with-curl
 BuildOption(conf):  --with-posix-acl
+%if %{with selinux}
 BuildOption(conf):  --with-selinux
+%else
+BuildOption(conf):  --without-selinux
+%endif
 BuildOption(conf):  --with-xattr
 BuildOption(conf):  --with-e2fsattrs
 BuildOption(conf):  --with-audit
-BuildOption(install): bindir=%{_sbindir}
+BuildOption(install):  bindir=%{_sbindir}
 
 BuildRequires:  gcc
 BuildRequires:  make
@@ -41,7 +48,9 @@ BuildRequires:  pkgconfig(nettle)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  pkgconfig(libacl)
+%if %{with selinux}
 BuildRequires:  pkgconfig(libselinux)
+%endif
 BuildRequires:  pkgconfig(libattr)
 BuildRequires:  pkgconfig(e2p)
 BuildRequires:  pkgconfig(audit)
@@ -79,4 +88,4 @@ mkdir -p -m0700 %{buildroot}%{_localstatedir}/lib/aide
 %dir %attr(0700,root,root) %{_localstatedir}/log/aide
 
 %changelog
-%{?autochangelog}
+%autochangelog

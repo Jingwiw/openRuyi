@@ -13,6 +13,18 @@
 %bcond xattr 1
 %bcond libcap 1
 %bcond docs 1
+%bcond tests 1
+%bcond lto 1
+
+%if %{without lto}
+%global _lto_cflags %{nil}
+%endif
+
+%ifarch riscv64
+# Avoid LTO on riscv64; gnulib archives can leave symbols unresolved with
+# the default linker.
+%global _lto_cflags %{nil}
+%endif
 
 Summary:        GNU Core Utilities
 Name:           coreutils
@@ -99,7 +111,15 @@ the GNU fileutils, sh-utils, and textutils packages.
 %install -a
 # TODO: Avoid illegal package names
 rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/*@*
+%if %{without docs}
+rm -f %{buildroot}%{_infodir}/coreutils.info*
+%endif
 %find_lang %{name} --generate-subpackages
+
+%if %{without tests}
+%check
+:
+%endif
 
 %files
 %doc NEWS README THANKS

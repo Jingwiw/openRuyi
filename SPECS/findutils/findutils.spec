@@ -10,6 +10,17 @@
 %bcond selinux 1
 %bcond nls 1
 %bcond tests 1
+%bcond lto 1
+
+%if %{without lto}
+%global _lto_cflags %{nil}
+%endif
+
+%ifarch riscv64
+# Avoid LTO on riscv64; gnulib archives can leave symbols unresolved with
+# the default linker.
+%global _lto_cflags %{nil}
+%endif
 
 Name:           findutils
 Version:        4.10.0

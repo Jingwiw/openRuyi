@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: laokz <zhangkai@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
@@ -16,10 +17,23 @@
 
 %define enable_stackguard_randomization 1
 
+%bcond audit 1
+%bcond debuginfo 1
+%bcond fortify 1
+%bcond libcap 1
 # We need to consider the nscd subpackage, or not.
 %bcond nscd 1
 # This is libnsl1, we already have newer libnsl - 251
 %bcond libnsl 0
+%bcond selinux 1
+%bcond systemtap 1
+%bcond tests 1
+
+%if %{without debuginfo}
+%global debug_package %{nil}
+%undefine _debugsource_packages
+%global _build_id_links none
+%endif
 
 Name:           glibc
 Summary:        Standard Shared Libraries (from the GNU C Library)
@@ -38,19 +52,30 @@ Source4:        nscd.sysusers
 # For obvious reasons.
 Patch2000:      glibc-2.4-china.diff
 
-BuildRequires:  pkgconfig(audit)
 BuildRequires:  bison
-BuildRequires:  pkgconfig(libcap)
-BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  texinfo
 BuildRequires:  python3
+%if %{with nscd}
 BuildRequires:  systemd-rpm-macros
+%endif
+%if %{with systemtap}
 BuildRequires:  systemtap-sdt-devel
+%endif
 BuildRequires:  xz
 BuildRequires:  pkgconfig(zlib)
+%if %{with audit}
+BuildRequires:  pkgconfig(audit)
+%endif
+%if %{with libcap}
+BuildRequires:  pkgconfig(libcap)
+%endif
+%if %{with selinux}
+BuildRequires:  pkgconfig(libselinux)
+%endif
+%if %{with fortify}
 # Provide Scrt1.o for _FORTIFY_SOURCE configure.
-# TODO: how about bootstrap build? - 251
 BuildRequires:  glibc-devel
+%endif
 
 Provides:       rtld(GNU_HASH)
 
@@ -185,6 +210,7 @@ target="%{_target_cpu}-openruyi-linux"
 # Default CFLAGS and Compiler
 #
 enable_stack_protector=
+enable_fortify_source=
 BuildFlags=
 tmp="%{build_cflags}"
 for opt in $tmp; do
@@ -196,6 +222,9 @@ for opt in $tmp; do
     *) BuildFlags+=" $opt" ;;
   esac
 done
+%if %{without fortify}
+enable_fortify_source=
+%endif
 
 #
 # Build base glibc
@@ -211,7 +240,11 @@ cd build-%{_target_cpu}
     --infodir=%{_infodir} \
     --build=%{build} \
     --host=${target} \
+%if %{with systemtap}
     --enable-systemtap \
+%else
+    --disable-systemtap \
+%endif
 %if %{enable_stackguard_randomization}
     --enable-stackguard-randomization \
 %endif
@@ -238,9 +271,11 @@ cd build-%{_target_cpu}
 %make_build
 cd ..
 
+%if %{with tests}
 %check
 make %{?_smp_mflags} %{?make_output_sync} -C build-%{_target_cpu} check-abi
 make %{?_smp_mflags} %{?make_output_sync} -C build-%{_target_cpu} test t=elf/check-localplt
+%endif
 
 %define rtldlib %{_lib}
 # Each architecture has a different name for the dynamic linker:
@@ -279,6 +314,8 @@ ln -s . %{buildroot}%{_libdir}/lp64d
 cd build-%{_target_cpu}
 make %{?_smp_mflags} %{?make_output_sync} install_root=%{buildroot} localedata/install-locale-files
 cd ..
+
+rm -f %{buildroot}%{_infodir}/dir
 
 %find_lang libc --generate-subpackages
 
@@ -320,7 +357,7 @@ install -m 644 %{SOURCE4} %{buildroot}%{_sysusersdir}/nscd.conf
 
 # Move getconf to %{_libexecdir}/getconf/ to avoid cross device link
 mv %{buildroot}%{_bindir}/getconf %{buildroot}%{_libexecdir}/getconf/getconf
-ln -s %{_libexecdir}/getconf/getconf %{buildroot}%{_bindir}/getconf
+ln -s ../libexec/getconf/getconf %{buildroot}%{_bindir}/getconf
 
 rm %{buildroot}/%{_lib}
 %if "%{rtldlib}" != "%{_lib}"
@@ -575,4 +612,4 @@ rpm.spawn({"%{_sbindir}/ldconfig"})
 %endif
 
 %changelog
-%{?autochangelog}
+%autochangelog

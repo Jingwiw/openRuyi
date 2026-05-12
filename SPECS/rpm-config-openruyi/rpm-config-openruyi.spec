@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond lto 1
 
 # ignore the explicit bash requires from the kernel mod scripts
 %define __requires_exclude ^/bin/bash$
@@ -36,6 +39,9 @@ kmp.attr
 macros
 macros.buildsystem
 macros.ldconfig
+%if %{without lto}
+lto-disabled.macros
+%endif
 macros.sbat
 macros.vendor
 macros.vpath
@@ -62,6 +68,9 @@ mkdir -p %{buildroot}%{_rpmconfigdir}/macros.d
 install -p -m 755 -t %{buildroot}%{_rpmconfigdir}/ *.prov
 install -p -m 755 -t %{buildroot}%{_rpmconfigdir}/ *.ksyms
 install -p -m 644 -t %{buildroot}%{_rpmconfigdir}/macros.d macros.*
+%if %{without lto}
+install -p -m 644 lto-disabled.macros %{buildroot}%{_rpmconfigdir}/macros.d/macros.no-lto
+%endif
 
 %files
 %dir %{_rpmconfigdir}/openruyi/
@@ -77,4 +86,4 @@ install -p -m 644 -t %{buildroot}%{_rpmconfigdir}/macros.d macros.*
 %{_rpmconfigdir}/find-supplements.ksyms
 
 %changelog
-%{?autochangelog}
+%autochangelog

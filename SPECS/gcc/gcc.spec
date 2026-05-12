@@ -6,6 +6,9 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %bcond lto 1
+%bcond fortran 1
+%bcond go 1
+%bcond objc 1
 
 %define gcc_version 15
 %define gcc_suffix 15
@@ -29,8 +32,12 @@ Source0:        cpp
 
 BuildRequires:  gcc%{gcc_version}
 BuildRequires:  gcc%{gcc_version}-c++
+%if %{with fortran}
 BuildRequires:  gcc%{gcc_version}-fortran
+%endif
+%if %{with go}
 BuildRequires:  gcc%{gcc_version}-go
+%endif
 %if %{build_ada}
 BuildRequires:  gcc%{gcc_version}-ada
 %endif
@@ -73,6 +80,7 @@ Requires:       libstdc++-devel-gcc%{gcc_version}
 %description -n libstdc++-devel
 The system GNU C++ development files.
 
+%if %{with fortran}
 %package     -n gcc-fortran
 Summary:        The system GNU Fortran Compiler
 License:        GPL-3.0-or-later
@@ -81,7 +89,9 @@ Requires:       gcc = %{version}
 
 %description -n gcc-fortran
 The system GNU Fortran Compiler.
+%endif
 
+%if %{with objc}
 %package     -n gcc-objc
 Summary:        The system GNU Objective C Compiler
 License:        GPL-3.0-or-later
@@ -99,6 +109,7 @@ Requires:       gcc-objc = %{version}
 
 %description -n gcc-obj-c++
 The system GNU Objective C++ Compiler.
+%endif
 
 %package     -n gcc-ada
 Summary:        The system GNU Ada Compiler
@@ -109,6 +120,7 @@ Requires:       gcc = %{version}
 %description -n gcc-ada
 The system GNU Ada Compiler.
 
+%if %{with go}
 %package     -n gcc-go
 Summary:        The system GNU Go Compiler
 License:        GPL-3.0-or-later
@@ -119,6 +131,7 @@ Requires(postun): update-alternatives
 
 %description -n gcc-go
 The system GNU Go Compiler.
+%endif
 
 %package     -n gcc-d
 Summary:        The system GNU D Compiler
@@ -169,6 +182,7 @@ Conflicts:      libgomp
 %description -n libgomp
 The system GNU Compiler OpenMP Runtime Library.
 
+%if %{with fortran}
 %package     -n libgfortran
 Summary:        The GNU Fortran Compiler Runtime Library
 License:        GPL-3.0-or-later WITH GCC-exception-3.1
@@ -179,7 +193,9 @@ Conflicts:      libgfortran
 
 %description -n libgfortran
 The system GNU Fortran Compiler Runtime Library.
+%endif
 
+%if %{with objc}
 %package     -n libobjc
 Summary:        The GNU Objective C Compiler Runtime Library
 License:        GPL-3.0-or-later WITH GCC-exception-3.1
@@ -190,6 +206,7 @@ Conflicts:      libobjc
 
 %description -n libobjc
 The system GNU Objective C Compiler Runtime Library.
+%endif
 
 %prep
 
@@ -198,8 +215,10 @@ mkdir -p $RPM_BUILD_ROOT/lib
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 mkdir -p $RPM_BUILD_ROOT%{_infodir}
+%if %{with objc}
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/packages/gcc-objc/
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/packages/gcc-obj-c++/
+%endif
 # Link all the binaries
 for program in \
         gcc gcov gcov-dump gcov-tool \
@@ -208,8 +227,12 @@ for program in \
 %endif
         g++ \
         cpp \
+%if %{with fortran}
         gfortran \
+%endif
+%if %{with go}
         gccgo \
+%endif
 %if %{build_ada}
         gnat gnatbind gnatchop gnatclean gnatkr \
         gnatlink gnatls gnatmake gnatname gnatprep \
@@ -221,10 +244,12 @@ for program in \
     ; do
   ln -sf $program-%{gcc_suffix} $RPM_BUILD_ROOT%{_prefix}/bin/$program
 done
+%if %{with go}
 # For go and gofmt use alternatives since they are shared with golang
 mkdir -p %{buildroot}%{_sysconfdir}/alternatives
 ln -sf %{_sysconfdir}/alternatives/go %{buildroot}%{_bindir}/go
 ln -sf %{_sysconfdir}/alternatives/gofmt %{buildroot}%{_bindir}/gofmt
+%endif
 # Link section 1 manpages
 for man1 in \
         gcc gcov gcov-dump gcov-tool \
@@ -233,8 +258,12 @@ for man1 in \
 %endif
         g++ \
         cpp \
+%if %{with fortran}
         gfortran \
+%endif
+%if %{with go}
         gccgo \
+%endif
 %if %{build_d}
         gdc \
 %endif
@@ -258,6 +287,7 @@ mkdir -p $RPM_BUILD_ROOT%{_libdir}/bfd-plugins
 ln -s `gcc-%{gcc_suffix} -print-file-name=liblto_plugin.so` $RPM_BUILD_ROOT%{_libdir}/bfd-plugins/liblto_plugin.so
 %endif
 
+%if %{with go}
 %post -n gcc-go
 # we don't want a BuildRequires on gccN-go but otherwise the install
 # step of the build fails, so simply skip the script when gccN-go isn't there
@@ -271,6 +301,7 @@ fi
 if [ $1 -eq 0 ] ; then
   update-alternatives --remove go %{_bindir}/go-%{gcc_suffix}
 fi
+%endif
 
 %files -n gcc
 %defattr(-,root,root)
@@ -311,16 +342,20 @@ fi
 %doc %{_mandir}/man1/g++.1.gz
 %doc %{_mandir}/man1/c++.1.gz
 
+%if %{with fortran}
 %files -n gcc-fortran
 %defattr(-,root,root)
 %{_prefix}/bin/gfortran
 %doc %{_mandir}/man1/gfortran.1.gz
+%endif
 
+%if %{with objc}
 %files -n gcc-objc
 %defattr(-,root,root)
 
 %files -n gcc-obj-c++
 %defattr(-,root,root)
+%endif
 
 %if %{build_ada}
 %files -n gcc-ada
@@ -340,6 +375,7 @@ fi
 %files -n libstdc++-devel
 %defattr(-,root,root)
 
+%if %{with go}
 %files -n gcc-go
 %defattr(-,root,root)
 %{_bindir}/gccgo
@@ -348,6 +384,7 @@ fi
 %ghost %{_sysconfdir}/alternatives/go
 %ghost %{_sysconfdir}/alternatives/gofmt
 %doc %{_mandir}/man1/gccgo.1.gz
+%endif
 
 %if %{build_d}
 %files -n gcc-d
@@ -374,11 +411,15 @@ fi
 %files -n libgomp
 %defattr(-,root,root)
 
+%if %{with fortran}
 %files -n libgfortran
 %defattr(-,root,root)
+%endif
 
+%if %{with objc}
 %files -n libobjc
 %defattr(-,root,root)
+%endif
 
 %changelog
 %autochangelog

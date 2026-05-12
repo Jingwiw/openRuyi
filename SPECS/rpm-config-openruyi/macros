@@ -53,8 +53,9 @@
 %requires_ge() %{expand:%(t=$(echo '%*' | LC_ALL=C xargs -r rpm -q --qf 'Requires: %%{name} >= %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not"); test -n "$t" || echo "%%{error: %%%%{requires_eq %*} does not resolve}"; echo $t)}
 %__perl			/usr/bin/perl
 
-# we use the macro as one can easily override it and thus disable LTO for a particular package
-%_lto_cflags		-flto=auto -ffat-lto-objects
+# we use the macro as one can easily override it and thus disable LTO for a
+# particular package or build profile.
+%_lto_cflags		%{?_without_lto:%{nil}}%{!?_without_lto:-flto=auto -ffat-lto-objects}
 
 # Security Hardening
 %openruyi_security_cflags   -fstack-protector-strong -D_FORTIFY_SOURCE=3 -fstack-clash-protection -Wformat -Werror=format-security

@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
@@ -9,7 +10,16 @@
 # avoid bootstrapping problem
 %define _binary_payload w9.bzdio
 
+%bcond  acl 1
+%bcond  bdb_ro 1
+%bcond  debuginfo 1
+%bcond  libcap 1
+%bcond  nls 1
+%bcond  openmp 1
+%bcond  plugins 1
 %bcond  python 1
+%bcond  selinux 1
+%bcond  systemd_macros 1
 
 Name:           rpm
 Summary:        The RPM Package Manager
@@ -79,7 +89,9 @@ BuildRequires:  cmake
 BuildRequires:  config
 BuildRequires:  findutils
 BuildRequires:  gcc
+%if %{with nls}
 BuildRequires:  gettext-devel
+%endif
 BuildRequires:  glibc-devel
 BuildRequires:  gzip
 BuildRequires:  libtool
@@ -87,15 +99,23 @@ BuildRequires:  make
 BuildRequires:  patch
 BuildRequires:  perl
 BuildRequires:  pkgconfig(bzip2)
+%if %{with acl}
 BuildRequires:  pkgconfig(libacl)
+%endif
 BuildRequires:  pkgconfig(libarchive)
+%if %{with libcap}
 BuildRequires:  pkgconfig(libcap)
+%endif
+%if %{with debuginfo}
 BuildRequires:  pkgconfig(libdw)
+%endif
 BuildRequires:  pkgconfig(libelf)
 BuildRequires:  pkgconfig(libgcrypt)
 BuildRequires:  pkgconfig(liblzma)
 BuildRequires:  pkgconfig(libmagic)
+%if %{with selinux}
 BuildRequires:  pkgconfig(libselinux)
+%endif
 BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig(lua)
 BuildRequires:  pkgconfig(ncurses)
@@ -120,6 +140,7 @@ is easy to update packages.  RPM keeps track of all these manipulations
 in a central database. This way it is possible to get an overview of
 all installed packages.  RPM also supports database queries.
 
+%if %{with python}
 %package     -n python-rpm
 Summary:        python binding for RPM
 Provides:       python3-rpm
@@ -128,6 +149,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description -n python-rpm
 Thie package provides python binding for RPM
+%endif
 
 %package        devel
 Summary:        Development files for librpm
@@ -153,7 +175,9 @@ Requires:       binutils
 Requires:       bzip2
 Requires:       coreutils
 Requires:       diffutils
+%if %{with debuginfo}
 Requires:       dwz
+%endif
 Requires:       file
 Requires:       findutils
 Requires:       gawk
@@ -167,12 +191,16 @@ Requires:       grep
 Requires:       make
 Requires:       patch
 Requires:       sed
+%if %{with systemd_macros}
 Requires:       systemd-rpm-macros
+%endif
 Requires:       tar
 Requires:       util-linux
 Requires:       which
 Requires:       xz
+%if %{with debuginfo}
 Requires:       debugedit
+%endif
 Requires:       cpio
 Requires:       file
 
@@ -180,12 +208,14 @@ Requires:       file
 If you want to build a rpm, you need this package. It provides rpmbuild
 and requires some packages that are usually required.
 
+%if %{with plugins}
 %package        plugin-unshare
 Summary:        Rpm plugin for Linux namespace isolation functionality
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    plugin-unshare
 Rpm plugin for Linux namespace isolation functionality.
+%endif
 
 %prep
 %setup -q -n rpm-%{version}
@@ -243,17 +273,24 @@ cmake .. \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DRPM_VENDOR=openruyi \
   -DWITH_ARCHIVE=ON \
+  -DWITH_ACL=%{?with_acl:ON}%{!?with_acl:OFF} \
+  -DWITH_CAP=%{?with_libcap:ON}%{!?with_libcap:OFF} \
+  -DWITH_LIBDW=%{?with_debuginfo:ON}%{!?with_debuginfo:OFF} \
+  -DWITH_LIBELF=ON \
   -DWITH_READLINE=OFF \
-  -DWITH_SELINUX=ON \
+  -DWITH_SELINUX=%{?with_selinux:ON}%{!?with_selinux:OFF} \
   -DWITH_SEQUOIA=OFF \
   -DWITH_LEGACY_OPENPGP=ON \
   -DENABLE_NDB=ON \
-  -DENABLE_BDB_RO=ON \
+  -DENABLE_BDB_RO=%{?with_bdb_ro:ON}%{!?with_bdb_ro:OFF} \
   -DENABLE_SQLITE=OFF \
+  -DENABLE_NLS=%{?with_nls:ON}%{!?with_nls:OFF} \
   -DWITH_AUDIT=OFF \
   -DWITH_DBUS=OFF \
-  -DENABLE_PYTHON=%{?with_python:ON}%{?!with_python:OFF} \
+  -DENABLE_PYTHON=%{?with_python:ON}%{!?with_python:OFF} \
   -DENABLE_TESTSUITE=OFF \
+  -DENABLE_OPENMP=%{?with_openmp:ON}%{!?with_openmp:OFF} \
+  -DENABLE_PLUGINS=%{?with_plugins:ON}%{!?with_plugins:OFF} \
   -D__FIND_DEBUGINFO=%{_prefix}/lib/rpm/find-debuginfo \
   -D__AR:FILEPATH=ar -D__AS:FILEPATH=as \
   -D__CC:FILEPATH=gcc -D__CPP:FILEPATH="gcc -E" -D__CXX:FILEPATH=g++ \
@@ -323,8 +360,10 @@ sed -e '/^%%__systemd_sysusers/s/^/#/' -i %{buildroot}%{_prefix}/lib/rpm/macros
 %files -f %{name}.lang
 %defattr(-,root,root)
 %license       COPYING
+%if %{with plugins}
 %exclude %{_prefix}/lib/rpm/macros.d/macros.transaction_unshare
 %exclude %{_mandir}/man8/rpm-plugin-unshare*
+%endif
        /etc/rpm
        %{_bindir}/gendiff
        %{_bindir}/rpm
@@ -353,7 +392,9 @@ sed -e '/^%%__systemd_sysusers/s/^/#/' -i %{buildroot}%{_prefix}/lib/rpm/macros
        %{_prefix}/lib/rpm/rpmdump
        %{_prefix}/lib/rpm/openruyi
        %{_prefix}/lib/rpm/tgpg
+%if %{with plugins}
        %{_libdir}/rpm-plugins
+%endif
        %{_libdir}/librpm.so.*
        %{_libdir}/librpmio.so.*
        %{_libdir}/librpmsign.so.*
@@ -367,9 +408,11 @@ sed -e '/^%%__systemd_sysusers/s/^/#/' -i %{buildroot}%{_prefix}/lib/rpm/macros
 %dir   %attr(755,root,root) %{_prefix}/src/packages/BUILDROOT
 %dir   %attr(755,root,root) %{_prefix}/src/packages/RPMS/*
 
+%if %{with python}
 %files -n python-rpm
 %license COPYING
 %{_libdir}/python*/*
+%endif
 
 %files build
 %defattr(-,root,root)
@@ -404,10 +447,12 @@ sed -e '/^%%__systemd_sysusers/s/^/#/' -i %{buildroot}%{_prefix}/lib/rpm/macros
 %{_libdir}/cmake/rpm
 %doc %{_docdir}/rpm
 
+%if %{with plugins}
 %files plugin-unshare
 %defattr(-,root,root)
 %{_prefix}/lib/rpm/macros.d/macros.transaction_unshare
 %doc %{_mandir}/man8/rpm-plugin-unshare*
+%endif
 
 %changelog
 %autochangelog

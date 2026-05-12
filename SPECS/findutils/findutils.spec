@@ -1,9 +1,15 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond lang_subpackages 1
+%bcond selinux 1
+%bcond nls 1
+%bcond tests 1
 
 Name:           findutils
 Version:        4.10.0
@@ -12,12 +18,8 @@ Summary:        The GNU versions of find utilities (find and xargs)
 License:        GPL-3.0-or-later
 URL:            https://www.gnu.org/software/findutils/
 VCS:            git:https://https.git.savannah.gnu.org/git/findutils.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:1387e0b67ff247d2abde998f90dfbf70c1491391a59ddfecb8ae698789f0a4f5
 Source0:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-#!RemoteAsset
-Source1:        https://ftpmirror.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
-#!RemoteAsset
-Source2:        https://savannah.gnu.org/project/release-gpgkeys.php?group=%{name}&download=1&file=./%{name}.keyring
 BuildSystem:    autotools
 
 # adds a new option -xautofs to find to not descend into directories on autofs file systems
@@ -25,14 +27,30 @@ Patch0:         findutils-xautofs.patch
 # https://git.savannah.gnu.org/cgit/findutils.git/commit/?id=e5d6eb919b9
 Patch1:         findutils-avoid-crash-system-loop.patch
 
-BuildOption(conf): --libexecdir=%{_libdir}/find
-BuildOption(conf): --localstatedir=%{_localstatedir}/lib
+BuildOption(conf):  --libexecdir=%{_libdir}/find
+BuildOption(conf):  --localstatedir=%{_localstatedir}/lib
+%if %{without selinux}
+BuildOption(conf):  --without-selinux
+%endif
+%if %{without nls}
+BuildOption(conf):  --disable-nls
+%endif
 
 BuildRequires:  automake
+BuildRequires:  texinfo
+
+%if %{with nls}
+BuildRequires:  gettext
+%endif
+
+%if %{with tests}
 # BuildRequire dejagnu for 'runtest' to execute all tests.
 BuildRequires:  dejagnu
-BuildRequires:  texinfo
+%endif
+
+%if %{with selinux}
 BuildRequires:  libselinux-devel
+%endif
 
 Provides:       find = %{version}-%{release}
 
@@ -48,17 +66,29 @@ You should install findutils because it includes tools that are very
 useful for finding things on your system.
 
 %install -a
+: > %{name}.files
 rm -f %{buildroot}%{_infodir}/find-maint*
 
-rm %{buildroot}%{_bindir}/locate
-rm %{buildroot}%{_bindir}/updatedb
-rm -r %{buildroot}%{_libdir}/find
-rm %{buildroot}%{_mandir}/man1/locate.1*
-rm %{buildroot}%{_mandir}/man1/updatedb.1*
-rm %{buildroot}%{_mandir}/man5/locatedb.5*
+rm -f %{buildroot}%{_bindir}/locate
+rm -f %{buildroot}%{_bindir}/updatedb
+rm -rf %{buildroot}%{_libdir}/find
+rm -f %{buildroot}%{_mandir}/man1/locate.1*
+rm -f %{buildroot}%{_mandir}/man1/updatedb.1*
+rm -f %{buildroot}%{_mandir}/man5/locatedb.5*
+%if %{with nls}
+%if %{without lang_subpackages}
+%find_lang %{name}
+cat %{name}.lang >> %{name}.files
+%else
 %find_lang %{name} --generate-subpackages
+%endif
+%endif
 
-%files
+%if %{without tests}
+%check
+%endif
+
+%files -f %{name}.files
 %license COPYING
 %doc AUTHORS NEWS README THANKS TODO
 %{_bindir}/find
@@ -68,4 +98,4 @@ rm %{buildroot}%{_mandir}/man5/locatedb.5*
 %{_mandir}/man1/xargs.1%{?ext_man}
 
 %changelog
-%{?autochangelog}
+%autochangelog

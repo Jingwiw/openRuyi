@@ -1,10 +1,13 @@
 # SPDX-FileCopyrightText: (C) 2025, 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025, 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Xuhai Chang <xuhai.oerv@isrc.iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond tests 1
 
 Name:           abseil-cpp
 Version:        20260107.0
@@ -27,12 +30,14 @@ BuildOption(conf):  -GNinja
 BuildOption(conf):  -DABSL_USE_EXTERNAL_GOOGLETEST:BOOL=ON
 BuildOption(conf):  -DABSL_FIND_GOOGLETEST:BOOL=ON
 BuildOption(conf):  -DABSL_ENABLE_INSTALL:BOOL=ON
-BuildOption(conf):  -DABSL_BUILD_TESTING:BOOL=ON
-BuildOption(conf):  -DABSL_BUILD_TEST_HELPERS:BOOL=ON
+BuildOption(conf):  -DABSL_BUILD_TESTING:BOOL=%{?with_tests:ON}%{!?with_tests:OFF}
+BuildOption(conf):  -DABSL_BUILD_TEST_HELPERS:BOOL=%{?with_tests:ON}%{!?with_tests:OFF}
 BuildOption(conf):  -DCMAKE_BUILD_TYPE:STRING=None
 BuildOption(conf):  -DCMAKE_CXX_STANDARD:STRING=17
+%if %{with tests}
 # TODO: Exclude flaky test. https://github.com/abseil/abseil-cpp/issues/1804
 BuildOption(check):  --exclude-regex absl_failure_signal_handler_test
+%endif
 
 # The contents of absl/time/internal/cctz are derived from
 # https://github.com/google/cctz (https://src.fedoraproject.org/rpms/cctz), but
@@ -61,6 +66,7 @@ Abseil is not meant to be a competitor to the standard library; we've just
 found that many of these utilities serve a purpose within our code base,
 and we now want to provide those resources to the C++ community as a whole.
 
+%if %{with tests}
 %package        testing
 Summary:        Libraries needed for running tests on the installed %{name}
 Requires:       %{name} = %{version}-%{release}
@@ -69,11 +75,14 @@ Provides:       bundled(cctz)
 
 %description    testing
 %{summary}.
+%endif
 
 %package        devel
 Summary:        Development files for %{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
+%if %{with tests}
 Requires:       %{name}-testing = %{version}-%{release}
+%endif
 
 # Some of the headers from CCTZ are part of the -devel subpackage. See the
 # corresponding virtual Provides in the base package for full details.
@@ -180,6 +189,7 @@ Development headers for %{name}
 %{_libdir}/libabsl_utf8_for_code_point.so.%{lib_version}
 %{_libdir}/libabsl_vlog_config_internal.so.%{lib_version}
 
+%if %{with tests}
 %files testing
 # TESTONLY libraries (that are actually installed):
 # absl/base/CMakeLists.txt
@@ -204,6 +214,7 @@ Development headers for %{name}
 %{_libdir}/libabsl_per_thread_sem_test_common.so.%{lib_version}
 # absl/time/CMakeLists.txt
 %{_libdir}/libabsl_time_internal_test_util.so.%{lib_version}
+%endif
 
 %files devel
 %{_includedir}/absl

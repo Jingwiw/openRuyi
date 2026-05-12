@@ -1,9 +1,14 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond seccomp 1
+%bcond compression 1
+%bcond autoreconf 1
 
 Name:           file
 Version:        5.46
@@ -12,19 +17,54 @@ Summary:        A Tool to Determine File Types
 License:        BSD-2-Clause
 URL:            http://www.darwinsys.com/file/
 VCS:            git:https://github.com/file/file
-#!RemoteAsset
+#!RemoteAsset:  sha256:c9cc77c7c560c543135edc555af609d5619dbef011997e988ce40a3d75d86088
 Source0:        https://www.astron.com/pub/file/file-%{version}.tar.gz
-#!RemoteAsset
-Source1:        https://www.astron.com/pub/file/file-%{version}.tar.gz.asc
-Buildsystem:    autotools
+BuildSystem:    autotools
 
 BuildOption(conf):  --disable-silent-rules
 BuildOption(conf):  --enable-fsect-man5
 
-BuildRequires:  bash
-BuildRequires:  libtool
-BuildRequires:  autoconf
+%if %{with seccomp}
+BuildOption(conf):  --enable-libseccomp
+%else
+BuildOption(conf):  --disable-libseccomp
+%endif
+
+%if %{with compression}
+BuildOption(conf):  --enable-zlib
+BuildOption(conf):  --enable-bzlib
+BuildOption(conf):  --enable-xzlib
+BuildOption(conf):  --enable-zstdlib
+BuildOption(conf):  --disable-lzlib
+BuildOption(conf):  --disable-lrziplib
+%else
+BuildOption(conf):  --disable-zlib
+BuildOption(conf):  --disable-bzlib
+BuildOption(conf):  --disable-xzlib
+BuildOption(conf):  --disable-zstdlib
+BuildOption(conf):  --disable-lzlib
+BuildOption(conf):  --disable-lrziplib
+%endif
+
 BuildRequires:  make
+BuildRequires:  gcc
+
+%if %{with autoreconf}
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
+%endif
+
+%if %{with seccomp}
+BuildRequires:  pkgconfig(libseccomp)
+%endif
+
+%if %{with compression}
+BuildRequires:  pkgconfig(zlib)
+BuildRequires:  pkgconfig(bzip2)
+BuildRequires:  pkgconfig(liblzma)
+BuildRequires:  pkgconfig(libzstd)
+%endif
 
 %description
 With the file command, you can obtain information on the file type of a
@@ -42,7 +82,12 @@ This package contains all necessary include files and libraries needed
 to develop applications that require the magic "file" interface.
 
 %conf -p
+%if %{with autoreconf}
 autoreconf -fiv
+%endif
+
+%install -a
+rm -f %{buildroot}%{_libdir}/libmagic.la
 
 %files
 %defattr (-,root,root)
@@ -65,4 +110,4 @@ autoreconf -fiv
 %doc README.DEVELOPER AUTHORS NEWS ChangeLog
 
 %changelog
-%{?autochangelog}
+%autochangelog

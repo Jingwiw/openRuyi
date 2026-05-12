@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 # SPDX-FileContributor: laokz <zhangkai@iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
@@ -10,7 +11,9 @@
 # provided by binutils.
 %global _lto_cflags %{nil}
 
-%bcond bootstrap 1
+%bcond alternatives 1
+%bcond debuginfod 1
+%bcond tests 1
 
 Name:           binutils
 Summary:        GNU Binutils
@@ -42,16 +45,20 @@ BuildOption(build):  -C build-dir
 
 BuildRequires:  gcc-c++
 BuildRequires:  bison
-BuildRequires:  dejagnu
 BuildRequires:  flex
-# for the testsuite
-BuildRequires:  glibc-static
 BuildRequires:  texinfo
-BuildRequires:  zlib-ng-compat-static
 BuildRequires:  pkgconfig(libzstd)
+BuildRequires:  pkgconfig(zlib)
+%if %{with tests}
+BuildRequires:  glibc-static
+BuildRequires:  zlib-ng-compat-static
+BuildRequires:  dejagnu
+%endif
 
+%if %{with alternatives}
 Requires(post):  update-alternatives
 Requires(preun):  update-alternatives
+%endif
 
 %description
 C compiler utilities: ar, as, gprof, ld, nm, objcopy, objdump, ranlib,
@@ -87,8 +94,11 @@ cd build-dir
     --enable-compressed-debug-sections=all \
       --enable-shared \
       --enable-lto \
-%if %{with bootstrap} && 0%{?do_profiling}
+%if 0%{?do_profiling}
       --enable-pgo-build=lto \
+%endif
+%if %{without debuginfod}
+      --without-debuginfod \
 %endif
       --disable-gprofng \
       --enable-colored-disassembly \
@@ -105,9 +115,13 @@ if [ ! -f "%{buildroot}/%{_bindir}/ld.bfd" ]; then
 else
   rm -f "%{buildroot}/%{_bindir}/ld";
 fi
+%if %{with alternatives}
 mkdir -p "%{buildroot}/%{_sysconfdir}/alternatives";
 # Keep older versions of brp-symlink happy
 ln -s "%{_sysconfdir}/alternatives/ld" "%{buildroot}/%{_bindir}/ld";
+%else
+ln -s "ld.bfd" "%{buildroot}/%{_bindir}/ld";
+%endif
 
 chmod a+x %{buildroot}%{_libdir}/libbfd-*
 chmod a+x %{buildroot}%{_libdir}/libopcodes-*
@@ -121,6 +135,7 @@ cd ..
 %find_lang %{name} --all-name --generate-subpackages
 
 %check
+%if %{with tests}
 # Drop upstream-known pr19719 tests pending ld/32983.
 # https://sourceware.org/bugzilla/show_bug.cgi?id=32983
 sed -i '/"pr19719/d' ld/testsuite/ld-elf/shared.exp
@@ -138,7 +153,9 @@ make RUNTESTFLAGS='TEST_TIMEOUT=600' check || {
   find . -name '*.log' -exec grep -HnE -C 5 "$dejagnu_log_regex" {} + || :
   exit $rc
 }
+%endif
 
+%if %{with alternatives}
 %post
 if [ "$1" = 1 ]; then
 update-alternatives --install %{_bindir}/ld ld %{_bindir}/ld.bfd 2
@@ -148,6 +165,7 @@ fi
 if [ "$1" = 0 ]; then
      update-alternatives --remove ld %{_bindir}/ld.bfd
 fi;
+%endif
 
 %files
 %defattr(-,root,root)
@@ -161,7 +179,9 @@ fi;
 %dir %{_libdir}/bfd-plugins
 %{_libdir}/bfd-plugins/libdep.so
 %{_bindir}/*
+%if %{with alternatives}
 %ghost %{_sysconfdir}/alternatives/ld
+%endif
 %doc %{_infodir}/*.gz
 %{_libdir}/lib*-%{version}*.so
 %doc %{_mandir}/man1/*.1.gz

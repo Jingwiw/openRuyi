@@ -186,8 +186,8 @@ find %{buildroot}%{_libdir}/cmake -type d | sed -e 's!^%{buildroot}!%%dir "!g' -
 # remove unnecessary emacs lisp files
 rm -rf %{buildroot}%{_datadir}/emacs
 
-%if %{with tests}
 %check
+%if %{with tests}
 # Requires network access to run some tests, so exclude them
 NO_TEST="CTestTestUpload"
 # Exclude CPack component tests
@@ -207,6 +207,8 @@ bin/ctest %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
 %else
 build-dir/bin/ctest %{?_smp_mflags} -V -E "$NO_TEST" --output-on-failure
 %endif
+%else
+:
 %endif
 
 %files

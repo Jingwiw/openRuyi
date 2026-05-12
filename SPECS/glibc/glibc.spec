@@ -53,6 +53,7 @@ Source4:        nscd.sysusers
 Patch2000:      glibc-2.4-china.diff
 
 BuildRequires:  bison
+BuildRequires:  binutils
 BuildRequires:  texinfo
 BuildRequires:  python3
 %if %{with nscd}
@@ -234,7 +235,7 @@ cd build-%{_target_cpu}
 
 ../configure \
     CFLAGS="$BuildFlags" BUILD_CFLAGS="$BuildFlags" \
-    CC="%__cc" CXX="%__cxx" \
+    CC="%__cc -fuse-ld=bfd" CXX="%__cxx -fuse-ld=bfd" LD="ld.bfd" \
     --prefix=%{_prefix} \
     --libexecdir=%{_libexecdir} \
     --infodir=%{_infodir} \

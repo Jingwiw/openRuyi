@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: (C) 2025 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 # SPDX-FileContributor: Zheng Junjie <zhengjunjie@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
+
+%bcond lto 1
 
 %define gcc_version 15
 %define gcc_suffix 15
@@ -199,7 +202,10 @@ mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/packages/gcc-objc/
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/packages/gcc-obj-c++/
 # Link all the binaries
 for program in \
-        gcc gcov gcov-dump gcov-tool lto-dump \
+        gcc gcov gcov-dump gcov-tool \
+%if %{with lto}
+        lto-dump \
+%endif
         g++ \
         cpp \
         gfortran \
@@ -221,7 +227,10 @@ ln -sf %{_sysconfdir}/alternatives/go %{buildroot}%{_bindir}/go
 ln -sf %{_sysconfdir}/alternatives/gofmt %{buildroot}%{_bindir}/gofmt
 # Link section 1 manpages
 for man1 in \
-        gcc gcov gcov-dump gcov-tool lto-dump \
+        gcc gcov gcov-dump gcov-tool \
+%if %{with lto}
+        lto-dump \
+%endif
         g++ \
         cpp \
         gfortran \
@@ -244,8 +253,10 @@ ln -sf gcc-%{gcc_suffix} $RPM_BUILD_ROOT%{_prefix}/bin/cc
 ln -sf g++-%{gcc_suffix}.1.gz $RPM_BUILD_ROOT%{_mandir}/man1/c++.1.gz
 ln -sf gcc-%{gcc_suffix}.1.gz $RPM_BUILD_ROOT%{_mandir}/man1/cc.1.gz
 # Install the LTO linker plugin so it is auto-loaded by BFD
+%if %{with lto}
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/bfd-plugins
 ln -s `gcc-%{gcc_suffix} -print-file-name=liblto_plugin.so` $RPM_BUILD_ROOT%{_libdir}/bfd-plugins/liblto_plugin.so
+%endif
 
 %post -n gcc-go
 # we don't want a BuildRequires on gccN-go but otherwise the install
@@ -268,18 +279,24 @@ fi
 %{_prefix}/bin/gcov
 %{_prefix}/bin/gcov-dump
 %{_prefix}/bin/gcov-tool
+%if %{with lto}
 %{_prefix}/bin/lto-dump
+%endif
 %{_prefix}/bin/gcc-ar
 %{_prefix}/bin/gcc-nm
 %{_prefix}/bin/gcc-ranlib
+%if %{with lto}
 %dir %{_libdir}/bfd-plugins
 %{_libdir}/bfd-plugins/liblto_plugin.so
+%endif
 %doc %{_mandir}/man1/gcc.1.gz
 %doc %{_mandir}/man1/cc.1.gz
 %doc %{_mandir}/man1/gcov.1.gz
 %doc %{_mandir}/man1/gcov-dump.1.gz
 %doc %{_mandir}/man1/gcov-tool.1.gz
+%if %{with lto}
 %doc %{_mandir}/man1/lto-dump.1.gz
+%endif
 
 %files -n cpp
 %defattr(-,root,root)
@@ -364,4 +381,4 @@ fi
 %defattr(-,root,root)
 
 %changelog
-%{?autochangelog}
+%autochangelog

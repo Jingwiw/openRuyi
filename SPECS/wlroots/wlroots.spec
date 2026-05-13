@@ -17,6 +17,9 @@ URL:            https://gitlab.freedesktop.org/wlroots/wlroots
 Source0:        https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/%{version}/wlroots-%{version}.tar.gz
 BuildSystem:    meson
 
+# Fixes labwc launching issue on vmwgfx
+Patch0:         0001-render-egl-try-GBM-platform-if-device-platform-fails.patch
+
 BuildOption(conf):  -Dexamples=false
 BuildOption(conf):  -Dxwayland=disabled
 BuildOption(conf):  -Dbackends=drm,libinput

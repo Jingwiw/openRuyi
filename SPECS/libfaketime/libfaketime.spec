@@ -20,6 +20,7 @@ Source:         https://github.com/wolfcw/libfaketime/archive/refs/tags/v%{versi
 BuildSystem:    autotools
 
 Patch0:         0001-Add-const-qualifiers-to-fix-build-with-ISO-C23.patch
+Patch1:         0002-tests-Silence-an-unused-but-set-variable-warning-with-GCC16.patch
 
 BuildOption(build):  PREFIX=%{_prefix}
 BuildOption(build):  LIBDIRNAME=%{_libdir}/%{name}

@@ -5,10 +5,10 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%global gitver 50.0
+%global gitver 51.0
 %global gitnum 0
 
-%global obs_packaging_commit 485cd738c50d7be666e2d15ebb57cf029fcc3dd4
+%global obs_packaging_commit 29a097e3e793e0f88053fa9b090a15c1333aa2cc
 
 Name:           cloud-hypervisor
 Url:            https://github.com/cloud-hypervisor/cloud-hypervisor
@@ -16,11 +16,11 @@ Summary:        Cloud Hypervisor is a Virtual Machine Monitor (VMM) that runs on
 Version:        %{gitver}.%{gitnum}
 Release:        %autorelease
 License:        ASL 2.0 or BSD-3-clause
-#!RemoteAsset
+#!RemoteAsset:  sha256:66e2a1b45d1463aab22d763c02bbf8fff5a4c9833c4612a0b717867cd1ebdbbc
 Source0:        https://github.com/cloud-hypervisor/obs-packaging/raw/%{obs_packaging_commit}/cloud-hypervisor/src/%{name}-%{version}.tar.gz
-#!RemoteAsset
+#!RemoteAsset:  sha256:47e97b583ab92503cd588c38ecc92d4fd217012a97ab0748709e16b791bdee65
 Source1:        https://github.com/cloud-hypervisor/obs-packaging/raw/%{obs_packaging_commit}/cloud-hypervisor/src/%{name}-%{version}-vendor.tar.gz
-#!RemoteAsset
+#!RemoteAsset:  sha256:9ffccf72f43efaa6e6434be68da53e7ad6ffbe332149f44a4d99405d58da1dc2
 Source2:        https://github.com/cloud-hypervisor/obs-packaging/raw/%{obs_packaging_commit}/cloud-hypervisor/src/config.toml
 
 BuildRequires:  gcc
@@ -104,4 +104,4 @@ install -D -m755 target/%{rust_def_target}/release/vhost_user_net %{buildroot}%{
 %license LICENSES/CC-BY-4.0.txt
 
 %changelog
-%{?autochangelog}
+%autochangelog

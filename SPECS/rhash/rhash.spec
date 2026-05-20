@@ -42,6 +42,7 @@ Program features:
 
 %package        devel
 Summary:        Headers and Static Library for LibRHash
+Requires:       %{name}%{?_isa} = %{version}-%{release}
 
 %description    devel
 LibRHash is a professional, portable, thread-safe C library for

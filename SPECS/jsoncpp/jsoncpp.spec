@@ -15,6 +15,7 @@ URL:            https://github.com/open-source-parsers/jsoncpp
 #!RemoteAsset:  sha256:830bf352d822d8558e9d0eb19d640d2e38536b4b6699c30a4488da09d5b1df18
 Source0:        https://github.com/open-source-parsers/%{name}/archive/refs/tags/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildSystem:    meson
+BuildOption(conf):  -Dcpp_std=c++17
 
 BuildRequires:  gcc-c++
 BuildRequires:  meson

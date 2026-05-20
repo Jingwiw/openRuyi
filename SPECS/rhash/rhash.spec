@@ -19,6 +19,7 @@ BuildSystem:    autotools
 BuildOption(prep):  -n RHash-%{version}
 BuildOption(install):  install-lib-so-link
 BuildOption(install):  install-lib-headers
+BuildOption(install):  install-pkg-config
 BuildOption(install):  install-gmo
 
 BuildRequires:  pkgconfig
@@ -104,6 +105,7 @@ sed -i "s|-fomit-frame-pointer|%{optflags}|g" configure
 %{_includedir}/rhash.h
 %{_includedir}/rhash_torrent.h
 %{_libdir}/librhash.so
+%{_libdir}/pkgconfig/librhash.pc
 
 %changelog
 %autochangelog

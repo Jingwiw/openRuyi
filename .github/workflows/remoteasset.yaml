@@ -26,23 +26,28 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        sudo apt install -y rpm curl util-linux util-linux-extra
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends rpm curl util-linux util-linux-extra
 
     - uses: actions/checkout@v6
       with:
-        fetch-depth: 2
+        fetch-depth: 0
 
     - name: Find changed remote assets
       id: find-changed
       run: |
-        git diff --name-only HEAD^1...HEAD 'SPECS/**/*.spec' > changed-files
+        set -euo pipefail
+        git diff --name-only -z --diff-filter=ACMRT HEAD^1 HEAD -- 'SPECS/**/*.spec' > changed-files
 
         touch changed-remoteassets
 
-        while IFS= read -r file; do
+        while IFS= read -r -d '' file; do
           [ -f "$file" ] || continue
 
           echo "::group::Processing $file" >&2
+          # The pull_request checkout is the synthetic merge commit; compare it
+          # with its first parent so the file list and contents share one view.
           if git cat-file -e "HEAD^1:$file" ; then
             # Changed file
             git cat-file blob "HEAD^1:$file" | scripts/remoteassetify.py --unsafe-optional-enosys --dry-run > old.tmp
@@ -57,21 +62,24 @@ jobs:
           echo "::endgroup::" >&2
         done < changed-files
 
-        num_changed="$(wc -l < changed-remoteassets)"
-        echo "num=$num_changed" > "$GITHUB_OUTPUT"
+        num_changed="$(wc -l < changed-remoteassets | tr -d ' ')"
+        echo "num=$num_changed" >> "$GITHUB_OUTPUT"
 
-        echo "# Specs with changed remote assets" >> "$GITHUB_STEP_SUMMARY"
-        echo "" >> "$GITHUB_STEP_SUMMARY"
-        sed -e 's/^/    /' changed-remoteassets >> "$GITHUB_STEP_SUMMARY"
-        if [ "$num_changed" -eq 0 ]; then
-          echo "*(None)*" >> "$GITHUB_STEP_SUMMARY"
-        fi
-        echo "" >> "$GITHUB_STEP_SUMMARY"
+        {
+          echo "# Specs with changed remote assets"
+          echo ""
+          sed -e 's/^/    /' changed-remoteassets
+          if [ "$num_changed" -eq 0 ]; then
+            echo "*(None)*"
+          fi
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
 
     - name: Check remote assets
       id: check-changed
       if: steps.find-changed.outputs.num != '0'
       run: |
+        set -euo pipefail
         touch needs-update changes.diff
 
         while IFS= read -r file; do
@@ -80,28 +88,33 @@ jobs:
           echo "::endgroup::" >&2
         done < changed-remoteassets
 
-        num_needs_update="$(wc -l < needs-update)"
-        echo "num=$num_needs_update" > "$GITHUB_OUTPUT"
+        num_needs_update="$(wc -l < needs-update | tr -d ' ')"
+        echo "num=$num_needs_update" >> "$GITHUB_OUTPUT"
 
-        echo "# Specs requiring update" >> "$GITHUB_STEP_SUMMARY"
-        echo "" >> "$GITHUB_STEP_SUMMARY"
-        sed -e 's/^/    /' needs-update >> "$GITHUB_STEP_SUMMARY"
-        if [ "$num_needs_update" -eq 0 ]; then
-          echo "*(None)*" >> "$GITHUB_STEP_SUMMARY"
-        fi
-        echo "" >> "$GITHUB_STEP_SUMMARY"
+        {
+          echo "# Specs requiring update"
+          echo ""
+          sed -e 's/^/    /' needs-update
+          if [ "$num_needs_update" -eq 0 ]; then
+            echo "*(None)*"
+          fi
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
 
         mv changes.diff "pr-${{ github.event.pull_request.number }}-remoteassets.diff"
 
     - name: Print patch
       if: steps.check-changed.outputs.num != '0'
       run: |
-        echo "# Patch" >> "$GITHUB_STEP_SUMMARY"
-        echo "" >> "$GITHUB_STEP_SUMMARY"
-        echo '```diff' >> "$GITHUB_STEP_SUMMARY"
-        cat "pr-${{ github.event.pull_request.number }}-remoteassets.diff" >> "$GITHUB_STEP_SUMMARY"
-        echo '```' >> "$GITHUB_STEP_SUMMARY"
-        echo "" >> "$GITHUB_STEP_SUMMARY"
+        set -euo pipefail
+        {
+          echo "# Patch"
+          echo ""
+          echo '```diff'
+          cat "pr-${{ github.event.pull_request.number }}-remoteassets.diff"
+          echo '```'
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
 
     - uses: actions/upload-artifact@v7
       if: steps.check-changed.outputs.num != '0'
@@ -112,6 +125,7 @@ jobs:
     - name: Fail if update required
       if: steps.check-changed.outputs.num != '0'
       run: |
+        set -euo pipefail
         url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         echo "::error::Updates required for some #!RemoteAsset lines. Please see $url"
         exit 1

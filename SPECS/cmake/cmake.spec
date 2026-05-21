@@ -30,6 +30,10 @@ BuildOption(conf):  -DCMAKE_DOC_DIR=share/doc/cmake
 BuildOption(conf):  -DCMAKE_MAN_DIR=share/man
 BuildOption(conf):  -DCMAKE_USE_SYSTEM_LIBRARIES=ON
 BuildOption(conf):  -DCMAKE_USE_SYSTEM_LIBRARY_CPPDAP=OFF
+# Keep CPPDAP and JsonCpp on the same vendored API boundary.
+BuildOption(conf):  -DCMAKE_USE_SYSTEM_LIBRARY_JSONCPP=OFF
+BuildOption(conf):  -DCMAKE_USE_SYSTEM_LIBRARY_CURL=OFF
+BuildOption(conf):  -DCMAKE_USE_SYSTEM_LIBRARY_NGHTTP2=OFF
 BuildOption(conf):  -DCMAKE_USE_OPENSSL=ON
 BuildOption(conf):  -DBUILD_CursesDialog=OFF
 %if %{with tests}
@@ -52,13 +56,11 @@ BuildRequires:  cmake
 BuildRequires:  pkgconfig(bzip2)
 BuildRequires:  pkgconfig(expat)
 BuildRequires:  pkgconfig(libarchive)
-BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  pkgconfig(libuv)
 BuildRequires:  pkgconfig(liblzma)
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig(openssl)
-BuildRequires:  pkgconfig(jsoncpp)
 BuildRequires:  pkgconfig(librhash)
 %endif
 

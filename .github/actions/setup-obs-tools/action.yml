@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
+# SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+#
+# SPDX-License-Identifier: MulanPSL-2.0
+
+name: Setup OBS tools
+description: Install osc and obs-build from the openSUSE Tools repository.
+
+runs:
+  using: composite
+  steps:
+    - name: Configure openSUSE Tools repository
+      shell: bash
+      run: |
+        set -euo pipefail
+        . /etc/os-release
+        if [ "${ID:-}" != "ubuntu" ] || [ -z "${VERSION_ID:-}" ]; then
+          echo "::error::setup-obs-tools requires an Ubuntu runner with VERSION_ID" >&2
+          exit 1
+        fi
+        obs_repo="xUbuntu_${VERSION_ID}"
+        sudo install -d -m 0755 /etc/apt/keyrings
+        curl -fsSL "https://download.opensuse.org/repositories/openSUSE:/Tools/${obs_repo}/Release.key" \
+          | sudo gpg --dearmor -o /etc/apt/keyrings/obs-tools.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/obs-tools.gpg] https://download.opensuse.org/repositories/openSUSE:/Tools/${obs_repo}/ /" \
+          | sudo tee /etc/apt/sources.list.d/obs-tools.list > /dev/null
+
+    - name: Install OBS tools
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends osc obs-build libwww-perl libxml-parser-perl

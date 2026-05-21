@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
       with:
@@ -45,10 +45,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-
     - name: Install tools
-      run: |
-        echo "deb http://download.opensuse.org/repositories/openSUSE:/Tools/xUbuntu_24.04/ /" | sudo tee /etc/apt/sources.list.d/obs.list
-        wget -qO - http://download.opensuse.org/repositories/openSUSE:/Tools/xUbuntu_24.04/Release.key | sudo apt-key add -
-        sudo apt update && sudo apt install osc obs-build libwww-perl libxml-parser-perl -y
+      uses: ./.github/actions/setup-obs-tools
     - name: apply pbuild patch
       run: |
         sudo patch --directory=/usr/lib/build --strip=1 -i $(pwd)/.github/build/pbuild.patch

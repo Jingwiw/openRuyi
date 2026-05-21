@@ -29,53 +29,84 @@ jobs:
         fetch-depth: 0
     - name: get changed files
       id: changed-files
-      uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
-      with:
-        files_yaml: |
-          specs:
-            - SPECS/**
+      run: |
+        set -euo pipefail
+        git diff --name-only -z --diff-filter=ACMRT HEAD^1 HEAD -- 'SPECS/**' > changed-spec-files
+
+        # pbuild's onlybuild flag works at package granularity; collapse the
+        # file list first so multi-file changes do not duplicate work.
+        : > changed-packages.raw
+        while IFS= read -r -d '' file; do
+          case "$file" in
+            SPECS/*/*)
+              package="${file#SPECS/}"
+              package="${package%%/*}"
+              printf '%s\0' "$package" >> changed-packages.raw
+              ;;
+            SPECS/*)
+              echo "::error::Cannot map top-level SPECS path to one package: $file"
+              exit 1
+              ;;
+          esac
+        done < changed-spec-files
+        sort -zu changed-packages.raw > changed-packages
+
+        if [ -s changed-packages ]; then
+          echo "specs_any_changed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "specs_any_changed=false" >> "$GITHUB_OUTPUT"
+        fi
     - name: cache
       id:   cache
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
       uses: actions/cache@v5
       with:
         path: |
           SPECS/.pbuild
           SPECS/_build.x86_64
-        key: ${{ runner.os }}-${{ hashFiles('.github/build/_config') }}
+        key: ${{ runner.os }}-pbuild-${{ hashFiles('.github/build/_config', '.github/build/_pbuild', '.github/build/pbuild.patch') }}
         restore-keys: |
-          ${{ runner.os }}-
+          ${{ runner.os }}-pbuild-
     - name: Install tools
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
       uses: ./.github/actions/setup-obs-tools
     - name: apply pbuild patch
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
       run: |
-        sudo patch --directory=/usr/lib/build --strip=1 -i $(pwd)/.github/build/pbuild.patch
+        set -euo pipefail
+        sudo patch --directory=/usr/lib/build --strip=1 -i "$PWD/.github/build/pbuild.patch"
     - name: Limit the number of compilations
       if: steps.changed-files.outputs.specs_any_changed == 'true'
       run: |
-        set -x
-        all_file="${{ steps.changed-files.outputs.specs_all_changed_files }}"
-        for i in $all_file; do
-         p=$(basename $(dirname $i))
-         echo $p
-         echo "BuildFlags: onlybuild:$p" >> ./.github/build/_config
-        done
+        set -euo pipefail
+        while IFS= read -r -d '' p; do
+          echo "$p"
+          echo "BuildFlags: onlybuild:$p" >> ./.github/build/_config
+        done < changed-packages
     - name: Build package(s)
-      run: (cp .github/build/* SPECS && cd SPECS && (sudo pbuild --vm-type=chroot --preset x86_64 --showlog --root=/tmp/b || (sudo pbuild --preset x86_64 --result && exit 1)))
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
+      run: |
+        set -euo pipefail
+        cp .github/build/* SPECS
+        cd SPECS
+        if ! sudo pbuild --vm-type=chroot --preset x86_64 --showlog --root=/tmp/b; then
+          sudo pbuild --preset x86_64 --result
+          exit 1
+        fi
     - name: get result
       id: result
       if: steps.changed-files.outputs.specs_any_changed == 'true'
       run: |
-        set -x
-        all_file="${{ steps.changed-files.outputs.specs_all_changed_files }}"
+        set -euo pipefail
         {
           echo 'paths<<EOF'
-          for i in $all_file; do
-           p=$(basename $(dirname $i))
-           echo "SPECS/_build.x86_64/$p"
-          done
+          while IFS= read -r -d '' p; do
+            echo "SPECS/_build.x86_64/$p"
+          done < changed-packages
           echo 'EOF'
         } >> "$GITHUB_OUTPUT"
     - uses: actions/upload-artifact@v7
+      if: steps.changed-files.outputs.specs_any_changed == 'true'
       with:
        name: PR${{ github.event.pull_request.number }}-build-packages-results
        path: ${{ steps.result.outputs.paths }}

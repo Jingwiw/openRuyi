@@ -59,7 +59,7 @@ BuildRequires:  pkgconfig(zlib)
 BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(jsoncpp)
-BuildRequires:  rhash-devel
+BuildRequires:  pkgconfig(librhash)
 %endif
 
 %if %{with tests}

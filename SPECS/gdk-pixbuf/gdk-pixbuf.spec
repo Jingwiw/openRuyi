@@ -21,7 +21,10 @@ BuildOption(conf):  -Dgtk_doc=true
 BuildOption(conf):  -Dman=true
 BuildOption(conf):  -Dothers=enabled
 BuildOption(conf):  -Dandroid=disabled
+# TODO: Package glycin and switch to the upstream glycin-backed loader path.
 BuildOption(conf):  -Dglycin=disabled
+# Keep build-time image sniffing independent of the system MIME database.
+BuildOption(conf):  -Dgio_sniffing=false
 
 BuildRequires:  docbook-xsl
 BuildRequires:  gettext

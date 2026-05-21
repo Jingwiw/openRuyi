@@ -5,13 +5,17 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 name: update package to obs
+
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
     paths:
      - 'SPECS/**'
 concurrency:
-  group: update_package
+  group: ${{ github.workflow }}-${{ github.ref }}
   queue: max
   cancel-in-progress: false
 
@@ -25,17 +29,21 @@ jobs:
     - name: Install tools
       uses: ./.github/actions/setup-obs-tools
     - name: Setup osc config
+      env:
+        OSC_PASSWORD: ${{ secrets.BOT }}
       run: |
-        set -x
-        mkdir -p ~/.config/osc
+        set -euo pipefail
+        install -d -m 700 ~/.config/osc
         cat > ~/.config/osc/oscrc <<EOF
         [general]
         apiurl = https://build.openruyi.cn
         [https://build.openruyi.cn]
-        pass = ${{ secrets.BOT }}
+        pass = ${OSC_PASSWORD}
         user = a-bot
         credentials_mgr_class=osc.credentials.PlaintextConfigFileCredentialsManager
         EOF
+        chmod 600 ~/.config/osc/oscrc
     - name: run script
       run: |
-        ./scripts/update-package ${{ github.event.before }} ${{ github.sha }}
+        set -euo pipefail
+        ./scripts/update-package "${{ github.event.before }}" "${{ github.sha }}"

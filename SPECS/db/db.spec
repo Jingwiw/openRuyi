@@ -15,7 +15,7 @@ Summary:        The Berkeley DB database library for C
 License:        BSD-3-Clause AND LGPL-2.1-only AND Sleepycat
 URL:            https://www.oracle.com/database/berkeley-db/
 # VCS: This package does not have a VCS link
-#!RemoteAsset
+#!RemoteAsset:  sha256:a9c5e2b004a5777aa03510cfe5cd766a4a3b777713406b02809c17c8e0e7a8fb
 Source0:        https://download.oracle.com/berkeley-db/db-%{version}.tar.gz
 # I really don't want to use autotools here
 
@@ -167,4 +167,4 @@ mv examples docs
 %{_bindir}/db*_tuner
 
 %changelog
-%{?autochangelog}
+%autochangelog

@@ -26,6 +26,9 @@ BuildRequires:  chrpath
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  gdbm-devel
 BuildRequires:  pkgconfig(lmdb)
+%if %{with tcl}
+BuildRequires:  pkgconfig(tcl)
+%endif
 
 %description
 The Berkeley Database (Berkeley DB) is a programmatic toolkit that

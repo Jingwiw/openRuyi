@@ -1,0 +1,26 @@
+# Packages whose changes justify rebuilding the slim KIWI validation image.
+NetworkManager
+authselect
+bash
+ca-certificates
+cracklib
+glibc
+grub
+kiwi
+libpwquality
+lvm2
+linux
+openresolv
+openruyi-release
+openruyi-repos
+openruyi-systemd-default-preset
+openssh
+pam
+setup
+shadow
+sudo
+system-user-root
+systemd
+util-linux
+which
+xfsprogs

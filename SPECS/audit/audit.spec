@@ -20,6 +20,7 @@ BuildSystem:    autotools
 
 BuildOption(conf):  --libexecdir=%{_libexecdir}/%{name}
 BuildOption(conf):  --with-apparmor
+BuildOption(conf):  --with-riscv
 BuildOption(conf):  --with-libcap-ng=no
 BuildOption(conf):  --disable-static
 BuildOption(conf):  --with-python3=no

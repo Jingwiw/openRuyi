@@ -26,8 +26,10 @@ BuildOption(conf):  --with-python3=no
 BuildOption(conf):  --disable-zos-remote
 
 BuildRequires:  autoconf >= 2.50
-BuildRequires:  linux-headers >= 5.15
+BuildRequires:  automake
 BuildRequires:  libtool
+BuildRequires:  linux-headers >= 5.15
+BuildRequires:  make
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(bash-completion)
 
@@ -54,20 +56,28 @@ export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,-z,relro,-z,now"
 
 %install -a
-rm -rf %{buildroot}/%{_mandir}/man[578]
-mkdir -p %{buildroot}/%{_mandir}/man5
-install -m 0644 docs/libaudit.conf.5 %{buildroot}/%{_mandir}/man5
+rm -rf %{buildroot}%{_mandir}/man[578]
+mkdir -p %{buildroot}%{_mandir}/man5
+install -m 0644 docs/libaudit.conf.5 %{buildroot}%{_mandir}/man5
 install -m 0644 init.d/libaudit.conf %{buildroot}%{_sysconfdir}
-install -D -m 0644 ./m4/audit.m4  %{buildroot}%{_datadir}/aclocal/audit.m4
+install -D -m 0644 m4/audit.m4 %{buildroot}%{_datadir}/aclocal/audit.m4
 
 install -d -m 750 %{buildroot}%{_sysconfdir}/audisp/plugins.d
 
 %files
-%license COPYING
+%license COPYING COPYING.LIB
 %{_bindir}/aulast
 %{_bindir}/aulastlog
 %{_bindir}/ausyscall
-%{_sbindir}/*
+%{_sbindir}/audisp-af_unix
+%{_sbindir}/audisp-filter
+%{_sbindir}/audisp-remote
+%{_sbindir}/audisp-syslog
+%{_sbindir}/auditctl
+%{_sbindir}/auditd
+%{_sbindir}/augenrules
+%{_sbindir}/aureport
+%{_sbindir}/ausearch
 # Merged files from libaudit1
 %{_libdir}/libaudit.so.1
 %{_libdir}/libaudit.so.1.*
@@ -90,7 +100,7 @@ install -d -m 750 %{buildroot}%{_sysconfdir}/audisp/plugins.d
 %{bash_completions_dir}/ausearch
 %{bash_completions_dir}/aureport
 %{bash_completions_dir}/augenrules
-%{_mandir}/man*/*
+%{_mandir}/man5/*
 
 %files devel
 %doc contrib/plugin

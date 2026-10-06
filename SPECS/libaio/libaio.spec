@@ -11,10 +11,10 @@ Version:        0.3.113
 Release:        %autorelease
 Summary:        Linux-Native Asynchronous I/O Access Library
 License:        LGPL-2.1-or-later
-URL:            https://pagure.io/libaio
-VCS:            git:https://pagure.io/libaio.git
-#!RemoteAsset
-Source0:        https://releases.pagure.org/libaio/libaio-%{version}.tar.gz
+URL:            https://codeberg.org/jmoyer/libaio
+VCS:            git:https://codeberg.org/jmoyer/libaio.git
+#!RemoteAsset:  sha256:bb4807cc5fd5320242e286be2372597851fa0a23e14d4386cf045d3fcef0d8d9
+Source0:        https://codeberg.org/jmoyer/libaio/archive/libaio-%{version}.tar.gz
 
 # test failing for multilib
 Patch0:         libaio-fix-test-off64_t.patch
@@ -38,6 +38,9 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 This package provides the header files and libraries needed to develop
 applications using the Linux-native asynchronous I/O facility.
+
+%prep
+%autosetup -n %{name} -p1
 
 # No conf
 %conf
@@ -76,4 +79,4 @@ install -p -m 0644 man/*.3 %{buildroot}%{_mandir}/man3/
 %{_mandir}/man3/*
 
 %changelog
-%{?autochangelog}
+%autochangelog

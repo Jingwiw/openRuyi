@@ -58,6 +58,11 @@ Requires:       automake
 This package contains the header files, libraries and utilities necessary
 to write programs that use CORBA technology.
 
+%conf -p
+# A token limit below 1 avoids a large initial allocation and splits all addresses.
+# Also see: https://lists.gnu.org/archive/html/guix-patches/2024-03/msg00554.html
+sed -i 's/g_strsplit (loc, ",", G_MAXINT)/g_strsplit (loc, ",", 0)/' src/orb/orb-core/corba-loc.c
+
 %install -a
 rm -f %{buildroot}%{_libdir}/ORBit-2.0/*.*a
 rm -f %{buildroot}%{_libdir}/orbit-2.0/*.*a

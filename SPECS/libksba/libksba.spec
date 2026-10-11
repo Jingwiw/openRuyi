@@ -7,18 +7,14 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           libksba
-Version:        1.6.7
+Version:        1.8.1
 Release:        %autorelease
 Summary:        A X.509 Library
 License:        (GPL-2.0-or-later OR LGPL-3.0-or-later) AND GPL-3.0-or-later AND MIT
 URL:            https://www.gnupg.org
 VCS:            git:https://git.gnupg.org/libksba.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:c2f84393011827219ae117131dba8e7684c2bed0961eed11b0642c2acba440b5
 Source:         https://gnupg.org/ftp/gcrypt/libksba/%{name}-%{version}.tar.bz2
-#!RemoteAsset
-Source2:        https://gnupg.org/ftp/gcrypt/libksba/%{name}-%{version}.tar.bz2.sig
-#!RemoteAsset
-Source3:        https://gnupg.org/signature_key.asc#/%{name}.keyring
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-static
@@ -60,4 +56,4 @@ autoreconf -vfi
 %{_infodir}/ksba.info%{?ext_info}
 
 %changelog
-%{?autochangelog}
+%autochangelog

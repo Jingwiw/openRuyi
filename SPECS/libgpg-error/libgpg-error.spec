@@ -35,9 +35,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 Files needed for software development using libgpg-error.
 
-%conf -p
-autoreconf -fiv
-
 %install -a
 rm -r %{buildroot}%{_datadir}/common-lisp
 %find_lang %{name} --generate-subpackages

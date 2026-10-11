@@ -6,17 +6,17 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           libgpg-error
-Version:        1.58
+Version:        1.61
 Release:        %autorelease
 Summary:        Library That Defines Common Error Values for All GnuPG Components
 License:        GPL-2.0-or-later AND LGPL-2.1-or-later
 URL:            https://www.gnupg.org/software/libgpg-error/
 VCS:            git:https://git.gnupg.org/libgpg-error.git
-#!RemoteAsset:  sha256:f943aea9a830a8bd938e5124b579efaece24a3225ff4c3d27611a80ce1260c27
+#!RemoteAsset:  sha256:7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93
 Source0:        https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-%{version}.tar.bz2
 BuildSystem:    autotools
 
-BuildOption(conf): --enable-install-gpg-error-config
+BuildOption(conf):  --enable-install-gpg-error-config
 
 BuildRequires:  libtool
 BuildRequires:  pkgconfig
@@ -62,4 +62,4 @@ rm -r %{buildroot}%{_datadir}/common-lisp
 %{_mandir}/man1/gpgrt-config.*
 
 %changelog
-%{?autochangelog}
+%autochangelog

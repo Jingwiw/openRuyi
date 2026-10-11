@@ -18,23 +18,22 @@ Source0:        https://gnupg.org/ftp/gcrypt/gnupg/gnupg-%{version}.tar.bz2
 Source1:        scdaemon.udev
 BuildSystem:    autotools
 
-BuildOption(conf):  --disable-rpath
 BuildOption(conf):  --enable-g13
 BuildOption(conf):  --enable-large-secmem
 BuildOption(conf):  --with-gnu-ld
-BuildOption(conf):  --with-default-trust-store-file=%{_sysconfdir}/ssl/ca-bundle.pem
-BuildOption(conf):  --docdir=%{_docdir}/%{name}
+BuildOption(conf):  --with-default-trust-store-file=%{_sysconfdir}/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 
 BuildRequires:  expect
 BuildRequires:  fdupes
 BuildRequires:  texinfo
 BuildRequires:  pkgconfig(npth)
 BuildRequires:  pkgconfig(ldap)
+BuildRequires:  pkgconfig(libusb-1.0)
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(readline)
-BuildRequires:  pkgconfig(libassuan)
+BuildRequires:  pkgconfig(libassuan) >= 3.0.0
 BuildRequires:  glibc-devel
-BuildRequires:  pkgconfig(libgcrypt)
+BuildRequires:  pkgconfig(libgcrypt) >= 1.12.0
 BuildRequires:  libgpg-error-devel >= 1.56
 BuildRequires:  pkgconfig(ksba)
 BuildRequires:  pkgconfig(bzip2)
@@ -43,6 +42,7 @@ BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(zlib)
 
 Requires:       pinentry
+Requires:       libgcrypt >= 1.12.0
 
 Recommends:     dirmngr = %{version}-%{release}
 
@@ -52,6 +52,8 @@ messages and/or signing and verifying them.
 
 %package     -n dirmngr
 Summary:        Keyserver, CRL, and OCSP access for GnuPG
+Requires:       ca-certificates
+Requires:       libgcrypt >= 1.12.0
 
 %description -n dirmngr
 Dirmngr handles access to OpenPGP keyservers, CRLs, and OCSP providers
@@ -59,7 +61,6 @@ for GnuPG. It is invoked internally by gpg and gpgsm.
 
 %install -a
 install -Dm 0644 %{SOURCE1} %{buildroot}%{_udevrulesdir}/60-scdaemon.rules
-install -d -m 755 %{buildroot}%{_userunitdir}
 
 %find_lang gnupg2 --generate-subpackages
 

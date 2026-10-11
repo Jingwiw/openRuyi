@@ -17,7 +17,7 @@ VCS:            git:https://git.gnupg.org/libgcrypt.git
 Source:         https://gnupg.org/ftp/gcrypt/libgcrypt/%{name}-%{version}.tar.bz2
 BuildSystem:    autotools
 
-BuildRequires:  pkgconfig(gpg-error)
+BuildRequires:  pkgconfig(gpg-error) >= 1.56
 
 %description
 Libgcrypt is a general purpose library of cryptographic building

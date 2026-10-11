@@ -7,16 +7,14 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           libgcrypt
-Version:        1.11.2
+Version:        1.12.4
 Release:        %autorelease
 Summary:        The GNU Crypto Library
 License:        GPL-2.0-or-later AND LGPL-2.1-or-later AND GPL-3.0-or-later
 URL:            https://gnupg.org/software/libgcrypt
 VCS:            git:https://git.gnupg.org/libgcrypt.git
-#!RemoteAsset
+#!RemoteAsset:  sha256:d77f68f48879510e79a2f65977ccc68981781ea0923e5bdffac2a193ea3d660e
 Source:         https://gnupg.org/ftp/gcrypt/libgcrypt/%{name}-%{version}.tar.bz2
-#!RemoteAsset
-Source1:        https://gnupg.org/ftp/gcrypt/libgcrypt/%{name}-%{version}.tar.bz2.sig
 BuildSystem:    autotools
 
 BuildRequires:  pkgconfig(gpg-error)
@@ -59,4 +57,4 @@ library.
 %{_mandir}/man1/*
 
 %changelog
-%{?autochangelog}
+%autochangelog

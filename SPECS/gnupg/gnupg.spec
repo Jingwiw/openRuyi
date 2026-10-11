@@ -7,13 +7,13 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           gnupg
-Version:        2.5.20
+Version:        2.5.24
 Release:        %autorelease
 Summary:        File encryption, decryption, signature creation and verification utility
 License:        GPL-3.0-or-later
 URL:            https://www.gnupg.org
 VCS:            git:https://git.gnupg.org/gnupg.git
-#!RemoteAsset:  sha256:6461266e99c308419a379abe6c356d54c214136c4589bd65951091138989ffc6
+#!RemoteAsset:  sha256:bf149d01a2b9fcc0e4589b8ae8697d3d5c557ea48ed95a3fa55dd3b1187e6039
 Source0:        https://gnupg.org/ftp/gcrypt/gnupg/gnupg-%{version}.tar.bz2
 Source1:        scdaemon.udev
 BuildSystem:    autotools

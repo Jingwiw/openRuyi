@@ -13,13 +13,11 @@ URL:            https://github.com/jackaudio/jack2
 #!RemoteAsset:  sha256:1e42b9fc4ad7db7befd414d45ab2f8a159c0b30fcd6eee452be662298766a849
 Source0:        https://github.com/jackaudio/jack2/archive/refs/tags/v%{version}.tar.gz
 
-# remove the dep of imp.
 Patch0:         0001-remove-imp.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig
 BuildRequires:  python3
-BuildRequires:  make
 BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(expat)
@@ -27,7 +25,16 @@ BuildRequires:  pkgconfig(sndfile)
 BuildRequires:  pkgconfig(ncursesw)
 BuildRequires:  pkgconfig(opus)
 BuildRequires:  doxygen
-BuildRequires:  systemd-rpm-macros
+
+BuildSystem:    waf
+BuildOption(conf):  --mandir=%{_mandir}/man1
+BuildOption(conf):  --doxygen
+BuildOption(conf):  --dbus
+BuildOption(conf):  --classic
+BuildOption(conf):  --alsa
+BuildOption(conf):  --clients=256
+BuildOption(conf):  --ports-per-application=2048
+
 
 %description
 JACK is a low-latency audio server, written primarily for the Linux operating
@@ -43,27 +50,10 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 Header files for the Jack Audio Connection Kit.
 
-%prep
-%autosetup -p1 -n %{name}-%{version}
+%check
+LD_LIBRARY_PATH=%{buildroot}%{_libdir} %{buildroot}%{_bindir}/jackd --version
 
-%conf
-export PREFIX=%{_prefix}
-python3 ./waf configure \
-   --mandir=%{_mandir}/man1 \
-   --libdir=%{_libdir} \
-   --doxygen \
-   --dbus \
-   --classic \
-   --alsa \
-   --clients 256 \
-   --ports-per-application=2048
-
-%build
-%set_build_flags
-python3 ./waf build %{?_smp_mflags} -v
-
-%install
-python3 ./waf --destdir=%{buildroot} install
+%install -a
 mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 
 %files
@@ -72,6 +62,7 @@ mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 %{_bindir}/jackd
 %{_libdir}/jack/
 %{_libdir}/libjack.so.*
+%{_libdir}/libjacknet.so.*
 %{_libdir}/libjackserver.so.*
 %{_mandir}/man1/jackd*.1*
 %{_bindir}/jackdbus
@@ -82,8 +73,9 @@ mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 %{_docdir}/reference/html/
 %{_includedir}/jack/
 %{_libdir}/libjack.so
+%{_libdir}/libjacknet.so
 %{_libdir}/libjackserver.so
 %{_libdir}/pkgconfig/jack.pc
 
 %changelog
-%{?autochangelog}
+%autochangelog

@@ -6,25 +6,26 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+
 Name:           talloc
-Version:        2.4.3
+Version:        2.5.0
 Release:        %autorelease
 Summary:        A hierarchical memory allocator with destructors
 License:        LGPL-3.0-or-later
 URL:            https://talloc.samba.org/
 VCS:            git:https://gitlab.com/samba-team/devel/samba.git
-#!RemoteAsset:  sha256:dc46c40b9f46bb34dd97fe41f548b0e8b247b77a918576733c528e83abd854dd
+#!RemoteAsset:  sha256:912afa237510ae542a7733998eb18a12bcda35ab6729c8e2ddb43e8d0ebab007
 Source:         https://www.samba.org/ftp/talloc/talloc-%{version}.tar.gz
-BuildSystem:    autotools
+BuildSystem:    waf
 
 BuildOption(conf):  --disable-rpath
 BuildOption(conf):  --disable-rpath-install
 BuildOption(conf):  --bundled-libraries=NONE
 BuildOption(conf):  --builtin-libraries=replace
-BuildOption(conf):  --disable-silent-rules
 
-BuildRequires:  make
 BuildRequires:  pkgconfig(python3)
+BuildRequires:  libxslt
+BuildRequires:  docbook-xsl
 
 %description
 A library that implements a hierarchical, pool-based memory allocator with
@@ -52,6 +53,7 @@ Python bindings and libraries for using Talloc in Python applications.
 Summary:        Development files for python-talloc
 Provides:       python3-talloc-devel = %{version}-%{release}
 Provides:       python3-talloc-devel%{?_isa} = %{version}-%{release}
+%python_provide python3-talloc-devel
 Requires:       python3-talloc%{?_isa} = %{version}-%{release}
 
 %description -n python-talloc-devel
@@ -63,6 +65,7 @@ Development files for the python-talloc bindings.
 
 %files devel
 %{_includedir}/talloc.h
+%{_mandir}/man3/talloc.3*
 %{_libdir}/libtalloc.so
 %{_libdir}/pkgconfig/talloc.pc
 

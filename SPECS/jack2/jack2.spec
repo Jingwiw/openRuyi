@@ -4,6 +4,9 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+# Prevent client connection crashes with LTO: https://github.com/jackaudio/jack2/issues/485
+%global _lto_cflags %{nil}
+
 Name:           jack2
 Version:        1.9.22
 Release:        %autorelease
@@ -13,6 +16,7 @@ URL:            https://github.com/jackaudio/jack2
 #!RemoteAsset:  sha256:1e42b9fc4ad7db7befd414d45ab2f8a159c0b30fcd6eee452be662298766a849
 Source0:        https://github.com/jackaudio/jack2/archive/refs/tags/v%{version}.tar.gz
 
+# Support Python 3.12+; adapted from https://gitlab.com/ita1024/waf/-/commit/d2060dfd8af4edb5824153ff24e207b39ecd67a2
 Patch0:         0001-remove-imp.patch
 
 BuildRequires:  gcc-c++
@@ -22,19 +26,22 @@ BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(expat)
 BuildRequires:  pkgconfig(sndfile)
+BuildRequires:  pkgconfig(samplerate)
 BuildRequires:  pkgconfig(ncursesw)
 BuildRequires:  pkgconfig(opus)
 BuildRequires:  doxygen
 
 BuildSystem:    waf
 BuildOption(conf):  --mandir=%{_mandir}/man1
+BuildOption(conf):  --htmldir=%{_docdir}/%{name}/reference/html
 BuildOption(conf):  --doxygen
 BuildOption(conf):  --dbus
 BuildOption(conf):  --classic
 BuildOption(conf):  --alsa
-BuildOption(conf):  --clients=256
-BuildOption(conf):  --ports-per-application=2048
+BuildOption(conf):  --samplerate=yes
+BuildOption(conf):  --opus=yes
 
+Requires:       python3dist(dbus-python)
 
 %description
 JACK is a low-latency audio server, written primarily for the Linux operating
@@ -51,10 +58,7 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 Header files for the Jack Audio Connection Kit.
 
 %check
-LD_LIBRARY_PATH=%{buildroot}%{_libdir} %{buildroot}%{_bindir}/jackd --version
-
-%install -a
-mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
+# Upstream has no automated Waf test target.
 
 %files
 %doc ChangeLog.rst README.rst README_NETJACK2
@@ -70,7 +74,7 @@ mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 %{_bindir}/jack_control
 
 %files devel
-%{_docdir}/reference/html/
+%{_docdir}/%{name}/reference/html/
 %{_includedir}/jack/
 %{_libdir}/libjack.so
 %{_libdir}/libjacknet.so

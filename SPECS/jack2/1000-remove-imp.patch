@@ -1,3 +1,9 @@
+Author: Thomas Nagy <tnagy@waf.io>
+Subject: Use types.ModuleType with Python 3
+Origin: https://gitlab.com/ita1024/waf/-/commit/d2060dfd8af4edb5824153ff24e207b39ecd67a2
+
+Adapt the upstream loader fix to the bundled Waf 2.0.12.
+
 diff --git a/waflib/Context.py b/waflib/Context.py
 index 761b521..039abc6 100644
 --- a/waflib/Context.py

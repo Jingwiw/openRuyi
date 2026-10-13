@@ -28,6 +28,7 @@ Source1:        samba-systemd.sysusers
 Source2:        samba-winbind-systemd.sysusers
 Source3:        samba-usershares-systemd.sysusers
 Source4:        samba.tmpfiles
+Source5:        smb.conf
 BuildSystem:    waf
 
 BuildOption(conf):  --disable-rpath-install
@@ -131,6 +132,9 @@ BuildRequires:  doxygen
 
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 
+Requires(pre):  systemd-sysusers
+%systemd_requires
+
 %description
 Samba is the standard Windows interoperability suite of programs for Linux and
 Unix.
@@ -147,7 +151,7 @@ to SMB/CIFS printers.
 %package        devel
 Summary:        Developer tools for Samba libraries
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
-Requires:       libwbclient%{?_isa} = %{version}-%{release}
+Requires:       libwbclient-devel%{?_isa} = %{version}-%{release}
 
 %description    devel
 This package contains the header files for the libraries needed to develop
@@ -168,6 +172,8 @@ Requires:       ldb%{?_isa} = %{version}-%{release}
 Requires:       python3-ldb
 Requires:       python3-%{name} = %{version}-%{release}
 
+%systemd_requires
+
 %description    ad-dc
 This package provides AD Domain Controller functionality
 
@@ -175,6 +181,9 @@ This package provides AD Domain Controller functionality
 Summary:        Samba winbind
 Requires:       %{name}-client%{?_isa} = %{version}-%{release}
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+
+Requires(pre):  systemd-sysusers
+%systemd_requires
 
 %description    winbind
 This package provides the winbind NSS library, and some client tools.
@@ -184,7 +193,8 @@ Windows user and group accounts on Linux.
 
 %package     -n python-%{name}
 Summary:        Samba Python libraries
-Provides:       python3-%{name}
+Provides:       python3-%{name} = %{version}-%{release}
+Provides:       python3-%{name}%{?_isa} = %{version}-%{release}
 %python_provide python3-%{name}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       %{name}-client%{?_isa} = %{version}-%{release}
@@ -199,9 +209,18 @@ RPC and other Samba provided protocols in Python programs.
 
 %package     -n libwbclient
 Summary:        The winbind client library
+License:        LGPL-3.0-or-later
 
 %description -n libwbclient
 This package contains the winbind client library from the Samba suite.
+
+%package     -n libwbclient-devel
+Summary:        Development files for the winbind client library
+License:        LGPL-3.0-or-later
+Requires:       libwbclient%{?_isa} = %{version}-%{release}
+
+%description -n libwbclient-devel
+Headers and linker files for programs that use the winbind client library.
 
 %package     -n ldb
 Summary:        A schema-less, ldap like, API and database
@@ -211,10 +230,19 @@ License:        LGPL-3.0-or-later
 An extensible library that implements an LDAP like API to access remote LDAP
 servers, or use local tdb databases.
 
+%package     -n ldb-devel
+Summary:        Development files for the LDB library
+License:        LGPL-3.0-or-later
+Requires:       ldb%{?_isa} = %{version}-%{release}
+
+%description -n ldb-devel
+Headers and linker files for programs that use the LDB library.
+
 %package     -n python-ldb
 Summary:        Ldb Python bindings
 License:        LGPL-3.0-or-later
-Provides:       python3-ldb
+Provides:       python3-ldb = %{version}-%{release}
+Provides:       python3-ldb%{?_isa} = %{version}-%{release}
 %python_provide python3-ldb
 Requires:       ldb%{?_isa} = %{version}-%{release}
 
@@ -256,7 +284,7 @@ install -d -m 0755 %{buildroot}%{_sysconfdir}/security
 
 %install -a
 
-install -m 0644 examples/smb.conf.default %{buildroot}%{_sysconfdir}/samba/smb.conf
+install -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/samba/smb.conf
 echo "127.0.0.1 localhost" > %{buildroot}%{_sysconfdir}/samba/lmhosts
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/security
@@ -279,8 +307,17 @@ install -m 0644 packaging/systemd/samba.sysconfig %{buildroot}%{_sysconfdir}/sys
 rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %endif
 
-# TODO: Fix check.
+# Keep server and Winbind catalogs with their respective packages.
+%find_lang net
+%find_lang pam_winbind
+
 %check
+bin/testparm -s %{SOURCE5} \
+    --option="state directory=%{buildroot}/var/lib/samba" \
+    --option="cache directory=%{buildroot}/var/lib/samba" \
+    --option="lock directory=%{buildroot}/var/lib/samba/lock" \
+    --option="pid directory=%{buildroot}/run/samba" \
+    --option="netbios name=buildtest"
 
 %pre
 %sysusers_create_package %{name} %{SOURCE1}
@@ -291,25 +328,37 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 
 %post
 %tmpfiles_create_package %{name} %{SOURCE4}
-%systemd_post samba-bgqd.service
-%systemd_post smb.service
-%systemd_post nmb.service
+%systemd_post samba-bgqd.service smb.service nmb.service
 
 %preun
-%systemd_preun samba-bgqd.service
-%systemd_preun smb.service
-%systemd_preun nmb.service
+%systemd_preun samba-bgqd.service smb.service nmb.service
 
 %postun
-%systemd_postun_with_restart samba-bgqd.service
-%systemd_postun_with_restart smb.service
-%systemd_postun_with_restart nmb.service
+%systemd_postun_with_restart samba-bgqd.service smb.service nmb.service
 
-%files
+%post winbind
+%systemd_post winbind.service
+
+%preun winbind
+%systemd_preun winbind.service
+
+%postun winbind
+%systemd_postun_with_restart winbind.service
+
+%post ad-dc
+%systemd_post samba.service
+
+%preun ad-dc
+%systemd_preun samba.service
+
+%postun ad-dc
+%systemd_postun_with_restart samba.service
+
+%files -f net.lang
 %license COPYING
 %doc examples/autofs examples/LDAP examples/misc
 %doc examples/printer-accounting examples/printing
-%doc README.md WHATSNEW.txt
+%doc README.md WHATSNEW.txt examples/smb.conf.default
 %{_bindir}/smbstatus
 %{_bindir}/net
 %{_bindir}/pdbedit
@@ -423,7 +472,6 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %config(noreplace) %{_sysconfdir}/samba/smb.conf
 %config(noreplace) %{_sysconfdir}/samba/lmhosts
 %config(noreplace) %{_sysconfdir}/sysconfig/samba
-%{_datadir}/locale/*/LC_MESSAGES/net.mo
 
 %files client
 %doc source3/client/README.smbspool
@@ -691,7 +739,6 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/samba/libutil-reg-private-samba.so
 %{_libdir}/samba/libutil-setid-private-samba.so
 %{_libdir}/samba/libutil-tdb-private-samba.so
-%{_libdir}/samba/libldb-*.so
 %{_libdir}/samba/libngtcp2-crypto-gnutls-private-samba.so
 %{_libdir}/samba/libngtcp2-private-samba.so
 # dc libs
@@ -816,7 +863,7 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/samba/libsamba-net-join.cpython*.so
 %{_libdir}/samba/libsamba-python.cpython*.so
 
-%files winbind
+%files winbind -f pam_winbind.lang
 %{_libdir}/samba/idmap
 %{_libdir}/samba/nss_info
 %{_libdir}/samba/libnss-info-private-samba.so
@@ -834,24 +881,25 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/libnss_wins.so*
 %{_libdir}/security/pam_winbind.so
 %config(noreplace) %{_sysconfdir}/security/pam_winbind.conf
-%{_datadir}/locale/*/LC_MESSAGES/pam_winbind.mo
 
 %files -n libwbclient
+%license COPYING lib/ldb/LICENSE
 %{_libdir}/libwbclient.so.*
+
+%files -n libwbclient-devel
 %{_includedir}/samba-4.0/wbclient.h
 %{_libdir}/libwbclient.so
 %{_libdir}/pkgconfig/wbclient.pc
 
 %files -n ldb
+%license COPYING lib/ldb/LICENSE
 %{_bindir}/ldbadd
 %{_bindir}/ldbdel
 %{_bindir}/ldbedit
 %{_bindir}/ldbmodify
 %{_bindir}/ldbrename
 %{_bindir}/ldbsearch
-%{_libdir}/libldb.so
 %{_libdir}/libldb.so.*
-%{_libdir}/pkgconfig/ldb.pc
 %dir %{_libdir}/samba
 %{_libdir}/samba/libldb-key-value-private-samba.so
 %{_libdir}/samba/libldb-tdb-err-map-private-samba.so
@@ -871,6 +919,10 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/samba/ldb/ildap.so
 %{_libdir}/samba/ldb/ldap.so
 %{_libdir}/samba/libldb-cmdline-private-samba.so
+
+%files -n ldb-devel
+%{_libdir}/libldb.so
+%{_libdir}/pkgconfig/ldb.pc
 %{_includedir}/samba-4.0/ldb_module.h
 %{_includedir}/samba-4.0/ldb_handlers.h
 %{_includedir}/samba-4.0/ldb_errors.h

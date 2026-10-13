@@ -23,17 +23,17 @@ Source1:        kadmind.service
 Source2:        kpropd.service
 BuildSystem:    autotools
 
-# From https://github.com/krb5/krb5/pull/1471
+# Fix C23 strchr const handling: https://github.com/krb5/krb5/commit/ad4dcf1856dadc4b352b5c8ff08e51c7290fb41f
 Patch0:         Fix-strchr-conformance-to-C23.patch
+# Initialize PKINIT test data: https://github.com/krb5/krb5/commit/34d661676b1db04d870be3d7ad26616aa69d1f3d
+Patch1:         0001-initialize-pkinit-test-data.patch
 
 BuildOption(conf):  --without-ldap
 BuildOption(conf):  --disable-static
 BuildOption(conf):  --enable-dns-for-realm
 BuildOption(conf):  --disable-rpath
-BuildOption(conf):  --with-pam
 BuildOption(conf):  --enable-pkinit
 BuildOption(conf):  --with-crypto-impl=openssl
-BuildOption(conf):  --with-selinux
 BuildOption(conf):  --with-system-et
 BuildOption(conf):  --with-system-ss
 BuildOption(conf):  --with-system-verto
@@ -41,15 +41,19 @@ BuildOption(conf):  --with-lmdb
 BuildOption(conf):  --localstatedir=%{_localstatedir}
 BuildOption(build):  -C src
 BuildOption(install):  -C src
+# Run tests serially because test realms share listener ports.
+BuildOption(check):  -C src -j1
 
 BuildRequires:  autoconf
 BuildRequires:  bison
+BuildRequires:  make
+BuildRequires:  python3
+BuildRequires:  pkgconfig(cmocka)
 BuildRequires:  pkgconfig(libkeyutils)
-BuildRequires:  pkgconfig(pam)
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(com_err)
-BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  pkgconfig(libssl)
+BuildRequires:  libverto-libev
 BuildRequires:  pkgconfig(libverto)
 BuildRequires:  pkgconfig(lmdb)
 BuildRequires:  pkgconfig(ss)
@@ -63,6 +67,8 @@ Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
 %endif
+
+Requires:       libverto-libev%{?_isa}
 
 %description
 Kerberos is a network authentication system. This package contains all the
@@ -80,11 +86,10 @@ Requires:       pkgconfig(ss)
 This package contains the libraries, header files, and documentation needed
 for developing applications that use Kerberos 5.
 
-%conf
+%conf -p
 cd src
 export DEFCCNAME=DIR:/run/user/%%{uid}/krb5cc
 autoreconf -fi
-%configure
 
 %install -a
 install -D -m 644 src/util/ac_check_krb5.m4 %{buildroot}%{_datadir}/aclocal/ac_check_krb5.m4
@@ -100,15 +105,6 @@ install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/kpropd.service
 
 install -m 644 src/config-files/krb5.conf %{buildroot}%{_sysconfdir}/krb5.conf
 install -m 644 src/config-files/kdc.conf %{buildroot}%{_sysconfdir}/kdc.conf
-
-# remove some files should not in krb5
-rm -rf %{buildroot}%{_bindir}/compile_et
-rm -rf %{buildroot}%{_includedir}/com_err.h
-rm -rf %{buildroot}%{_libdir}/libcom_err.so
-rm -rf %{buildroot}%{_datadir}/et/
-
-# No tests.
-%check
 
 %if %{with systemd}
 %post
@@ -141,7 +137,6 @@ rm -rf %{buildroot}%{_datadir}/et/
 %{_mandir}/man5/*
 %{_mandir}/man7/*
 %{_mandir}/man8/*
-%exclude %{_mandir}/man1/compile_et.1.gz
 %exclude %{_mandir}/man1/krb5-config.1*
 %exclude %{_mandir}/man5/.k5identity.5.gz
 %exclude %{_mandir}/man5/.k5login.5.gz

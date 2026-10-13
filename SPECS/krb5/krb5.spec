@@ -21,6 +21,7 @@ VCS:            git:https://github.com/krb5/krb5
 Source:         https://kerberos.org/dist/krb5/1.22/%{name}-%{version}.tar.gz
 Source1:        kadmind.service
 Source2:        kpropd.service
+Source3:        krb5.conf
 BuildSystem:    autotools
 
 # Fix C23 strchr const handling: https://github.com/krb5/krb5/commit/ad4dcf1856dadc4b352b5c8ff08e51c7290fb41f
@@ -28,6 +29,7 @@ Patch0:         1000-fix-strchr-conformance-to-c23.patch
 # Initialize PKINIT test data: https://github.com/krb5/krb5/commit/34d661676b1db04d870be3d7ad26616aa69d1f3d
 Patch1:         1001-initialize-pkinit-test-data.patch
 
+BuildOption(conf):  --without-krb5-config
 BuildOption(conf):  --without-ldap
 BuildOption(conf):  --disable-static
 BuildOption(conf):  --enable-dns-for-realm
@@ -88,7 +90,6 @@ for developing applications that use Kerberos 5.
 
 %conf -p
 cd src
-export DEFCCNAME=DIR:/run/user/%%{uid}/krb5cc
 autoreconf -fi
 
 %install -a
@@ -103,7 +104,7 @@ install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/kadmind.service
 install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/kpropd.service
 %endif
 
-install -m 644 src/config-files/krb5.conf %{buildroot}%{_sysconfdir}/krb5.conf
+install -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/krb5.conf
 install -m 644 src/config-files/kdc.conf %{buildroot}%{_sysconfdir}/kdc.conf
 
 %if %{with systemd}

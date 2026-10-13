@@ -28,6 +28,7 @@ Source1:        samba-systemd.sysusers
 Source2:        samba-winbind-systemd.sysusers
 Source3:        samba-usershares-systemd.sysusers
 Source4:        samba.tmpfiles
+Source5:        smb.conf
 BuildSystem:    waf
 
 BuildOption(conf):  --disable-rpath-install
@@ -131,6 +132,9 @@ BuildRequires:  doxygen
 
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 
+Requires(pre):  systemd-sysusers
+%systemd_requires
+
 %description
 Samba is the standard Windows interoperability suite of programs for Linux and
 Unix.
@@ -168,6 +172,8 @@ Requires:       ldb%{?_isa} = %{version}-%{release}
 Requires:       python3-ldb
 Requires:       python3-%{name} = %{version}-%{release}
 
+%systemd_requires
+
 %description    ad-dc
 This package provides AD Domain Controller functionality
 
@@ -175,6 +181,9 @@ This package provides AD Domain Controller functionality
 Summary:        Samba winbind
 Requires:       %{name}-client%{?_isa} = %{version}-%{release}
 Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+
+Requires(pre):  systemd-sysusers
+%systemd_requires
 
 %description    winbind
 This package provides the winbind NSS library, and some client tools.
@@ -184,8 +193,7 @@ Windows user and group accounts on Linux.
 
 %package     -n python-%{name}
 Summary:        Samba Python libraries
-Provides:       python3-%{name}
-%python_provide python3-%{name}
+Provides:       python3-%{name} = %{version}-%{release}
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 Requires:       %{name}-client%{?_isa} = %{version}-%{release}
 Requires:       python3-ldb
@@ -214,8 +222,7 @@ servers, or use local tdb databases.
 %package     -n python-ldb
 Summary:        Ldb Python bindings
 License:        LGPL-3.0-or-later
-Provides:       python3-ldb
-%python_provide python3-ldb
+Provides:       python3-ldb = %{version}-%{release}
 Requires:       ldb%{?_isa} = %{version}-%{release}
 
 %description -n python-ldb
@@ -232,9 +239,6 @@ Expose CephFS (and RADOS) as SMB/CIFS shares directly via libcephfs,
 without an intermediate kernel mount.
 %endif
 
-%conf -p
-# https://gitlab.com/ita1024/waf/-/issues/2472
-export PYTHONARCHDIR=%{python3_sitearch}
 
 %install -p
 install -d -m 0755 %{buildroot}%{_libdir}/security
@@ -259,7 +263,7 @@ install -d -m 0755 %{buildroot}%{_sysconfdir}/security
 
 %install -a
 
-install -m 0644 examples/smb.conf.default %{buildroot}%{_sysconfdir}/samba/smb.conf
+install -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/samba/smb.conf
 echo "127.0.0.1 localhost" > %{buildroot}%{_sysconfdir}/samba/lmhosts
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/security
@@ -283,8 +287,12 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %endif
 
 %check
-bin/smbclient --version
-bin/smbd --version
+bin/testparm -s %{SOURCE5} \
+    --option="state directory=%{buildroot}/var/lib/samba" \
+    --option="cache directory=%{buildroot}/var/lib/samba" \
+    --option="lock directory=%{buildroot}/var/lib/samba/lock" \
+    --option="pid directory=%{buildroot}/run/samba" \
+    --option="netbios name=buildtest"
 
 %pre
 %sysusers_create_package %{name} %{SOURCE1}
@@ -295,25 +303,37 @@ bin/smbd --version
 
 %post
 %tmpfiles_create_package %{name} %{SOURCE4}
-%systemd_post samba-bgqd.service
-%systemd_post smb.service
-%systemd_post nmb.service
+%systemd_post samba-bgqd.service smb.service nmb.service
 
 %preun
-%systemd_preun samba-bgqd.service
-%systemd_preun smb.service
-%systemd_preun nmb.service
+%systemd_preun samba-bgqd.service smb.service nmb.service
 
 %postun
-%systemd_postun_with_restart samba-bgqd.service
-%systemd_postun_with_restart smb.service
-%systemd_postun_with_restart nmb.service
+%systemd_postun_with_restart samba-bgqd.service smb.service nmb.service
+
+%post winbind
+%systemd_post winbind.service
+
+%preun winbind
+%systemd_preun winbind.service
+
+%postun winbind
+%systemd_postun_with_restart winbind.service
+
+%post ad-dc
+%systemd_post samba.service
+
+%preun ad-dc
+%systemd_preun samba.service
+
+%postun ad-dc
+%systemd_postun_with_restart samba.service
 
 %files
 %license COPYING
 %doc examples/autofs examples/LDAP examples/misc
 %doc examples/printer-accounting examples/printing
-%doc README.md WHATSNEW.txt
+%doc README.md WHATSNEW.txt examples/smb.conf.default
 %{_bindir}/smbstatus
 %{_bindir}/net
 %{_bindir}/pdbedit

@@ -10,38 +10,31 @@
 %global vfs_modules    vfs_dfs_samba4,vfs_fake_dfq
 %global samba_modules  %{idmap_modules},%{pdb_modules},%{auth_modules},%{vfs_modules}
 
-# Change to 1 to enable these
 %bcond ceph 1
 %bcond pmda 0
 %bcond glusterfs 0
 
-# Why this macro magically disappeared is beyond me - 251
-%{?python3_sitearch: %global python3_sitearch %{python3_sitearch}}
 
 Name:           samba
-Version:        4.23.2
+Version:        4.25.0
 Release:        %autorelease
 Summary:        Server and Client software to interoperate with Windows machines
 License:        GPL-3.0-or-later
 URL:            https://www.samba.org
 VCS:            git:https://git.samba.org/samba.git
-#!RemoteAsset:  sha256:2de330647e1486683597e261285d04a9b7514ab5c7da27711736e22c7f2b9c2e
+#!RemoteAsset:  sha256:2e2cb7296833b35b8f7a7fb76045e0c57adc0c2cd03264b37df5d58e40f28437
 Source0:        https://download.samba.org/pub/samba/stable/%{name}-%{version}.tar.gz
-#!RemoteAsset:  sha256:c514f0a0aa41c351e08eb05925e10653546c4f3f582181ba851dd81e470cb439
-Source1:        https://download.samba.org/pub/samba/stable/%{name}-%{version}.tar.asc
-Source2:        samba-systemd.sysusers
-Source3:        samba-winbind-systemd.sysusers
-Source4:        samba-usershares-systemd.sysusers
-Source5:        samba.tmpfiles
-BuildSystem:    autotools
+Source1:        samba-systemd.sysusers
+Source2:        samba-winbind-systemd.sysusers
+Source3:        samba-usershares-systemd.sysusers
+Source4:        samba.tmpfiles
+BuildSystem:    waf
 
-BuildOption(conf):  --disable-rpath
 BuildOption(conf):  --disable-rpath-install
 BuildOption(conf):  --with-piddir=/run/samba
-BuildOption(conf):  --prefix=%{_prefix}
 BuildOption(conf):  --localstatedir=%{_localstatedir}
 BuildOption(conf):  --sysconfdir=%{_sysconfdir}
-BuildOption(conf):  --libdir=%{_libdir}
+BuildOption(conf):  --sbindir=%{_sbindir}
 BuildOption(conf):  --libexecdir=%{_libdir}
 BuildOption(conf):  --with-cachedir=%{_localstatedir}/lib/samba
 BuildOption(conf):  --with-lockdir=%{_localstatedir}/lib/samba/lock
@@ -63,10 +56,12 @@ BuildOption(conf):  --with-profiling-data
 %if %{without glusterfs}
 BuildOption(conf):  --disable-glusterfs
 %endif
-%if %{without ceph}
-BuildOption(conf):  --without-cephfs
+%if %{with ceph}
+BuildOption(conf):  --enable-cephfs
+%else
+BuildOption(conf):  --disable-cephfs
 %endif
-BuildOption(check):  TEST_OPTIONS=--quick
+BuildOption(conf):  --disable-cephrgw
 
 BuildRequires:  make
 BuildRequires:  libtool
@@ -77,9 +72,9 @@ BuildRequires:  pkgconfig(cups)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(ext2fs)
 BuildRequires:  flex
-BuildRequires:  pkgconfig(tdb)
-BuildRequires:  pkgconfig(talloc)
-BuildRequires:  pkgconfig(tevent)
+BuildRequires:  pkgconfig(tdb) >= 1.4.15
+BuildRequires:  pkgconfig(talloc) >= 2.5.0
+BuildRequires:  pkgconfig(tevent) >= 0.17.2
 BuildRequires:  pkgconfig(gnutls)
 BuildRequires:  pkgconfig(jansson)
 BuildRequires:  pkgconfig(krb5)
@@ -241,11 +236,7 @@ without an intermediate kernel mount.
 # https://gitlab.com/ita1024/waf/-/issues/2472
 export PYTHONARCHDIR=%{python3_sitearch}
 
-%build
-# Do not use %%make_build, make is just a wrapper around waf in Samba
-%{__make} %{?_smp_mflags} VERBOSE=1
-
-%install
+%install -p
 install -d -m 0755 %{buildroot}%{_libdir}/security
 install -d -m 0755 %{buildroot}/var/lib/samba
 install -d -m 0755 %{buildroot}/var/lib/samba/certs
@@ -266,8 +257,7 @@ install -d -m 0755 %{buildroot}/%{_libdir}/pkgconfig
 install -d -m 0755 %{buildroot}%{_sysconfdir}/pam.d
 install -d -m 0755 %{buildroot}%{_sysconfdir}/security
 
-# Do not use %%make_install, make is just a wrapper around waf in Samba
-%{__make} %{?_smp_mflags} VERBOSE=1 install DESTDIR=%{buildroot} CONFIGDIR=%{_sysconfdir}/samba
+%install -a
 
 install -m 0644 examples/smb.conf.default %{buildroot}%{_sysconfdir}/samba/smb.conf
 echo "127.0.0.1 localhost" > %{buildroot}%{_sysconfdir}/samba/lmhosts
@@ -278,12 +268,12 @@ install -m 0644 examples/pam_winbind/pam_winbind.conf %{buildroot}%{_sysconfdir}
 install -d -m 0755 %{buildroot}%{_sysconfdir}/openldap/schema
 install -m644 examples/LDAP/samba.schema %{buildroot}%{_sysconfdir}/openldap/schema/samba.schema
 
-install -m 0644 -Dp %{SOURCE2} %{buildroot}%{_sysusersdir}/samba.conf
-install -m 0644 -Dp %{SOURCE3} %{buildroot}%{_sysusersdir}/samba-winbind.conf
-install -m 0644 -Dp %{SOURCE4} %{buildroot}%{_sysusersdir}/samba-usershares.conf
+install -m 0644 -Dp %{SOURCE1} %{buildroot}%{_sysusersdir}/samba.conf
+install -m 0644 -Dp %{SOURCE2} %{buildroot}%{_sysusersdir}/samba-winbind.conf
+install -m 0644 -Dp %{SOURCE3} %{buildroot}%{_sysusersdir}/samba-usershares.conf
 
 install -d -m 0755 %{buildroot}%{_tmpfilesdir}
-install -D %{SOURCE5} %{buildroot}%{_tmpfilesdir}/samba.conf
+install -D -m 0644 %{SOURCE4} %{buildroot}%{_tmpfilesdir}/samba.conf
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/sysconfig
 install -m 0644 packaging/systemd/samba.sysconfig %{buildroot}%{_sysconfdir}/sysconfig/samba
@@ -292,18 +282,19 @@ install -m 0644 packaging/systemd/samba.sysconfig %{buildroot}%{_sysconfdir}/sys
 rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %endif
 
-# TODO: Fix check.
 %check
+bin/smbclient --version
+bin/smbd --version
 
 %pre
-%sysusers_create_package %{name} %{SOURCE2}
-%sysusers_create_package %{name}-usershares %{SOURCE4}
+%sysusers_create_package %{name} %{SOURCE1}
+%sysusers_create_package %{name}-usershares %{SOURCE3}
 
 %pre winbind
-%sysusers_create_package %{name}-winbind %{SOURCE3}
+%sysusers_create_package %{name}-winbind %{SOURCE2}
 
 %post
-%tmpfiles_create_package %{name} %{SOURCE5}
+%tmpfiles_create_package %{name} %{SOURCE4}
 %systemd_post samba-bgqd.service
 %systemd_post smb.service
 %systemd_post nmb.service
@@ -350,6 +341,7 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/samba/vfs/acl_xattr.so
 %{_libdir}/samba/vfs/aio_fork.so
 %{_libdir}/samba/vfs/aio_pthread.so
+%{_libdir}/samba/vfs/aio_ratelimit.so
 %{_libdir}/samba/vfs/audit.so
 %{_libdir}/samba/vfs/btrfs.so
 %{_libdir}/samba/vfs/cap.so
@@ -366,7 +358,6 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_libdir}/samba/vfs/fruit.so
 %{_libdir}/samba/vfs/full_audit.so
 %{_libdir}/samba/vfs/gpfs.so
-# TODO: Help! We don't have glusterfs but why is this here? - 251
 %{_libdir}/samba/vfs/glusterfs_fuse.so
 %{_libdir}/samba/vfs/linux_xfs_sgid.so
 %{_libdir}/samba/vfs/media_harmony.so
@@ -542,6 +533,7 @@ rm -f %{buildroot}%{_mandir}/man8/vfs_glusterfs.8*
 %{_includedir}/samba-4.0/util/idtree_random.h
 %{_includedir}/samba-4.0/util/signal.h
 %{_includedir}/samba-4.0/util/substitute.h
+%{_includedir}/samba-4.0/util/talloc_keep_secret.h
 %{_includedir}/samba-4.0/util/tevent_ntstatus.h
 %{_includedir}/samba-4.0/util/tevent_unix.h
 %{_includedir}/samba-4.0/util/tevent_werror.h

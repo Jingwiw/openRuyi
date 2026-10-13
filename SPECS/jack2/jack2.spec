@@ -4,6 +4,9 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+# Prevent client connection crashes with LTO: https://github.com/jackaudio/jack2/issues/485
+%global _lto_cflags %{nil}
+
 Name:           jack2
 Version:        1.9.22
 Release:        %autorelease
@@ -18,10 +21,13 @@ BuildSystem:    waf
 Patch0:         1000-remove-imp.patch
 
 BuildOption(conf):  --mandir=%{_mandir}/man1
+BuildOption(conf):  --htmldir=%{_docdir}/%{name}/reference/html
 BuildOption(conf):  --doxygen
 BuildOption(conf):  --dbus
 BuildOption(conf):  --classic
 BuildOption(conf):  --alsa
+BuildOption(conf):  --samplerate=yes
+BuildOption(conf):  --opus=yes
 
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig
@@ -30,16 +36,17 @@ BuildRequires:  pkgconfig(alsa)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(expat)
 BuildRequires:  pkgconfig(sndfile)
+BuildRequires:  pkgconfig(samplerate)
 BuildRequires:  pkgconfig(ncursesw)
 BuildRequires:  pkgconfig(opus)
 BuildRequires:  doxygen
 
+Requires:       python3dist(dbus-python)
+
 %description
 JACK is a low-latency audio server, written primarily for the Linux operating
-system. It can connect a number of different applications to an audio device, as
-well as allowing them to share audio between themselves. Its clients can run in
-their own processes (i.e. as a normal application), or can they can run within a
-JACK server (i.e. a "plugin").
+system. It connects applications to an audio device and lets them share audio.
+Clients can run in separate processes or as plugins in a JACK server.
 
 %package        devel
 Summary:        Header files for Jack
@@ -50,9 +57,6 @@ Header files for the Jack Audio Connection Kit.
 
 %check
 # Upstream has no automated Waf test target.
-
-%install -a
-mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 
 %files
 %doc ChangeLog.rst README.rst README_NETJACK2
@@ -68,7 +72,7 @@ mv %{buildroot}%{_datadir}/jack-audio-connection-kit %{buildroot}%{_docdir}
 %{_bindir}/jack_control
 
 %files devel
-%{_docdir}/reference/html/
+%{_docdir}/%{name}/reference/html/
 %{_includedir}/jack/
 %{_libdir}/libjack.so
 %{_libdir}/libjacknet.so

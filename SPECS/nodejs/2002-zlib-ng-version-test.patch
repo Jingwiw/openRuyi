@@ -1,0 +1,16 @@
+Subject: [PATCH] test: accept the zlib-ng compatibility version suffix
+
+Downstream test adaptation; keep validation for other version strings.
+Reference: https://github.com/nodejs/node/blob/v26.12.0/test/parallel/test-process-versions.js
+
+--- a/test/parallel/test-process-versions.js
++++ b/test/parallel/test-process-versions.js
+@@ -82,7 +82,7 @@
+ assert.match(process.versions.node, commonTemplate);
+ assert.match(process.versions.uv, commonTemplate);
+ assert.match(process.versions.nbytes, commonTemplate);
+-assert.match(process.versions.zlib, /^\d+(?:\.\d+){1,3}(?:-.*)?$/);
++assert.match(process.versions.zlib, /^\d+(?:\.\d+){1,3}(?:\.zlib-ng)?(?:-.*)?$/);
+ assert.match(process.versions.zstd, commonTemplate);
+ 
+ if (process.config.variables.node_use_lief) {

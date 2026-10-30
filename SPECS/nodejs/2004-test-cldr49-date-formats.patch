@@ -1,0 +1,41 @@
+Subject: [PATCH] test: accept CLDR 49 date and time-zone formats
+
+CLDR 49 adds an apostrophe before abbreviated English years and moves
+Europe/Dublin to the Irish metazone. Its missing standard name uses the
+localized GMT offset. Accept these outputs and retain the older formats.
+
+Sources:
+https://github.com/unicode-org/cldr/commit/3e217b1d93d55c504c897b914f66fba06f0fc3aa
+https://github.com/unicode-org/cldr/commit/4728ca3485005ff6654281b26c6dbf23b8e6ace3
+
+--- a/test/parallel/test-datetime-change-notify.js
++++ b/test/parallel/test-datetime-change-notify.js
+@@ -26,7 +26,7 @@
+   },
+   {
+     timeZone: 'Europe/Dublin',
+-    expected: /Irish Standard Time|Greenwich Mean Time/,
++    expected: /Irish Standard Time|Greenwich Mean Time|GMT\+00:00/,
+   },
+ ];
+ 
+--- a/test/parallel/test-intl.js
++++ b/test/parallel/test-intl.js
+@@ -65,7 +65,7 @@
+   // Use the GMT time zone
+   const GMT = 'Etc/GMT';
+ 
+-  // Construct an English formatter. Should format to "Jan 70"
++  // Construct an English formatter with a short month and two-digit year.
+   const dtf = new Intl.DateTimeFormat(['en'], {
+     timeZone: GMT,
+     month: 'short',
+@@ -89,7 +89,7 @@
+   // Check with toLocaleString
+   {
+     const localeString = dtf.format(date0);
+-    assert.strictEqual(localeString, 'Jan 70');
++    assert.match(localeString, /^Jan \u2019?70$/);
+   }
+   // Options to request GMT
+   const optsGMT = { timeZone: GMT };

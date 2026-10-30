@@ -83,6 +83,8 @@ Requires:       sqlite%{?_isa} >= 3.54.0
 2002-zlib-ng-version-test.patch
 # Report unsupported Wasm SIMD as skipped; https://github.com/felixonmars/archriscv-packages/blob/2c56f9918e59cb5cfb7af860d2336785d0a36dea/nodejs/wasm-simd-skip.patch.
 2003-wpt-wasm-simd-skip.patch
+# Accept CLDR 49 date and time-zone formats; https://github.com/unicode-org/cldr/pull/5725 and https://github.com/unicode-org/cldr/pull/5783.
+2004-test-cldr49-date-formats.patch
 # Preserve RISC-V live registers; https://github.com/v8/v8/commit/7e40e4bee05bbecad063f618ec64d48aa3a63ca7.
 1000-v8-riscv-byteswap.patch
 # Use public RISC-V float min/max helpers; https://github.com/v8/v8/commit/7d081be20f980a472a3460027d78423dd7efe603.

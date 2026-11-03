@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 0 ]; then
+    echo 'Usage: slapd-init' >&2
+    exit 2
+fi
+if [ "$(id -u)" -ne 0 ]; then
+    echo 'Run slapd-init as root.' >&2
+    exit 1
+fi
+config=/etc/openldap/slapd.d
+if [ -e "$config" ] || [ -L "$config" ]; then
+    echo "$config exists. No files changed." >&2
+    exit 1
+fi
+umask 077
+tmp=$(mktemp -d /etc/openldap/.slapd-init.XXXXXXXX)
+trap 'rm -rf -- "$tmp"' EXIT
+trap 'exit 1' HUP INT TERM
+@SBINDIR@/slapadd -F "$tmp" -n 0 -l @DATADIR@/openldap/slapd-initial.ldif
+@SBINDIR@/slaptest -F "$tmp" -u
+chown -R ldap:ldap "$tmp"
+# Do not replace a configuration created by another process.
+mv -T -n -- "$tmp" "$config"
+if [ -d "$tmp" ]; then
+    echo "$config exists. No files replaced." >&2
+    exit 1
+fi
+printf '%s\n' "Created $config. Start slapd.service to enable local administration."

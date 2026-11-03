@@ -13,15 +13,15 @@
 %global service_name postgresql.service
 
 Name:           postgresql
-Version:        18.4
+Version:        18.6
 Release:        %autorelease
 Summary:        PostgreSQL client programs
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
 License:        PostgreSQL
-Url:            http://www.postgresql.org/
+URL:            https://www.postgresql.org/
 VCS:            git:https://git.postgresql.org/git/postgresql.git
-#!RemoteAsset:  sha256:81a81ec695fb0c7901407defaa1d2f7973617154cf27ba74e3a7ab8e64436094
+#!RemoteAsset:  sha256:555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f
 Source0:        https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
 Source1:        Makefile.regress
 Source2:        postgresql.pam
@@ -31,17 +31,16 @@ Source5:        postgresql.tmpfiles
 Source6:        postgresql.service
 BuildSystem:    autotools
 
-# Comments for these patches are in the patch files.
-Patch0:         rpm-pgsql.patch
-Patch1:         postgresql-var-run-socket.patch
-Patch2:         postgresql-no-libecpg.patch
+# Use the pgsql installation directories; https://git.almalinux.org/rpms/postgresql/src/branch/c9s/rpm-pgsql.patch
+Patch2000:      2000-pgsql-installation-directories.patch
+# Use runtime sockets outside private temporary directories; https://git.almalinux.org/rpms/postgresql16/src/branch/c10s/postgresql-var-run-socket.patch
+Patch2001:      2001-runtime-socket-directory.patch
 
-BuildOption(conf):  --disable-rpath
 BuildOption(conf):  --with-ldap
 BuildOption(conf):  --with-openssl
 BuildOption(conf):  --with-pam
 BuildOption(conf):  --with-gssapi
-BuildOption(conf):  --with-ossp-uuid
+BuildOption(conf):  --with-uuid=e2fs
 BuildOption(conf):  --with-libxml
 BuildOption(conf):  --with-libxslt
 BuildOption(conf):  --enable-nls
@@ -68,12 +67,12 @@ BuildRequires:  pkgconfig(zlib)
 BuildRequires:  systemd
 BuildRequires:  pkgconfig(systemd)
 BuildRequires:  util-linux
-BuildRequires:  pkgconfig(python)
+BuildRequires:  pkgconfig(python3)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(krb5)
 BuildRequires:  pkgconfig(ldap)
 BuildRequires:  gettext
-BuildRequires:  pkgconfig(ossp-uuid)
+BuildRequires:  pkgconfig(uuid)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libxslt)
 BuildRequires:  pkgconfig(pam)
@@ -168,15 +167,13 @@ Summary:        The test suite distributed with PostgreSQL
 Requires:       %{name}-server%{?_isa} = %{version}-%{release}
 Requires:       %{name}-server-devel%{?_isa} = %{version}-%{release}
 Requires:       %{name}-contrib%{?_isa} = %{version}-%{release}
+Requires:       selinux-tools
 
 %description    test
 The postgresql-test package contains files needed for various tests for the
 PostgreSQL database management system, including regression tests and
 benchmarks.
 %endif
-
-%prep
-%autosetup -n postgresql-%{version} -p1
 
 %build -a
 %make_build -C contrib
@@ -192,8 +189,7 @@ benchmarks.
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/contrib
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
 
-install -d $RPM_BUILD_ROOT/etc/pam.d
-install -m 644 %{SOURCE2} $RPM_BUILD_ROOT/etc/pam.d/postgresql
+install -D -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/pam.d/postgresql
 
 # PGDATA needs removal of group and world permissions due to pg_pwd hole.
 install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/data
@@ -222,7 +218,7 @@ install -m 644 %{SOURCE3} $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/.bash_prof
     rm -f GNUmakefile Makefile *.o
     chmod 0755 pg_regress regress.so
     popd
-    sed 's|@bindir@|%{_bindir}|g' \
+    sed -e 's|@bindir@|%{_bindir}|g' -e 's|@sbindir@|%{_sbindir}|g' \
         < %{SOURCE1} \
         > $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/Makefile
     chmod 0644 $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/Makefile
@@ -234,35 +230,23 @@ rm %{buildroot}%{_libdir}/*.a
 # Remove extension example docs
 rm -f $RPM_BUILD_ROOT%{_docdir}/%{name}/pgsql/extension/*.example
 
-find_lang_bins ()
-{
-    lstfile=$1 ; shift
-    cp /dev/null "$lstfile"
-    for binary; do
-        %find_lang "$binary"-%{majorversion}
-        cat "$binary"-%{majorversion}.lang >>"$lstfile"
-    done
-}
-find_lang_bins devel.lst pg_config
-find_lang_bins server.lst \
-    initdb pg_basebackup pg_controldata pg_ctl pg_resetwal pg_rewind plpgsql \
-    postgres pg_checksums pg_verifybackup pg_combinebackup \
-    pg_walsummary
-find_lang_bins contrib.lst \
-    pg_amcheck pg_archivecleanup pg_test_fsync pg_test_timing pg_waldump
-find_lang_bins main.lst \
-    pg_dump pg_upgrade pgscripts psql \
-libpq5
-
-find_lang_bins plpython3.lst plpython
+%find_lang pg_config-%{majorversion} ecpg-%{majorversion} devel.lst
+%find_lang initdb-%{majorversion} pg_basebackup-%{majorversion} pg_controldata-%{majorversion} pg_ctl-%{majorversion} \
+    pg_resetwal-%{majorversion} pg_rewind-%{majorversion} plpgsql-%{majorversion} postgres-%{majorversion} \
+    pg_checksums-%{majorversion} pg_verifybackup-%{majorversion} pg_combinebackup-%{majorversion} pg_walsummary-%{majorversion} server.lst
+%find_lang pg_amcheck-%{majorversion} pg_archivecleanup-%{majorversion} pg_test_fsync-%{majorversion} pg_test_timing-%{majorversion} \
+    pg_waldump-%{majorversion} contrib.lst
+%find_lang pg_dump-%{majorversion} pg_upgrade-%{majorversion} pgscripts-%{majorversion} psql-%{majorversion} \
+    libpq5-%{majorversion} ecpglib6-%{majorversion} main.lst
+%find_lang plpython-%{majorversion} plpython3.lst
 
 install -m0644 -D %{SOURCE4} %{buildroot}%{_sysusersdir}/postgresql.conf
 install -m0644 -D %{SOURCE5} %{buildroot}%{_tmpfilesdir}/postgresql.conf
 install -m0644 -D %{SOURCE6} %{buildroot}%{_unitdir}/postgresql.service
 
 %pre server
-%sysusers_create_package postgresql postgresql.sysusers.conf
-%tmpfiles_create_package postgresql postgresql.tmpfiles.conf
+%sysusers_create_package postgresql %{SOURCE4}
+%tmpfiles_create_package postgresql %{SOURCE5}
 
 %post server
 %systemd_post %service_name
@@ -290,6 +274,9 @@ install -m0644 -D %{SOURCE6} %{buildroot}%{_unitdir}/postgresql.service
 %{_bindir}/reindexdb
 %{_bindir}/vacuumdb
 %{_libdir}/libpq.so.*
+%{_libdir}/libecpg.so.*
+%{_libdir}/libecpg_compat.so.*
+%{_libdir}/libpgtypes.so.*
 
 %if %{with docs}
 %files doc
@@ -462,15 +449,27 @@ install -m0644 -D %{SOURCE6} %{buildroot}%{_unitdir}/postgresql.service
 %{_tmpfilesdir}/postgresql.conf
 %{_unitdir}/postgresql.service
 
-%files server-devel -f devel.lst
-%{_bindir}/pg_config
+%files server-devel
 %dir %{_datadir}/pgsql
 %{_datadir}/pgsql/errcodes.txt
 %dir %{_includedir}/pgsql
 %{_includedir}/pgsql/server
 %{_libdir}/pgsql/pgxs/
 
-%files devel
+%files devel -f devel.lst
+%{_bindir}/ecpg
+%{_includedir}/ecpg*.h
+%{_includedir}/pgtypes*.h
+%{_includedir}/sqlca.h
+%{_includedir}/sql3types.h
+%{_includedir}/sqlda*.h
+%{_includedir}/pgsql/informix/
+%{_libdir}/libecpg.so
+%{_libdir}/libecpg_compat.so
+%{_libdir}/libpgtypes.so
+%{_libdir}/pkgconfig/libecpg.pc
+%{_libdir}/pkgconfig/libecpg_compat.pc
+%{_libdir}/pkgconfig/libpgtypes.pc
 %{_bindir}/pg_config
 %{_includedir}/libpq-events.h
 %{_includedir}/libpq-fe.h

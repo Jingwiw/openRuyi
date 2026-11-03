@@ -8,21 +8,19 @@
 %global ldb_modulesdir %(pkg-config --variable=modulesdir ldb)
 
 Name:           sssd
-Version:        2.11.1
+Version:        2.13.1
 Release:        %autorelease
 Summary:        System Security Services Daemon
 License:        GPL-3.0-or-later
 URL:            https://github.com/SSSD/sssd
-#!RemoteAsset:  sha256:80935c9f0cffde6e74b2751398c8677c90d31644d2474dade2d336c56ab76d35
+#!RemoteAsset:  sha256:05ea79e89f0be399983925b8874ac196d6dc5fd4416f83609557b9fc8ef798b5
 Source0:        %{url}/releases/download/%{version}/%{name}-%{version}.tar.gz
-#!RemoteAsset:  sha256:d972568557dd66dcffc43b9a3a44907f33fe796a7fb734edba3e48fd510c01b5
-Source1:        %{url}/releases/download/%{version}/%{name}-%{version}.tar.gz.asc
-Source2:        sssd.sysusers
+Source1:        sssd.sysusers
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-static
-BuildOption(conf):  --disable-rpath
 BuildOption(conf):  --without-oidc-child
+BuildOption(conf):  --with-id-provider-idp=no
 BuildOption(conf):  --with-db-path=%{_localstatedir}/lib/sss/db
 BuildOption(conf):  --with-gpo-cache-path=%{_localstatedir}/lib/sss/gpo_cache
 BuildOption(conf):  --with-pipe-path=%{_localstatedir}/lib/sss/pipes
@@ -33,6 +31,8 @@ BuildOption(conf):  --without-python2-bindings
 BuildOption(conf):  --with-sssd-user=sssd
 BuildOption(conf):  --with-subid
 BuildOption(build):  all
+# Certificate tests use JOSE even when oidc_child is disabled.
+BuildOption(check):  JOSE_CFLAGS="$(pkg-config --cflags jose)" JOSE_LIBS="$(pkg-config --libs jose)"
 
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -57,6 +57,7 @@ BuildRequires:  pkgconfig(dhash)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(ini_config)
 BuildRequires:  pkgconfig(jansson)
+BuildRequires:  pkgconfig(jose)
 BuildRequires:  pkgconfig(krb5)
 BuildRequires:  pkgconfig(ldb)
 BuildRequires:  pkgconfig(libcap)
@@ -86,6 +87,15 @@ BuildRequires:  subid-devel
 BuildRequires:  softhsm
 BuildRequires:  openssh
 BuildRequires:  bc
+BuildRequires:  make
+BuildRequires:  pkgconfig(nss_wrapper)
+BuildRequires:  pkgconfig(pam_wrapper)
+BuildRequires:  pkgconfig(uid_wrapper)
+
+Requires:       bind-utils
+Requires:       python3-systemd
+Requires(post): alternatives
+Requires(preun): alternatives
 
 %description
 This package provides a set of daemons to manage access to remote directories
@@ -203,7 +213,7 @@ Library to map certificates to users based on rules
 
 %package     -n python-sssdconfig
 Summary:        SSSD and IPA configuration file manipulation classes and functions
-%python_provide python3-sssdconfig
+Provides:       python3-sssdconfig = %{version}-%{release}
 
 %description -n python-sssdconfig
 Provides python3 files for manipulation SSSD and IPA configuration files.
@@ -211,7 +221,7 @@ Provides python3 files for manipulation SSSD and IPA configuration files.
 %package     -n python-sss-murmur
 Summary:        Python3 bindings for murmur hash function
 License:        LGPL-3.0-or-later
-%python_provide python3-sss-murmur
+Provides:       python3-sss-murmur = %{version}-%{release}
 
 %description -n python-sss-murmur
 Provides python3 module for calculating the murmur hash version 3
@@ -220,7 +230,7 @@ Provides python3 module for calculating the murmur hash version 3
 Summary:        Python3 bindings for the FreeIPA HBAC Evaluator library
 License:        LGPL-3.0-or-later
 Requires:       ipa-hbac = %{version}-%{release}
-%python_provide python-ipa-hbac
+Provides:       python3-ipa-hbac = %{version}-%{release}
 
 %description -n python-ipa-hbac
 The python-ipa-hbac contains the bindings so that ipa-hbac can be
@@ -230,7 +240,7 @@ used by Python applications.
 Summary:        Python3 bindings for sss-nss-idmap
 License:        LGPL-3.0-or-later
 Requires:       sss-nss-idmap = %{version}-%{release}
-%python_provide python-sss-nss-idmap
+Provides:       python3-sss-nss-idmap = %{version}-%{release}
 
 %description -n python-sss-nss-idmap
 The python-sss-nss-idmap contains the bindings so that sss-nss-idmap can
@@ -242,61 +252,60 @@ autoreconf -fiv
 %install -a
 mkdir -p %{buildroot}%{_sysconfdir}/cifs-utils
 
-mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
-install -m644 src/examples/logrotate %{buildroot}%{_sysconfdir}/logrotate.d/sssd
+install -D -m644 src/examples/logrotate %{buildroot}%{_sysconfdir}/logrotate.d/sssd
 
-mkdir -p %{buildroot}%{_sysconfdir}/krb5.conf.d/
-cp %{buildroot}%{_datadir}/sssd/krb5-snippets/enable_sssd_conf_dir \
+install -D -m 0644 %{buildroot}%{_datadir}/sssd/krb5-snippets/enable_sssd_conf_dir \
    %{buildroot}%{_sysconfdir}/krb5.conf.d/enable_sssd_conf_dir
 
 install -Dm0644 contrib/sssd-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
-install -Dpm0644 %{SOURCE2} %{buildroot}%{_sysusersdir}/sssd.conf
+install -Dpm0644 %{SOURCE1} %{buildroot}%{_sysusersdir}/sssd.conf
 
 %find_lang %{name} --generate-subpackages
+%find_lang sss_ssh_authorizedkeys sss_ssh_knownhosts sssd-simple sssd-sudo \
+    sssd-session-recording sssd-systemtap sssd sss_cache sss_debuglevel \
+    sss_obfuscate sss_override sss_seed sssctl sssd_krb5_locator_plugin \
+    pam_sss pam_sss_gss \
+    sssd-man.lang --with-man --without-mo
+%find_lang sssd-ldap sssd-ldap-attributes ldap-man.lang --with-man --without-mo
+%find_lang sssd-krb5 krb5-man.lang --with-man --without-mo
+%find_lang sssd-ipa ipa-man.lang --with-man --without-mo
+%find_lang sssd-ad ad-man.lang --with-man --without-mo
+%find_lang sssd-ifp dbus-man.lang --with-man --without-mo
+%find_lang sssd-kcm kcm-man.lang --with-man --without-mo
+%find_lang sss_rpcidmapd nfs-idmap-man.lang --with-man --without-mo
+%find_lang idmap_sss winbind-idmap-man.lang --with-man --without-mo
+%find_lang sss-certmap sss-certmap-man.lang --with-man --without-mo
 
 %pre
-%sysusers_create_package %{name} %{SOURCE2}
+%sysusers_create_package %{name} %{SOURCE1}
 
 %post
+alternatives --install %{_sysconfdir}/cifs-utils/idmap-plugin cifs-idmap-plugin %{_libdir}/cifs-utils/cifs_idmap_sss.so 20
 if [ -x /usr/bin/systemd-tmpfiles ]; then
    systemd-tmpfiles --create %{_tmpfilesdir}/sssd.conf || :
 fi
 
-%systemd_post sssd.service
-%systemd_post sssd-autofs.socket
-%systemd_post sssd-nss.socket
-%systemd_post sssd-ssh.socket
-%systemd_post sssd-sudo.socket
-%__rm -f %{_localstatedir}/lib/sss/mc/passwd
-%__rm -f %{_localstatedir}/lib/sss/mc/group
-%__rm -f %{_localstatedir}/lib/sss/mc/initgroups
-%__rm -f %{_localstatedir}/lib/sss/mc/sid
+%systemd_post sssd.service sssd-autofs.socket sssd-nss.socket sssd-pac.socket sssd-pam.socket sssd-ssh.socket sssd-sudo.socket
+rm -f %{_localstatedir}/lib/sss/mc/passwd \
+    %{_localstatedir}/lib/sss/mc/group \
+    %{_localstatedir}/lib/sss/mc/initgroups \
+    %{_localstatedir}/lib/sss/mc/sid
 %__rm -f %{_localstatedir}/lib/sss/pubconf/known_hosts
 
 %preun
-%systemd_preun sssd.service
-%systemd_preun sssd-autofs.socket
-%systemd_preun sssd-nss.socket
-%systemd_preun sssd-pam.socket
-%systemd_preun sssd-ssh.socket
-%systemd_preun sssd-sudo.socket
+if [ "$1" -eq 0 ]; then
+    alternatives --remove cifs-idmap-plugin %{_libdir}/cifs-utils/cifs_idmap_sss.so
+fi
+%systemd_preun sssd.service sssd-autofs.socket sssd-nss.socket sssd-pac.socket sssd-pam.socket sssd-ssh.socket sssd-sudo.socket
 
 %postun
-%__rm -f %{_localstatedir}/lib/sss/mc/passwd
-%__rm -f %{_localstatedir}/lib/sss/mc/group
-%__rm -f %{_localstatedir}/lib/sss/mc/initgroups
-%__rm -f %{_localstatedir}/lib/sss/mc/sid
-%systemd_postun_with_restart sssd-autofs.socket
-%systemd_postun_with_restart sssd-nss.socket
-%systemd_postun_with_restart sssd-pam.socket
-%systemd_postun_with_restart sssd-ssh.socket
-%systemd_postun_with_restart sssd-sudo.socket
+rm -f %{_localstatedir}/lib/sss/mc/passwd \
+    %{_localstatedir}/lib/sss/mc/group \
+    %{_localstatedir}/lib/sss/mc/initgroups \
+    %{_localstatedir}/lib/sss/mc/sid
+%systemd_postun_with_restart sssd-autofs.socket sssd-nss.socket sssd-pac.socket sssd-pam.socket sssd-ssh.socket sssd-sudo.socket
 
-%systemd_postun sssd-autofs.service
-%systemd_postun sssd-nss.service
-%systemd_postun sssd-pam.service
-%systemd_postun sssd-ssh.service
-%systemd_postun sssd-sudo.service
+%systemd_postun sssd-autofs.service sssd-nss.service sssd-pac.service sssd-pam.service sssd-ssh.service sssd-sudo.service
 
 %post dbus
 %systemd_post sssd-ifp.service
@@ -314,27 +323,22 @@ fi
 %systemd_preun sssd-kcm.socket
 
 %postun kcm
-%systemd_postun_with_restart sssd-kcm.socket
-%systemd_postun_with_restart sssd-kcm.service
+%systemd_postun_with_restart sssd-kcm.socket sssd-kcm.service
 
 %posttrans
 %systemd_postun_with_restart sssd.service
-%__chown -f -R root:sssd %{_sysconfdir}/sssd || true
-%__chmod -f -R g+r %{_sysconfdir}/sssd || true
-%__chown -f -h sssd:sssd %{_localstatedir}/lib/sss/db/* || true
-%__chown -f -h sssd:sssd %{_localstatedir}/log/%{name}/*.log* || true
-%__chown -f -h sssd:sssd %{_localstatedir}/lib/sss/secrets/*.ldb || true
-%__chown -f -R sssd:sssd %{_localstatedir}/lib/sss/gpo_cache || true
 
-%files
-%license src/sss_client/COPYING src/sss_client/COPYING.LESSER
+%files -f sssd-man.lang
 %doc src/examples/sssd-example.conf
+%license src/sss_client/COPYING src/sss_client/COPYING.LESSER
 %{_sbindir}/sssd
 %{_unitdir}/sssd.service
 %{_unitdir}/sssd-autofs.socket
 %{_unitdir}/sssd-autofs.service
 %{_unitdir}/sssd-nss.socket
 %{_unitdir}/sssd-nss.service
+%{_unitdir}/sssd-pac.socket
+%{_unitdir}/sssd-pac.service
 %{_unitdir}/sssd-pam.socket
 %{_unitdir}/sssd-pam.service
 %{_unitdir}/sssd-ssh.socket
@@ -345,6 +349,7 @@ fi
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/sssd_be
 %{_libexecdir}/%{name}/sssd_nss
+%{_libexecdir}/%{name}/sssd_pac
 %attr(0750,root,sssd) %caps(cap_dac_read_search=p) %{_libexecdir}/%{name}/sssd_pam
 %{_libexecdir}/%{name}/sssd_autofs
 %{_libexecdir}/%{name}/sssd_ssh
@@ -409,6 +414,7 @@ fi
 %{_libdir}/security/pam_sss.so
 %{_libdir}/security/pam_sss_gss.so
 %{_libdir}/krb5/plugins/libkrb5/sssd_krb5_locator_plugin.so
+%{_libdir}/krb5/plugins/authdata/sssd_pac_plugin.so
 %dir %{_libdir}/cifs-utils
 %{_libdir}/cifs-utils/cifs_idmap_sss.so
 %dir %{_sysconfdir}/cifs-utils
@@ -434,39 +440,16 @@ fi
 %{_mandir}/man8/sss_debuglevel.8*
 %{_mandir}/man8/sss_seed.8*
 %{_mandir}/man8/sssctl.8*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man1/sss_ssh_authorizedkeys.1*
-%{_mandir}/*/man1/sss_ssh_knownhosts.1*
-%{_mandir}/*/man5/sssd.conf.5*
-%{_mandir}/*/man5/sssd-sudo.5*
-%{_mandir}/*/man5/sssd-session-recording.5*
-%{_mandir}/*/man5/sssd-systemtap.5*
-%{_mandir}/*/man8/sssd.8*
-%{_mandir}/*/man8/sss_cache.8*
-# Emm why only for ru & sv - 251
-%{_mandir}/*/man8/sss_debuglevel.8.gz
-%{_mandir}/*/man8/sss_obfuscate.8*
-%{_mandir}/*/man8/sss_override.8*
-%{_mandir}/*/man8/sss_seed.8*
-%{_mandir}/*/man8/sssctl.8*
-%{_mandir}/*/man8/sssd_krb5_locator_plugin.8*
-%{_mandir}/*/man8/sssd_krb5_localauth_plugin.8*
-%{_mandir}/*/man8/pam_sss.8*
-%{_mandir}/*/man8/pam_sss_gss.8*
 # sssd-idp
-%exclude %{_libdir}/sssd/libsss_idp.so
+%exclude %{_mandir}/*/man5/sssd-idp.5*
 %exclude %{_libdir}/%{name}/modules/sssd_krb5_idp_plugin.so
-%exclude %{_mandir}/man5/sssd-idp*
 
-%files ldap
+%files ldap -f ldap-man.lang
 %{_libdir}/%{name}/libsss_ldap.so
 %{_mandir}/man5/sssd-ldap.5*
 %{_mandir}/man5/sssd-ldap-attributes.5*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sssd-ldap.5*
-%{_mandir}/*/man5/sssd-ldap-attributes.5*
 
-%files krb5
+%files krb5 -f krb5-man.lang
 %{_libdir}/%{name}/libsss_krb5.so
 %{_mandir}/man5/sssd-krb5.5*
 %attr(775,sssd,sssd) %dir %{_localstatedir}/lib/sss/pubconf/krb5.include.d
@@ -476,59 +459,45 @@ fi
 %dir %{_datadir}/sssd/krb5-snippets
 %{_datadir}/sssd/krb5-snippets/enable_sssd_conf_dir
 %{_datadir}/sssd/krb5-snippets/sssd_enable_idp
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sssd-krb5.5*
 
-%files ipa
+%files ipa -f ipa-man.lang
 %attr(770,sssd,sssd) %dir %{_localstatedir}/lib/sss/keytabs
 %{_libdir}/%{name}/libsss_ipa.so
 %attr(0750,root,sssd) %caps(cap_setuid,cap_setgid=p) %{_libexecdir}/%{name}/selinux_child
 %{_mandir}/man5/sssd-ipa.5*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sssd-ipa.5*
 
-%files ad
+%files ad -f ad-man.lang
 %{_libdir}/%{name}/libsss_ad.so
 %{_libexecdir}/%{name}/gpo_child
 %{_mandir}/man5/sssd-ad.5*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sssd-ad.5*
 
 %files proxy
 %attr(0750,root,sssd) %{_libexecdir}/%{name}/proxy_child
 %{_libdir}/%{name}/libsss_proxy.so
 
-%files dbus
+%files dbus -f dbus-man.lang
 %{_libexecdir}/%{name}/sssd_ifp
 %{_mandir}/man5/sssd-ifp.5*
 %{_unitdir}/sssd-ifp.service
 %{_datadir}/dbus-1/system.d/org.freedesktop.sssd.infopipe.conf
 %{_datadir}/dbus-1/system-services/org.freedesktop.sssd.infopipe.service
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sssd-ifp.5*
 
-%files kcm
+%files kcm -f kcm-man.lang
 %{_libexecdir}/%{name}/sssd_kcm
 %dir %{_datadir}/sssd-kcm
 %{_datadir}/sssd-kcm/kcm_default_ccache
 %{_unitdir}/sssd-kcm.socket
 %{_unitdir}/sssd-kcm.service
 %{_mandir}/man8/sssd-kcm.8*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man8/sssd-kcm.8*
 
-%files nfs-idmap
+%files nfs-idmap -f nfs-idmap-man.lang
 %{_mandir}/man5/sss_rpcidmapd.5*
 %{_libdir}/libnfsidmap/sss.so
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sss_rpcidmapd.5*
 
-%files winbind-idmap
+%files winbind-idmap -f winbind-idmap-man.lang
 %dir %{_libdir}/samba/idmap
 %{_libdir}/samba/idmap/sss.so
 %{_mandir}/man8/idmap_sss.8*
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man8/idmap_sss.8*
 
 %files -n sss-sudo
 %{_libdir}/libsss_sudo.so*
@@ -570,14 +539,12 @@ fi
 %files -n python-ipa-hbac
 %{python3_sitearch}/pyhbac.so
 
-%files -n sss-certmap
+%files -n sss-certmap -f sss-certmap-man.lang
 %{_libdir}/libsss_certmap.so.*
 %{_mandir}/man5/sss-certmap.5*
 %{_includedir}/sss_certmap.h
 %{_libdir}/libsss_certmap.so
 %{_libdir}/pkgconfig/sss_certmap.pc
-# TODO: %%find_lang failed us - 251
-%{_mandir}/*/man5/sss-certmap.5*
 
 %changelog
 %autochangelog

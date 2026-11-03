@@ -13,23 +13,9 @@ wordings usually there). Later improved by the upstream in
 
 Signed-off-by: Petr Písař <ppisar@redhat.com>
 ---
- warnquota.c    |  2 +-
  warnquota.conf | 16 ++++++++--------
- 2 files changed, 9 insertions(+), 9 deletions(-)
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/warnquota.c b/warnquota.c
-index 2882fee..48d79c0 100644
---- a/warnquota.c
-+++ b/warnquota.c
-@@ -883,7 +883,7 @@ cc_parse_err:
- 			}
- #ifdef USE_LDAP_MAIL_LOOKUP
- 			else if (!strcmp(var, "LDAP_MAIL")) {
--				if(strcasecmp(value, "true") == 0) 
-+				if(strncasecmp(value, "true", 4) == 0)
- 					config->use_ldap_mail = 1;
- 				else
- 					config->use_ldap_mail = 0;
 diff --git a/warnquota.conf b/warnquota.conf
 index 5bbd0ab..366c3e0 100644
 --- a/warnquota.conf

@@ -5,19 +5,22 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%bcond check 0
-
 Name:           strongswan
-Version:        6.0.2
+Version:        6.1.0
 Release:        %autorelease
 Summary:        An OpenSource IPsec-based VPN and TNC solution
 License:        GPL-2.0-or-later
 URL:            https://www.strongswan.org/
 VCS:            git:https://github.com/strongswan/strongswan
-#!RemoteAsset
+#!RemoteAsset:  sha256:fe6c97481298767213cfc2e9a1da29fdd8018d481ff4cb9cf0283099654f20d4
 Source0:        https://download.strongswan.org/strongswan-%{version}.tar.bz2
 Source1:        strongswan.tmpfiles
 BuildSystem:    autotools
+
+# Disable automatic LAN bypass routing; https://sources.debian.org/src/strongswan/6.1.0-2/debian/patches/02_disable-bypass-lan.patch/
+Patch2000:      2000-disable-bypass-lan.patch
+# Disable automatic user-space IPsec routing; https://sources.debian.org/src/strongswan/6.1.0-2/debian/patches/dont-load-kernel-libipsec-plugin-by-default.patch/
+Patch2001:      2001-disable-kernel-libipsec.patch
 
 BuildOption(conf):  --disable-static
 BuildOption(conf):  --with-ipsec-script=strongswan
@@ -39,8 +42,6 @@ BuildOption(conf):  --enable-gcm
 BuildOption(conf):  --enable-chapoly
 BuildOption(conf):  --enable-md4
 BuildOption(conf):  --enable-ml
-BuildOption(conf):  --enable-gcrypt
-BuildOption(conf):  --enable-newhope
 BuildOption(conf):  --enable-xauth-eap
 BuildOption(conf):  --enable-xauth-pam
 BuildOption(conf):  --enable-xauth-noauth
@@ -66,16 +67,12 @@ BuildOption(conf):  --enable-tpm
 BuildOption(conf):  --enable-farp
 BuildOption(conf):  --enable-dhcp
 BuildOption(conf):  --enable-ha
-BuildOption(conf):  --enable-led
 BuildOption(conf):  --enable-sql
 BuildOption(conf):  --enable-sqlite
-BuildOption(conf):  --enable-tnc-ifmap
 BuildOption(conf):  --enable-tnc-pdp
 BuildOption(conf):  --enable-tnc-imc
 BuildOption(conf):  --enable-tnc-imv
 BuildOption(conf):  --enable-tnccs-20
-BuildOption(conf):  --enable-tnccs-11
-BuildOption(conf):  --enable-tnccs-dynamic
 BuildOption(conf):  --enable-imc-test
 BuildOption(conf):  --enable-imv-test
 BuildOption(conf):  --enable-imc-scanner
@@ -88,12 +85,13 @@ BuildOption(conf):  --enable-imc-swima
 BuildOption(conf):  --enable-imv-swima
 BuildOption(conf):  --enable-imc-hcd
 BuildOption(conf):  --enable-imv-hcd
+BuildOption(conf):  --disable-ikev1
+BuildOption(conf):  --enable-ldap
 BuildOption(conf):  --enable-curl
 BuildOption(conf):  --enable-cmd
 BuildOption(conf):  --enable-acert
 BuildOption(conf):  --enable-vici
 BuildOption(conf):  --enable-swanctl
-BuildOption(conf):  --enable-duplicheck
 BuildOption(conf):  --enable-selinux
 BuildOption(conf):  --enable-stroke
 BuildOption(conf):  --enable-kernel-libipsec
@@ -103,9 +101,6 @@ BuildOption(conf):  CPPFLAGS="-DSTARTER_ALLOW_NON_ROOT"
 BuildOption(conf):  --enable-aesni
 %endif
 
-BuildRequires:  autoconf
-BuildRequires:  automake
-BuildRequires:  libtool
 BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  pkgconfig(systemd)
@@ -116,21 +111,18 @@ BuildRequires:  pkgconfig(ldap)
 BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  gettext-devel
-BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(pam)
 BuildRequires:  pkgconfig(json-c)
-BuildRequires:  pkgconfig(libgcrypt)
 BuildRequires:  pkgconfig(xtables)
 BuildRequires:  pkgconfig(libcap)
+BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  pkgconfig(tss2-sys)
 
-Requires(post):  systemd
-Requires(preun):  systemd
-Requires(postun):  systemd
+%systemd_requires
 
 %description
-The strongSwan IPsec implementation supports both the IKEv1 and IKEv2 key
-exchange protocols in conjunction with the native NETKEY IPsec stack of the
+The strongSwan IPsec implementation supports the IKEv2 key
+exchange protocol in conjunction with the native NETKEY IPsec stack of the
 Linux kernel.
 
 %package        tnc-imcvs
@@ -140,16 +132,13 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    tnc-imcvs
 This package provides Trusted Network Connect's (TNC) architecture support.
 
-%conf -p
-export ACLOCAL_PATH=/usr/share/gettext/m4:$ACLOCAL_PATH
-autoreconf -fiv
-
 %install -a
 # prefix man pages
-for i in %{buildroot}%{_mandir}/*/*; do
-    if echo "$i" | grep -vq '/strongswan[^\/]*$'; then
-        mv "$i" "`echo "$i" | sed -re 's|/([^/]+)$|/strongswan_\1|'`"
-    fi
+for manpage in %{buildroot}%{_mandir}/*/*; do
+    case "${manpage##*/}" in
+        strongswan*) ;;
+        *) mv "$manpage" "${manpage%/*}/strongswan_${manpage##*/}" ;;
+    esac
 done
 
 # delete unwanted library files - no consumers, so no -devel package
@@ -158,7 +147,7 @@ rm -f %{buildroot}%{_libdir}/strongswan/*.so
 chmod 644 %{buildroot}%{_sysconfdir}/strongswan/strongswan.conf
 
 install -d -m 700 %{buildroot}%{_sysconfdir}/strongswan/ipsec.d/{aacerts,acerts,certs,cacerts,crls,ocspcerts,private,reqs}
-install -d -m 0700 %{buildroot}%{_rundir}/strongswan
+install -d -m 0755 %{buildroot}%{_rundir}/strongswan
 
 install -D -m 0644 %{SOURCE1} %{buildroot}/%{_tmpfilesdir}/strongswan.conf
 
@@ -175,8 +164,8 @@ install -D -m 0644 %{SOURCE1} %{buildroot}/%{_tmpfilesdir}/strongswan.conf
 %systemd_postun_with_restart strongswan.service strongswan-starter.service
 
 %files
-%license COPYING
 %doc README NEWS TODO ChangeLog
+%license COPYING
 %dir %attr(0755,root,root) %{_sysconfdir}/strongswan
 %config(noreplace) %{_sysconfdir}/strongswan/*
 %dir %{_libdir}/strongswan
@@ -190,11 +179,10 @@ install -D -m 0644 %{SOURCE1} %{buildroot}/%{_tmpfilesdir}/strongswan.conf
 %{_sbindir}/strongswan
 %{_sbindir}/swanctl
 %{_libdir}/strongswan/*.so.*
-%{_libdir}/strongswan/plugins/*.so.*
 %exclude %{_libdir}/strongswan/libimcv.so.*
 %exclude %{_libdir}/strongswan/libtnccs.so.*
-%exclude %{_libdir}/strongswan/libipsec.so.*
 %{_libdir}/strongswan/plugins/*.so
+%exclude %{_libdir}/strongswan/plugins/libstrongswan-*tnc*.so
 %{_libexecdir}/strongswan/*
 %exclude %{_libexecdir}/strongswan/attest
 %exclude %{_libexecdir}/strongswan/pt-tls-client
@@ -204,12 +192,11 @@ install -D -m 0644 %{SOURCE1} %{buildroot}/%{_tmpfilesdir}/strongswan.conf
 %{_datadir}/strongswan/templates/database/
 %attr(0755,root,root) %dir %{_rundir}/strongswan
 %{_tmpfilesdir}/strongswan.conf
-%{_libdir}/strongswan/libipsec.so.*
 
 %files tnc-imcvs
 %{_sbindir}/sw-collector
 %{_sbindir}/sec-updater
-%dir %{_libdir}/strongswan/imcvs
+%{_libdir}/strongswan/imcvs/
 %dir %{_libdir}/strongswan/plugins
 %{_libdir}/strongswan/libimcv.so.*
 %{_libdir}/strongswan/libtnccs.so.*
@@ -220,4 +207,4 @@ install -D -m 0644 %{SOURCE1} %{buildroot}/%{_tmpfilesdir}/strongswan.conf
 %{_datadir}/strongswan/swidtag/*.swidtag
 
 %changelog
-%{?autochangelog}
+%autochangelog

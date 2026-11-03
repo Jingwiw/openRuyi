@@ -1,0 +1,21 @@
+From: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+Date: Wed, 11 Nov 2020 16:45:44 +0100
+Subject: dont-load-kernel-libipsec-plugin-by-default
+
+---
+ conf/plugins/kernel-libipsec.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/conf/plugins/kernel-libipsec.conf b/conf/plugins/kernel-libipsec.conf
+index e9834da..89c3c5e 100644
+--- a/conf/plugins/kernel-libipsec.conf
++++ b/conf/plugins/kernel-libipsec.conf
+@@ -8,7 +8,7 @@ kernel-libipsec {
+ 
+     # Whether to load the plugin. Can also be an integer to increase the
+     # priority of this plugin.
+-    load = yes
++    load = no
+ 
+     # Whether to send and receive ESP packets without UDP encapsulation if
+     # supported on this platform and no NAT is detected.

@@ -18,7 +18,7 @@ ExecStart=/usr/bin/postgres -D ${PGDATA}
 ExecReload=/bin/kill -HUP ${MAINPID}
 KillMode=mixed
 KillSignal=SIGINT
-TimeoutSec=infinity
+TimeoutSec=120
 
 OOMScoreAdjust=-200
 

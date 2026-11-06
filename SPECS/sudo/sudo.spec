@@ -20,14 +20,6 @@ Source2:        sudo.pam
 Source3:        sudo-i.pam
 BuildSystem:    autotools
 
-# NOTE: Temporarily disable applying CVE patches below.
-# These patches (CVE-2025-32462 / CVE-2025-32463) have not yet been checked
-# against the latest upstream version.
-# Until verification is done, do not apply them to avoid conflicts.
-# TODO: Re-enable if upstream has not fixed the issues.
-# Patch0:         0001-CVE-2025-32462.patch
-# Patch1:         0002-CVE-2025-32463.patch
-
 BuildOption(conf):  --disable-root-mailer
 BuildOption(conf):  --disable-intercept
 BuildOption(conf):  --disable-log-server
@@ -37,16 +29,14 @@ BuildOption(conf):  --with-logfac=authpriv
 BuildOption(conf):  --with-pam
 BuildOption(conf):  --with-pam-login
 BuildOption(conf):  --with-editor=/bin/vi
-BuildOption(conf):  --with-env-editor
-BuildOption(conf):  --with-ignore-dot
-BuildOption(conf):  --with-tty-tickets
 BuildOption(conf):  --without-ldap
 BuildOption(conf):  --with-selinux
 BuildOption(conf):  --with-passprompt="[sudo] password for %p: "
-BuildOption(conf):  --without-linux-audit
+BuildOption(conf):  --with-linux-audit
 BuildOption(conf):  --with-sssd
 BuildOption(install):  install_uid=`id -u` install_gid=`id -g` sudoers_uid=`id -u` sudoers_gid=`id -g`
 
+BuildRequires:  pkgconfig(audit)
 BuildRequires:  pkgconfig(pam)
 BuildRequires:  groff
 BuildRequires:  flex
@@ -77,7 +67,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 The %{name}-devel package contains header files for developing sudo plugins.
 
 %conf -p
-autoreconf -I m4 -fv --install
 export CFLAGS="%{build_cflags} -fpie" LDFLAGS="%{build_ldflags} -pie"
 
 %install -a
@@ -102,20 +91,17 @@ rm -f %{buildroot}%{_sysconfdir}/sudoers.dist
 mkdir -p %{buildroot}/etc/ld.so.conf.d
 echo "/usr/libexec/sudo" > %{buildroot}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
 # Install PAM files
-mkdir -p %{buildroot}/etc/pam.d
-install -p -c -m 0644 %{S:2} %{buildroot}/etc/pam.d/sudo
-install -p -c -m 0644 %{S:3} %{buildroot}/etc/pam.d/sudo-i
+install -D -p -m 0644 %{S:2} %{buildroot}/etc/pam.d/sudo
+install -D -p -m 0644 %{S:3} %{buildroot}/etc/pam.d/sudo-i
 
 %find_lang sudo --all-name --generate-subpackages
-# Remove rpath
-# chrpath --delete %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/* %{buildroot}%{_libexecdir}/sudo/*
 
 %post
 /bin/chmod 0440 /etc/sudoers || :
 
 %files
-%license LICENSE.md
 %doc %{_docdir}/%{name}
+%license LICENSE.md
 %attr(0440,root,root) %config(noreplace) /etc/sudoers
 %attr(0750,root,root) %dir /etc/sudoers.d/
 %config(noreplace) /etc/dnf/protected.d/sudo.conf

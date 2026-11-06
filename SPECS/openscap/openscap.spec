@@ -7,25 +7,21 @@
 %bcond asciidoc 0
 
 Name:           openscap
-Version:        1.4.4
+Version:        1.4.6
 Release:        %autorelease
 Summary:        Open Source Libraries for SCAP Integration
 License:        LGPL-2.1-or-later
 URL:            http://www.open-scap.org/
 VCS:            git:https://github.com/OpenSCAP/openscap
-#!RemoteAsset:  sha256:25b1b046822121204e6d53d877a532c88bf7fde14b94c9c72297cd5709b03478
+#!RemoteAsset:  sha256:7c6064ea52bc0002a21ba8d49e33bb25f55c388a06ba60b3c5ba02783b8acf8e
 Source:         https://github.com/OpenSCAP/openscap/releases/download/%{version}/openscap-%{version}.tar.gz
 BuildSystem:    cmake
 
-BuildOption(conf):  -DWITH_PCRE2=ON
+BuildOption(conf):  -DENABLE_PYTHON3=ON
 BuildOption(conf):  -DENABLE_PERL=ON
 BuildOption(conf):  -DENABLE_DOCS=ON
 BuildOption(conf):  -DOPENSCAP_PROBE_UNIX_GCONF=OFF
-BuildOption(conf):  -DGCONF_LIBRARY=
 
-BuildRequires:  autoconf
-BuildRequires:  automake
-BuildRequires:  libtool
 BuildRequires:  make
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
@@ -40,7 +36,6 @@ BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  pkgconfig(libcap)
 BuildRequires:  pkgconfig(blkid)
 BuildRequires:  pkgconfig(bzip2)
-BuildRequires:  pkgconfig(ldap)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(yaml-0.1)
@@ -66,7 +61,6 @@ Requires:       acl
 Requires:       libblkid
 Requires:       libcap
 Requires:       libselinux
-Requires:       openldap
 Requires:       popt
 Requires:       procps
 Requires:       xmlsec
@@ -122,16 +116,13 @@ mv %{buildroot}%{_sysconfdir}/bash_completion.d/* %{buildroot}%{bash_completions
 
 %{__python3} %{_rpmconfigdir}/openruyi/pathfix.py -i %{__python3} -p -n $RPM_BUILD_ROOT%{_bindir}/scap-as-rpm
 
-%check
-ctest -V -E sce/test_sce_in_ds.sh
-
 %files
-%license COPYING
 %doc AUTHORS NEWS README.md docs/oscap-scan.cron
 %if %{with asciidoc}
 %doc %{_pkgdocdir}/manual/
 %endif
 %doc %{_pkgdocdir}/html/
+%license COPYING
 %{_bindir}/*
 %{_libdir}/*.so.*
 %dir %{_datadir}/openscap

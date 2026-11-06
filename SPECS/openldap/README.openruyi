@@ -1,0 +1,91 @@
+OpenLDAP on openRuyi
+===================
+
+Initial configuration
+---------------------
+The package does not start the server or create a directory database.
+Install openldap-client for the LDAP commands below.
+Run these commands as root on a new installation:
+
+    slapd-init
+    systemctl start slapd
+    ldapsearch -Q -Y EXTERNAL -H ldapi:/// -b cn=config dn
+
+slapd-init refuses an existing /etc/openldap/slapd.d, including an empty
+one. It validates a temporary configuration before it publishes the directory.
+Do not delete an existing directory to make initialization succeed.
+
+The service runs as ldap. It accepts local Unix socket connections only.
+Only the local root identity can manage cn=config. There is no default
+LDAP password, domain, network listener, or business database.
+Enable the service with systemctl enable slapd after configuration and tests.
+
+Add a directory database
+------------------------
+Use ldapadd -Q -Y EXTERNAL -H ldapi:/// -f FILE to add configuration entries.
+Load the required schema LDIF files from /etc/openldap/schema first.
+Do not substitute schema names without checking their attribute definitions.
+
+Load back_mdb.so from @LIBEXECDIR@/openldap with an olcModuleList entry.
+Add an olcMdbConfig entry with the suffix, directory, size limit, and ACLs
+for your deployment. Use a directory under /var/lib/ldap owned by ldap,
+with mode 0700. Give each database its own directory.
+Use slappasswd to create a password hash if the database needs a root password.
+Do not put a plaintext password in a shell command or use an example password.
+See slapd-config(5), slapd-mdb(5), and slapd.access(5).
+
+Manage configuration
+--------------------
+Use ldapmodify over ldapi:/// for online changes. Do not edit the generated
+files in slapd.d or recalculate their CRC values. For offline changes, stop
+the service and use slapmodify or export and import with slapcat and slapadd.
+
+For a custom .schema file, use a temporary slapd.conf with the required
+include directives. Run slaptest -f FILE -F EMPTY_DIRECTORY to convert it.
+Review the generated schema entry before importing it. Keep backups outside
+the live configuration directory. See slaptest(8) and slapadd(8).
+
+Network access and TLS
+----------------------
+Configure certificate, key, and CA paths through cn=config before enabling
+network access. The ldap user must be able to read them. The service cannot
+read home directories. Use a deployment-owned directory under /etc instead.
+Configure access controls and require protected authentication as appropriate.
+Test certificate trust and hostname validation from a client.
+
+Use systemctl edit slapd to override the listener list. For example:
+
+    [Service]
+    ExecStart=
+    ExecStart=@LIBEXECDIR@/slapd -d 0 -F /etc/openldap/slapd.d -h "ldapi:/// ldap://127.0.0.1:389/"
+    AmbientCapabilities=CAP_NET_BIND_SERVICE
+    CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+The capability is needed for low TCP ports when the service runs as ldap.
+Use ldapsearch -ZZ for StartTLS. Do not disable certificate checks to make
+that test pass. Opening a listener does not configure a firewall or TLS.
+SASL mechanisms also depend on the installed Cyrus SASL modules. There is
+no package-specific mechanism allowlist. Configure GSSAPI only after its
+keytab, service identity, and client authentication have been tested.
+
+Existing installations
+----------------------
+The service no longer reads /etc/sysconfig/openldap or selects slapd.conf.
+Review existing listener, identity, and startup options before restarting.
+The package does not convert or delete administrator data. A retained old
+configuration or .rpmsave file is not used by the new service automatically.
+For a legacy slapd.conf, stop the service and convert a copy with slaptest.
+Alternatively, use a service override with an explicit -f path while migrating.
+
+Before a 2.6 to 2.7 upgrade, stop slapd and use the 2.6 tools to export
+cn=config and every database to separate LDIF files. Save configuration,
+certificates, permissions, module lists, and database copies. Check the exports
+before replacing the old binaries. The MDB storage format changed in 2.7.
+
+Use the 2.7 tools to import into new, separate directories. Check removed
+backends, module paths, ACLs, password policies, and schema before switching.
+Validate with slaptest and compare exported entries after import. Keep the old
+binaries and untouched data until application tests pass. Do not open a 2.7
+MDB directory with 2.6 tools or overwrite the only copy during rollback.
+
+https://www.openldap.org/doc/admin27/appendix-upgrading.html

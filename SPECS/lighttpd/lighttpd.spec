@@ -15,18 +15,17 @@
 %bcond nss 0
 
 Name:           lighttpd
-Version:        1.4.82
+Version:        1.4.85
 Release:        %autorelease
 Summary:        Lightning fast webserver with light system requirements
 License:        BSD-3-Clause
-URL:            http://www.lighttpd.net/
+URL:            https://www.lighttpd.net/
 VCS:            git:https://git.lighttpd.net/lighttpd/lighttpd1.4.git
-#!RemoteAsset
-Source0:        http://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-%{version}.tar.xz
+#!RemoteAsset:  sha256:18de51b393bac4a6827879e1a7ff377c169e414bae92cd245091d80fc2601d13
+Source0:        https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-%{version}.tar.xz
 Source1:        lighttpd.logrotate
-Source2:        php.d-lighttpd.ini
-Source3:        lighttpd.sysusers
-Source4:        lighttpd.tmpfiles
+Source2:        lighttpd.sysusers
+Source3:        lighttpd.tmpfiles
 BuildSystem:    autotools
 
 BuildOption(conf):  --libdir='%{_libdir}/lighttpd'
@@ -122,23 +121,18 @@ BuildRequires:  libpq-devel
 BuildRequires:  libdbi-devel
 %endif
 
-Requires:       system-logos
 Requires:       %{name}-filesystem = %{version}-%{release}
-Requires:       %{name}-mod_deflate = %{version}-%{release}
-Requires:       %{name}-mod_webdav = %{version}-%{release}
-Requires:       %{name}-mod_magnet = %{version}-%{release}
-Requires:       %{name}-mod_openssl = %{version}-%{release}
 
 %description
 lighttpd is a secure, fast, compliant, and very flexible web server that has
 been optimized for high-performance environments.
 
 %package        fastcgi
-Summary:        FastCGI module and spawning helper for lighttpd
+Summary:        FastCGI configuration for lighttpd
 Requires:       %{name} = %{version}-%{release}
 
 %description    fastcgi
-This package contains the spawn-fcgi helper and configuration for FastCGI.
+This package contains the FastCGI configuration for lighttpd.
 
 %if %{with dbi}
 %package        mod_authn_dbi
@@ -279,12 +273,13 @@ The lighttpd-filesystem package contains the basic directory layout
 for the lighttpd server.
 
 %conf -p
+# TODO: Restore the default ML-KEM group when GnuTLS is built with leancrypto.
+sed -i '/^[[:space:]]*"X25519MLKEM768:"[[:space:]]*$/d' src/mod_gnutls.c
 autoreconf -fiv
 
 %install -a
 
 install -D -p -m 0644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/lighttpd
-install -D -p -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/php.d/lighttpd.ini
 install -D -p -m 0644 doc/systemd/lighttpd.service %{buildroot}%{_unitdir}/lighttpd.service
 
 # Install default web page
@@ -293,6 +288,8 @@ mkdir -p %{buildroot}%{webroot}
 # Config examples
 rm -rf config
 cp -a doc/config config
+sed -i -e 's|"/srv/www"|"%{webroot}"|' \
+       -e 's|server_root + "/htdocs"|server_root|' config/lighttpd.annotated.conf
 find config -name 'Makefile*' | xargs rm -f
 chmod -x doc/scripts/*.sh
 
@@ -300,23 +297,16 @@ chmod -x doc/scripts/*.sh
 mkdir -p %{buildroot}%{_sysconfdir}/lighttpd
 cp -a config/*.conf config/*.d %{buildroot}%{_sysconfdir}/lighttpd/
 
-# Modules load config
-mkdir -p %{buildroot}/usr/lib/modules-load.d
-echo tls > %{buildroot}/usr/lib/modules-load.d/lighttpd-mod_gnutls.conf
-echo tls > %{buildroot}/usr/lib/modules-load.d/lighttpd-mod_openssl.conf
-
 # Create directories
 mkdir -p %{buildroot}%{_var}/log/lighttpd
-mkdir -p %{buildroot}%{_var}/run/lighttpd
 mkdir -p %{buildroot}%{_var}/lib/lighttpd/
 
-install -m0644 -D %{SOURCE3} %{buildroot}%{_sysusersdir}/lighttpd.conf
+install -m0644 -D %{SOURCE2} %{buildroot}%{_sysusersdir}/lighttpd.conf
 
-mkdir -p %{buildroot}/usr/lib/tmpfiles.d
-install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
+install -m0644 -D %{SOURCE3} %{buildroot}%{_tmpfilesdir}/lighttpd.conf
 
 %pre
-%sysusers_create_package %{name} %{SOURCE3}
+%sysusers_create_package %{name} %{SOURCE2}
 
 %post
 %systemd_post lighttpd.service
@@ -328,8 +318,8 @@ install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
 %systemd_postun_with_restart lighttpd.service
 
 %files
-%license COPYING
 %doc AUTHORS README
+%license COPYING
 %config(noreplace) %{_sysconfdir}/lighttpd/*.conf
 %config(noreplace) %{_sysconfdir}/lighttpd/conf.d/*.conf
 %exclude %{_sysconfdir}/lighttpd/conf.d/deflate.conf
@@ -343,13 +333,26 @@ install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
 %{_tmpfilesdir}/lighttpd.conf
 %{_sbindir}/lighttpd
 %{_sbindir}/lighttpd-angel
-%{_libdir}/lighttpd/
-
-%exclude %{_libdir}/lighttpd/mod_webdav.so
+%dir %{_libdir}/lighttpd/
+%{_libdir}/lighttpd/mod_accesslog.so
+%{_libdir}/lighttpd/mod_ajp13.so
+%{_libdir}/lighttpd/mod_auth.so
+%{_libdir}/lighttpd/mod_authn_file.so
+%{_libdir}/lighttpd/mod_cgi.so
+%{_libdir}/lighttpd/mod_dirlisting.so
+%{_libdir}/lighttpd/mod_extforward.so
+%{_libdir}/lighttpd/mod_h2.so
+%{_libdir}/lighttpd/mod_proxy.so
+%{_libdir}/lighttpd/mod_rrdtool.so
+%{_libdir}/lighttpd/mod_sockproxy.so
+%{_libdir}/lighttpd/mod_ssi.so
+%{_libdir}/lighttpd/mod_status.so
+%{_libdir}/lighttpd/mod_userdir.so
+%{_libdir}/lighttpd/mod_vhostdb.so
+%{_libdir}/lighttpd/mod_wstunnel.so
 %{_mandir}/man8/lighttpd*8*
 
 %files fastcgi
-%config(noreplace) %{_sysconfdir}/php.d/lighttpd.ini
 %config(noreplace) %{_sysconfdir}/lighttpd/conf.d/fastcgi.conf
 
 %if %{with dbi}
@@ -374,7 +377,6 @@ install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
 %{_libdir}/lighttpd/mod_deflate.so
 
 %files mod_gnutls
-%{_prefix}/lib/modules-load.d/lighttpd-mod_gnutls.conf
 %{_libdir}/lighttpd/mod_gnutls.so
 
 %files mod_magnet
@@ -395,7 +397,6 @@ install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
 %endif
 
 %files mod_openssl
-%{_prefix}/lib/modules-load.d/lighttpd-mod_openssl.conf
 %{_libdir}/lighttpd/mod_openssl.so
 
 %if %{with dbi}
@@ -424,11 +425,11 @@ install -m0644 -D %{SOURCE4} %{buildroot}/usr/lib/tmpfiles.d/lighttpd.conf
 %dir %{_sysconfdir}/lighttpd/
 %dir %{_sysconfdir}/lighttpd/conf.d/
 %dir %{_sysconfdir}/lighttpd/vhosts.d/
-%ghost %attr(0750, lighttpd, lighttpd) %{_var}/run/lighttpd/
+%ghost %attr(0750, lighttpd, lighttpd) /run/lighttpd/
 %attr(0750, lighttpd, lighttpd) %{_var}/lib/lighttpd/
 %attr(0750, lighttpd, lighttpd) %{_var}/log/lighttpd/
 %attr(0700, lighttpd, lighttpd) %dir %{webroot}/
 %{_sysusersdir}/lighttpd.conf
 
 %changelog
-%{?autochangelog}
+%autochangelog

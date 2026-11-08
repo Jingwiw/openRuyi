@@ -17,8 +17,7 @@ Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  diffutils
-BuildRequires:  postgresql-server-devel >= 18
-BuildRequires:  postgresql-server-devel < 19
+BuildRequires:  postgresql-server-devel(api) = 18
 BuildRequires:  postgresql-server
 BuildRequires:  perl
 BuildRequires:  perl(IPC::Run)
@@ -32,7 +31,7 @@ to PostgreSQL. Enable it in a database with CREATE EXTENSION vector.
 %package        devel
 Summary:        Development headers for PostgreSQL vector extensions
 Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       postgresql-server-devel
+Requires:       postgresql-server-devel(api) = 18
 
 %description    devel
 These headers let other PostgreSQL extensions use pgvector data types.

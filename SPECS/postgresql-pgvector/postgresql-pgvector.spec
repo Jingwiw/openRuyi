@@ -19,6 +19,7 @@ BuildRequires:  make
 BuildRequires:  diffutils
 BuildRequires:  postgresql-server-devel(api) = 18
 BuildRequires:  postgresql-server
+BuildRequires:  postgresql-contrib
 BuildRequires:  perl
 BuildRequires:  perl(IPC::Run)
 BuildRequires:  perl(Test::More)

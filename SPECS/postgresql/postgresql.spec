@@ -6,8 +6,8 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%bcond test 0
-%bcond docs 0
+%bcond test 1
+%bcond docs 1
 
 %global majorversion 18
 %global service_name postgresql.service
@@ -82,19 +82,18 @@ BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  pkgconfig(icu-uc)
 
 %if %{with docs}
+BuildRequires:  docbook-dtds
 BuildRequires:  docbook-xsl
+BuildRequires:  libxml2
+BuildRequires:  libxslt
 %endif
 
 Provides:       %{name}-libs = %{version}-%{release}
 
 %description
-PostgreSQL is an advanced Object-Relational database management system (DBMS).
-The base postgresql package contains the client programs that you'll need to
-access a PostgreSQL DBMS server, as well as HTML documentation for the whole
-system.  These client programs can be located on the same machine as the
-PostgreSQL server, or on a remote machine that accesses a PostgreSQL server
-over a network connection.  The PostgreSQL server can be found in the
-postgresql-server sub-package.
+PostgreSQL is an object-relational database management system.
+This package provides client programs and libraries for local and remote servers.
+The server and HTML manual are available in postgresql-server and postgresql-doc.
 
 %package        devel
 Summary:        PostgreSQL development header files and libraries
@@ -112,9 +111,7 @@ Summary:        The programs needed to create and run a PostgreSQL server
 Requires:       %{name}%{?_isa} = %{version}-%{release}
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
 Requires:       systemd
-# We require this to be present for /usr/sbin/runuser when using --initdb (rhbz#2071437)
 Requires:       util-linux
-# postgresql setup requires runuser from util-linux package
 Provides:       %{name}-server(:MODULE_COMPAT_%{majorversion})
 
 %description    server
@@ -129,9 +126,7 @@ Summary:        Extra documentation for PostgreSQL
 BuildArch:      noarch
 
 %description    doc
-The postgresql-doc package contains some additional documentation for
-PostgreSQL.  Currently, this includes the main documentation in PDF format
-and source files for the PostgreSQL tutorial.
+This package contains the PostgreSQL HTML manual and tutorial files.
 %endif
 
 %package        contrib
@@ -178,8 +173,12 @@ benchmarks.
 %build -a
 %make_build -C contrib
 
+%if %{with docs}
+%make_build -C doc/src/sgml html
+%endif
+
 %if %{with test}
-    make all -C src/test/regress
+%make_build -C src/test/regress
 %endif
 
 %install -a
@@ -259,7 +258,8 @@ install -m0644 -D %{SOURCE6} %{buildroot}%{_unitdir}/postgresql.service
 
 %files -f main.lst
 %doc doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
-%doc COPYRIGHT HISTORY
+%doc HISTORY
+%license COPYRIGHT
 %{_bindir}/clusterdb
 %{_bindir}/createdb
 %{_bindir}/createuser
@@ -280,7 +280,8 @@ install -m0644 -D %{SOURCE6} %{buildroot}%{_unitdir}/postgresql.service
 
 %if %{with docs}
 %files doc
-%doc doc/html
+%doc doc/src/sgml/html
+%license COPYRIGHT
 %{_libdir}/pgsql/tutorial/
 %endif
 

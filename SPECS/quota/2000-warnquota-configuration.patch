@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20P=C3=ADsa=C5=99?= <ppisar@redhat.com>
+Date: Tue, 23 Aug 2011 13:45:15 +0200
+Subject: [PATCH] Use the installed sendmail path
+
+Retain only the sendmail path change from the Fedora patch.
+Source: https://src.fedoraproject.org/rpms/quota/blob/2e8eac20489e1836c5f43b58d5b909e7d0c70d42/f/quota-4.06-warnquota-configuration-tunes.patch
+---
+ warnquota.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/warnquota.conf b/warnquota.conf
+index 5bbd0ab..b446271 100644
+--- a/warnquota.conf
++++ b/warnquota.conf
+@@ -19,7 +19,7 @@ FAIL        = "configure /etc/warnquota.conf before running warnquota"
+ #
+ # command used for sending mails
+ #
+-MAIL_CMD = "/usr/lib/sendmail -t"
++MAIL_CMD = "/usr/sbin/sendmail -t"
+ 
+ #
+ # Standard mail fields

@@ -9,7 +9,7 @@ Name:           quota
 Version:        4.11
 Release:        %autorelease
 Summary:        Linux Diskquota system as part of the Linux kernel
-License:        GPL-2.0-only AND GPL-2.0-or-later
+License:        GPL-2.0-only AND GPL-2.0-or-later AND LGPL-2.1-or-later
 URL:            https://sourceforge.net/projects/linuxquota/
 VCS:            git:https://git.code.sf.net/p/linuxquota/code
 #!RemoteAsset:  sha256:0a51b8f920254d8e83c34a4c3082b7d241f5d6fd65188afadf29859d5223ef78
@@ -20,9 +20,9 @@ Source3:        rpc-rquotad.service
 Source4:        rpc-rquotad.sysconfig
 BuildSystem:    autotools
 
-# Set warnquota mail defaults; https://src.fedoraproject.org/rpms/quota/blob/rawhide/f/quota-4.06-warnquota-configuration-tunes.patch
+# Use the installed sendmail path; https://src.fedoraproject.org/rpms/quota/blob/2e8eac20489e1836c5f43b58d5b909e7d0c70d42/f/quota-4.06-warnquota-configuration-tunes.patch
 Patch2000:      2000-warnquota-configuration.patch
-# Check the RPC port upper bound; https://src.fedoraproject.org/rpms/quota/blob/rawhide/f/quota-4.03-Validate-upper-bound-of-RPC-port.patch
+# Check the RPC port upper bound; https://src.fedoraproject.org/rpms/quota/blob/2e8eac20489e1836c5f43b58d5b909e7d0c70d42/f/quota-4.03-Validate-upper-bound-of-RPC-port.patch
 Patch2001:      2001-validate-rpc-port.patch
 
 BuildOption(conf):  --enable-bsd-behaviour
@@ -108,6 +108,7 @@ install -D -p -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/rpc-rquo
 %exclude %{_docdir}/%{name}
 
 %files devel
+%license COPYING
 %dir %{_includedir}/rpcsvc
 %{_includedir}/rpcsvc/rquota.*
 

@@ -40,6 +40,8 @@ BuildOption(conf):  --with-selinux
 BuildOption(conf):  --with-passprompt="[sudo] password for %p: "
 BuildOption(conf):  --with-linux-audit
 BuildOption(conf):  --enable-pie
+BuildOption(conf):  --enable-zlib=system
+BuildOption(conf):  --enable-tmpfiles.d=%{_tmpfilesdir}
 BuildOption(conf):  --with-sssd
 BuildOption(install):  install_uid=`id -u` install_gid=`id -g` sudoers_uid=`id -u` sudoers_gid=`id -g`
 

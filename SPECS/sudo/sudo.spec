@@ -15,18 +15,16 @@ URL:            https://www.sudo.ws
 VCS:            git:https://github.com/sudo-project/sudo.git
 #!RemoteAsset:  sha256:4a38a1ab3adb1199257edc2a7c4a2bd714665eb605b04368843b06dada2cfcfb
 Source0:        https://www.sudo.ws/dist/%{name}-%{version}.tar.gz
-Source1:        sudoers.conf
-Source2:        sudo.pam
-Source3:        sudo-i.pam
+Source1:        sudo.pam
+Source2:        sudo-i.pam
 BuildSystem:    autotools
 
-# NOTE: Temporarily disable applying CVE patches below.
-# These patches (CVE-2025-32462 / CVE-2025-32463) have not yet been checked
-# against the latest upstream version.
-# Until verification is done, do not apply them to avoid conflicts.
-# TODO: Re-enable if upstream has not fixed the issues.
-# Patch0:         0001-CVE-2025-32462.patch
-# Patch1:         0002-CVE-2025-32463.patch
+# Stop the mailer when dropping privileges fails; https://github.com/sudo-project/sudo/commit/3e474c2f201484be83d994ae10a4e20e8c81bb69.
+Patch0:         1000-mailer-privilege-drop.patch
+# Ignore caller time zones during policy evaluation; https://github.com/sudo-project/sudo/commit/db669167ca599f2a94cd8a4c5fae9e473c81a2fd.
+Patch1:         1001-policy-time-zone.patch
+# Preserve command TZ while clearing the policy environment; https://github.com/sudo-project/sudo/commit/1820a349687522f51023d1ae5925125f59679a8c.
+Patch2:         1002-preserve-command-time-zone.patch
 
 BuildOption(conf):  --disable-root-mailer
 BuildOption(conf):  --disable-intercept
@@ -37,23 +35,19 @@ BuildOption(conf):  --with-logfac=authpriv
 BuildOption(conf):  --with-pam
 BuildOption(conf):  --with-pam-login
 BuildOption(conf):  --with-editor=/bin/vi
-BuildOption(conf):  --with-env-editor
-BuildOption(conf):  --with-ignore-dot
-BuildOption(conf):  --with-tty-tickets
 BuildOption(conf):  --without-ldap
 BuildOption(conf):  --with-selinux
 BuildOption(conf):  --with-passprompt="[sudo] password for %p: "
-BuildOption(conf):  --without-linux-audit
+BuildOption(conf):  --with-linux-audit
+BuildOption(conf):  --enable-pie
+BuildOption(conf):  --enable-zlib=system
+BuildOption(conf):  --enable-tmpfiles.d=%{_tmpfilesdir}
 BuildOption(conf):  --with-sssd
 BuildOption(install):  install_uid=`id -u` install_gid=`id -g` sudoers_uid=`id -u` sudoers_gid=`id -g`
 
+BuildRequires:  pkgconfig(audit)
 BuildRequires:  pkgconfig(pam)
 BuildRequires:  groff
-BuildRequires:  flex
-BuildRequires:  bison
-BuildRequires:  automake
-BuildRequires:  autoconf
-BuildRequires:  libtool
 BuildRequires:  pkgconfig(libcap)
 BuildRequires:  pkgconfig(libselinux)
 BuildRequires:  gettext
@@ -76,10 +70,6 @@ Requires:       %{name}%{?_isa} = %{version}-%{release}
 %description    devel
 The %{name}-devel package contains header files for developing sudo plugins.
 
-%conf -p
-autoreconf -I m4 -fv --install
-export CFLAGS="%{build_cflags} -fpie" LDFLAGS="%{build_ldflags} -pie"
-
 %install -a
 # Set correct permissions
 chmod 755 %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
@@ -87,35 +77,32 @@ chmod 755 %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
 install -p -d -m 700 %{buildroot}/var/db/sudo/lectured
 install -p -d -m 750 %{buildroot}%{_sysconfdir}/sudoers.d
 install -p -d -m 755 %{buildroot}%{_sysconfdir}/dnf/protected.d/
-# Install sudoers config
-install -p -c -m 0440 %{S:1} %{buildroot}/etc/sudoers
+# Enable wheel in the upstream configuration; keep local edits on upgrade.
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL) ALL/' %{buildroot}%{_sysconfdir}/sudoers
 # Install dnf protection config
 echo sudo > sudo.conf
 install -p -c -m 0644 sudo.conf %{buildroot}/etc/dnf/protected.d/
 rm -f sudo.conf
-# Fix permissions on plugins
+# Enable stripping; declare final plugin permissions below.
 chmod +x %{buildroot}%{_libexecdir}/sudo/*.so
 # Clean up unwanted files
 rm -f %{buildroot}%{_datadir}/examples/sudo
 rm -f %{buildroot}%{_sysconfdir}/sudoers.dist
-# Add ld.so.conf.d entry for plugins
-mkdir -p %{buildroot}/etc/ld.so.conf.d
-echo "/usr/libexec/sudo" > %{buildroot}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
+# Add the private library directory to the loader cache.
+install -d -m 0755 %{buildroot}%{_sysconfdir}/ld.so.conf.d
+printf '%s\n' '%{_libexecdir}/sudo' > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 # Install PAM files
-mkdir -p %{buildroot}/etc/pam.d
-install -p -c -m 0644 %{S:2} %{buildroot}/etc/pam.d/sudo
-install -p -c -m 0644 %{S:3} %{buildroot}/etc/pam.d/sudo-i
+install -D -p -m 0644 %{SOURCE1} %{buildroot}/etc/pam.d/sudo
+install -D -p -m 0644 %{SOURCE2} %{buildroot}/etc/pam.d/sudo-i
 
 %find_lang sudo --all-name --generate-subpackages
-# Remove rpath
-# chrpath --delete %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/* %{buildroot}%{_libexecdir}/sudo/*
 
 %post
 /bin/chmod 0440 /etc/sudoers || :
 
 %files
-%license LICENSE.md
 %doc %{_docdir}/%{name}
+%license LICENSE.md
 %attr(0440,root,root) %config(noreplace) /etc/sudoers
 %attr(0750,root,root) %dir /etc/sudoers.d/
 %config(noreplace) /etc/dnf/protected.d/sudo.conf
@@ -127,18 +114,18 @@ install -p -c -m 0644 %{S:3} %{buildroot}/etc/pam.d/sudo-i
 %{_bindir}/cvtsudoers
 %{_sbindir}/visudo
 %{_libexecdir}/sudo/sesh
-%{_libexecdir}/sudo/sudo_noexec.so
-%{_libexecdir}/sudo/sudoers.so
-%{_libexecdir}/sudo/group_file.so
-%{_libexecdir}/sudo/system_group.so
-%{_libexecdir}/sudo/audit_json.so
+%attr(0644,root,root) %{_libexecdir}/sudo/sudo_noexec.so
+%attr(0644,root,root) %{_libexecdir}/sudo/sudoers.so
+%attr(0644,root,root) %{_libexecdir}/sudo/group_file.so
+%attr(0644,root,root) %{_libexecdir}/sudo/system_group.so
+%attr(0644,root,root) %{_libexecdir}/sudo/audit_json.so
 %{_libexecdir}/sudo/libsudo_util.so*
 %dir /var/db/sudo
 %dir /var/db/sudo/lectured
 %dir %{_libexecdir}/sudo
 %config(noreplace) /etc/pam.d/sudo
 %config(noreplace) /etc/pam.d/sudo-i
-%config(noreplace) /etc/ld.so.conf.d/*
+%config(noreplace) %{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*

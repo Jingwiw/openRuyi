@@ -19,6 +19,13 @@ Source1:        sudo.pam
 Source2:        sudo-i.pam
 BuildSystem:    autotools
 
+# Stop the mailer when dropping privileges fails; https://github.com/sudo-project/sudo/commit/3e474c2f201484be83d994ae10a4e20e8c81bb69.
+Patch0:         1000-mailer-privilege-drop.patch
+# Ignore caller time zones during policy evaluation; https://github.com/sudo-project/sudo/commit/db669167ca599f2a94cd8a4c5fae9e473c81a2fd.
+Patch1:         1001-policy-time-zone.patch
+# Preserve command TZ while clearing the policy environment; https://github.com/sudo-project/sudo/commit/1820a349687522f51023d1ae5925125f59679a8c.
+Patch2:         1002-preserve-command-time-zone.patch
+
 BuildOption(conf):  --disable-root-mailer
 BuildOption(conf):  --disable-intercept
 BuildOption(conf):  --disable-log-server

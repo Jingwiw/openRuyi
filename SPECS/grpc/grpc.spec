@@ -9,17 +9,17 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           grpc
-Version:        1.82.1
+Version:        1.84.3
 Release:        %autorelease
 Summary:        An HTTP/2-based Remote Procedure Call framework
 License:        Apache-2.0
 URL:            https://grpc.io/
 VCS:            git:https://github.com/grpc/grpc
-#!RemoteAsset:  sha256:d74186d8fa221cc7f07ec2db970098302559f73612f6cf340cfe754848c4fc29
+#!RemoteAsset:  sha256:c75a91397231e4e7cc3e6b98d9e169db0636c1c854489c5e6a11b0494e8c554d
 Source:         https://github.com/grpc/grpc/archive/refs/tags/v%{version}.tar.gz
+#!RemoteAsset:  sha256:5e9b520b22afbd53a662cc29017064be253c1dfa6df8958738594e7fec6ade33
+Source1:        https://github.com/grpc/grpc-proto/archive/ec30f589e2519d595688b9a42f88a91bdd6b733f/grpc-proto-ec30f589e2519d595688b9a42f88a91bdd6b733f.tar.gz
 BuildSystem:    cmake
-
-Patch2000:      2000-force-system-libraries-in-isolated-environments.patch
 
 BuildOption(conf):  -DgRPC_INSTALL:BOOL=ON
 BuildOption(conf):  -DgRPC_INSTALL_LIBDIR:PATH="%_lib"
@@ -31,8 +31,6 @@ BuildOption(conf):  -DgRPC_RE2_PROVIDER=package
 BuildOption(conf):  -DgRPC_SSL_PROVIDER=package
 BuildOption(conf):  -DgRPC_ZLIB_PROVIDER=package
 BuildOption(conf):  -DCMAKE_CXX_STANDARD=17
-BuildOption(conf):  -DgRPC_BENCHMARK_PROVIDER=none
-BuildOption(conf):  -DgRPC_BENCHMARK_PROVIDER=OFF
 BuildOption(conf):  -DgRPC_BUILD_TESTS=OFF
 BuildOption(conf):  -DgRPC_DOWNLOAD_ARCHIVES:BOOL=OFF
 BuildOption(conf):  -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=ON
@@ -47,7 +45,7 @@ BuildRequires:  pkgconfig(openssl)
 BuildRequires:  pkgconfig(protobuf)
 BuildRequires:  pkgconfig(re2)
 BuildRequires:  pkgconfig(zlib)
-BuildRequires:  pkgconfig(python)
+BuildRequires:  pkgconfig(python3)
 BuildRequires:  python3dist(pip)
 BuildRequires:  python3dist(wheel)
 BuildRequires:  python3dist(cython)
@@ -78,6 +76,8 @@ This package contains the libraries, header files, and tools needed to
 develop applications that use the gRPC framework.
 
 %prep -a
+mkdir -p third_party/grpc-proto
+tar -xf %{SOURCE1} --strip-components=1 -C third_party/grpc-proto
 find . -type f -regex ".*\.py\|.*\.sh" -exec sed -i -e 's|/usr/bin/env python.*|/usr/bin/python3|' -e 's|/usr/bin/python.*|/usr/bin/python3|' {} +
 rm -Rf third_party/abseil-cpp/
 
@@ -86,6 +86,9 @@ mkdir -p third_party/abseil-cpp/absl/log/
 touch third_party/abseil-cpp/absl/log/initialize.cc
 
 %build -a
+export GRPC_PYTHON_BUILD_SYSTEM_ABSL=1 GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1
+export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 GRPC_PYTHON_BUILD_SYSTEM_RE2=1
+export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 GRPC_PYTHON_BUILD_WITH_CYTHON=1
 %pyproject_wheel
 
 %install -a

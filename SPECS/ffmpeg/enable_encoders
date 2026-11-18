@@ -59,15 +59,11 @@ h263p
 h264_amf # hardware
 h264_nvenc # hardware
 h264_qsv # hardware
-h264_v4l2m2m # hardware
-h264_vaapi # hardware
 hap
 hdr
 hevc_amf # hardware
 hevc_nvenc # hardware
 hevc_qsv # hardware
-hevc_v4l2m2m # hardware
-hevc_vaapi # hardware
 huffyuv # trivial+zlib
 ilbc # ilbc
 jpeg2000

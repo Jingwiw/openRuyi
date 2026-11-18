@@ -14,6 +14,8 @@ License:        BSD-2-Clause
 URL:            https://github.com/protobuf-c/protobuf-c
 #!RemoteAsset:  sha256:e2c86271873a79c92b58fef7ebf8de1aa0df4738347a8bd5d4e65a80a16d0d24
 Source0:        %{url}/releases/download/v%{version}/%{name}-%{version}.tar.gz
+# Replace removed field-label access; https://github.com/protobuf-c/protobuf-c/pull/797.
+Patch0:         0001-Fix-compilation-against-protobuf-v34.patch
 BuildSystem:    autotools
 
 BuildOption(conf):  --disable-static
@@ -48,8 +50,8 @@ Requires:       %{name}-compiler%{?_isa} = %{version}-%{release}
 This package contains protobuf-c headers and libraries.
 
 %files
-%license LICENSE
 %doc README.md TODO
+%license LICENSE
 %{_libdir}/libprotobuf-c.so.1*
 
 %files compiler

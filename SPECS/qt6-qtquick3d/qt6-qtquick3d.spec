@@ -2,34 +2,30 @@
 # SPDX-FileCopyrightText: (C) 2025 openRuyi Project Contributors
 # SPDX-FileContributor: yyjeqhc <jialin.oerv@isrc.iscas.ac.cn>
 # SPDX-FileContributor: misaka00251 <liuxin@iscas.ac.cn>
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %define qt_module qtquick3d
-%define real_version 6.11.1
-%define short_version 6.11
+%define short_version 6.12
 
-%bcond system_assimp 0
 %bcond system_openxr 0
 
 Name:           qt6-qtquick3d
-Version:        6.11.1
+Version:        6.12.0
 Release:        %autorelease
 Summary:        Qt6 - Quick3D Libraries and utilities
-License:        LGPL-3.0-only OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+License:        GPL-3.0-only AND (GPL-3.0-only WITH Qt-GPL-exception-1.0) AND Apache-2.0 AND BSD-3-Clause AND MIT AND CC0-1.0
 URL:            https://www.qt.io
 VCS:            git:https://github.com/qt/qtquick3d
-#!RemoteAsset:  sha256:c76b85de3f8aa2a4bee64987acfef560675c1b378b92076c7c6264613e5b456f
-Source0:        https://download.qt.io/official_releases/qt/%{short_version}/%{real_version}/submodules/%{qt_module}-everywhere-src-%{real_version}.tar.xz
+#!RemoteAsset:  sha256:6ced6edbd25fb5a632fe770ae820b376bf50233e8d62002c79a69a505a2e429e
+Source0:        https://download.qt.io/official_releases/qt/%{short_version}/%{version}/submodules/%{qt_module}-everywhere-src-%{version}.tar.xz
 BuildSystem:    cmake
 
+BuildOption(conf):  -GNinja
 BuildOption(conf):  -DQT_BUILD_EXAMPLES:BOOL=ON
 BuildOption(conf):  -DQT_INSTALL_EXAMPLES_SOURCES:BOOL=ON
-%if %{with system_assimp}
 BuildOption(conf):  -DFEATURE_system_assimp=ON
-%else
-BuildOption(conf):  -DFEATURE_system_assimp=OFF
-%endif
 %if %{with system_openxr}
 BuildOption(conf):  -DFEATURE_system_openxr=ON
 %else
@@ -37,6 +33,7 @@ BuildOption(conf):  -DFEATURE_system_openxr=OFF
 %endif
 
 BuildRequires:  cmake
+BuildRequires:  ninja
 BuildRequires:  gcc-c++
 BuildRequires:  qt6-macros
 BuildRequires:  pkgconfig(Qt6Core)
@@ -48,9 +45,7 @@ BuildRequires:  pkgconfig(Qt6Quick)
 BuildRequires:  qt6-qtdeclarative-static
 BuildRequires:  pkgconfig(Qt6QuickTimeline)
 BuildRequires:  pkgconfig(Qt6ShaderTools)
-%if %{with system_assimp}
-BuildRequires:  pkgconfig(assimp) >= 5.0.0
-%endif
+BuildRequires:  pkgconfig(assimp) >= 5.1.6
 %if %{with system_openxr}
 BuildRequires:  pkgconfig(openxr)
 %endif
@@ -116,7 +111,7 @@ popd
 %{_qt6_libdir}/libQt6Quick3DXr.so.6*
 %{_qt6_qmldir}/QtQuick3D/
 %{_qt6_pluginsdir}/assetimporters/
-%{_qt6_archdatadir}/sbom/%{qt_module}-%{real_version}.spdx
+%{_qt6_archdatadir}/sbom/%{qt_module}-%{version}.spdx
 
 %files devel
 %{_bindir}/balsam-qt6

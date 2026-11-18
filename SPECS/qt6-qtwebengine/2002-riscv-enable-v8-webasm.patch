@@ -1,0 +1,26 @@
+Retain the RISC-V QtPdf workaround without changing other targets.
+Source: https://github.com/fedora-riscv/qt6-qtwebengine/commit/21451e4855b74c0c00a41d86f90925b07d3d4afe
+
+--- a/src/pdf/CMakeLists.txt
++++ b/src/pdf/CMakeLists.txt
+@@ -118,6 +118,12 @@
+         append_toolchain_setup(gnArgArg)
+         append_pkg_config_setup(gnArgArg)
+
++        if(TEST_architecture_arch STREQUAL "riscv64")
++            list(APPEND gnArgArg v8_enable_webassembly=true)
++        else()
++            list(APPEND gnArgArg v8_enable_webassembly=false)
++        endif()
++
+         list(APPEND gnArgArg
+           qtwebengine_target="${buildDir}/${config}/${arch}:QtPdf"
+           qt_libpng_config="${buildDir}/${config}/${arch}:qt_libpng_config"
+@@ -142,7 +148,6 @@
+           enable_web_speech=false
+           chrome_pgo_phase=0
+           strip_absolute_paths_from_debug_symbols=false
+-          v8_enable_webassembly=false
+           use_v8_context_snapshot=false
+           v8_use_external_startup_data=false
+           build_with_tflite_lib=false

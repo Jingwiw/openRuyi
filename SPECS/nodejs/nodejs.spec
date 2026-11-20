@@ -11,7 +11,7 @@
 %global _test_target          test-ci-js
 %global nodejs_major          26
 %global nodejs_minor          13
-%global nodejs_patch          0
+%global nodejs_patch          1
 %global nodejs_abi            %{nodejs_major}.%{nodejs_minor}
 %global nodejs_soversion      147
 %global nodejs_version        %{nodejs_major}.%{nodejs_minor}.%{nodejs_patch}
@@ -33,7 +33,7 @@ Summary:        JavaScript runtime
 License:        Apache-2.0 AND Artistic-2.0 AND BSD-2-Clause AND BSD-3-Clause AND BlueOak-1.0.0 AND CC-BY-3.0 AND CC0-1.0 AND ISC AND MIT AND Unicode-3.0
 URL:            https://nodejs.org/
 VCS:            git:https://github.com/nodejs/node
-#!RemoteAsset:  sha256:263f639ecfa7a17b49438d76cdbf9aff73179e3c7cb789da69b900718427fa2e
+#!RemoteAsset:  sha256:a7f6204ff63b6a2cd274d48903285abb86ed53a99070e532d4c2fd787457d9e6
 Source0:        https://nodejs.org/dist/v%{version}/node-v%{version}.tar.xz
 Source1:        nodejs_native.attr
 BuildSystem:    autotools
@@ -105,6 +105,12 @@ Requires:       sqlite%{?_isa} >= 3.54.0
 1005-v8-riscv-fp-comparison.patch
 # Handle ICU 79 case folding; https://github.com/v8/v8/commit/f607706154eabc4a949628a88b38dbe95cd2274c.
 1006-v8-icu79-case-folding.patch
+# Look up active Wasm code by its saved return address; https://github.com/v8/v8/commit/dec5f6bdbe683eb74f7908310ac9a742d057181a.
+1007-v8-wasm-frame-code-lookup.patch
+# Read the ARM64 return address with the correct offset and authentication; https://github.com/v8/v8/commit/42ae3ed711b2a9a4a78f33415dbdf1f1246dc3f8.
+1008-v8-arm64-frame-calling-pc.patch
+# Account for RISC-V parameter and vector slots; https://github.com/v8/v8/commit/9235e225af3555365398cd7d24b31a2efe51650f.
+1009-v8-riscv-frame-calling-pc.patch
 # Adapt the version test for zlib-ng compatibility; https://github.com/nodejs/node/blob/v26.12.0/test/parallel/test-process-versions.js.
 2002-zlib-ng-version-test.patch
 # Report unsupported Wasm SIMD as skipped; https://github.com/felixonmars/archriscv-packages/blob/2c56f9918e59cb5cfb7af860d2336785d0a36dea/nodejs/wasm-simd-skip.patch.

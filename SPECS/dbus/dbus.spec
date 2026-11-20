@@ -6,11 +6,9 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-# default without selinux
-%bcond selinux 0
-
-# default without systemd
-%bcond systemd 0
+# bootstrap may need to disable selinux and systemd.
+%bcond selinux 1
+%bcond systemd 1
 
 Name:           dbus
 Version:        1.16.2
@@ -76,7 +74,7 @@ This package contains the core D-Bus components and runtime libraries.
 %package        common
 Summary:        D-BUS message bus configuration
 BuildArch:      noarch
-Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 %if %{with systemd}
 %{?systemd_requires}
 %endif

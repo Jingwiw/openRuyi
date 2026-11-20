@@ -555,7 +555,7 @@ OLD_CWD="$PWD"
 %global cmake_config_args %{cmake_config_args} \\\
     -DCLANG_BUILD_EXAMPLES:BOOL=OFF \\\
     -DCLANG_CONFIG_FILE_SYSTEM_DIR=%{_sysconfdir}/clang%{maj_ver}/ \\\
-    -DCLANG_DEFAULT_PIE_ON_LINUX=OFF \\\
+    -DCLANG_DEFAULT_PIE_ON_LINUX=ON \\\
     -DCLANG_DEFAULT_UNWINDLIB=libgcc \\\
     -DCLANG_ENABLE_STATIC_ANALYZER:BOOL=ON \\\
     -DCLANG_INCLUDE_DOCS:BOOL=ON \\\
@@ -714,8 +714,15 @@ for e in `ls %{buildroot}/%{install_libdir} | grep -e '-%{maj_ver}.so' -e '.so.%
 done
 popd
 
+mkdir -p %{buildroot}/%{_prefix}/lib/clang
+pushd %{buildroot}/%{_prefix}/lib/clang
+relpath=`realpath --relative-to=. %{buildroot}/%{install_libdir}/clang/%{maj_ver}`
+ln -sf $relpath .
+popd
+
 mkdir -p %{buildroot}/%{install_python3mod}
 cp -a clang/bindings/python/clang %{buildroot}/%{install_python3mod}
+sed -i 's/^\([[:space:]]*file = \)"libclang\.so"$/\1"libclang.so.%{maj_ver}.%{min_ver}.%{patch_ver}"/' %{buildroot}/%{install_python3mod}/clang/cindex.py
 mv -f %{buildroot}/%{install_prefix}/python_packages/mlir_core/mlir %{buildroot}/%{install_python3mod}
 
 rm -rf %{buildroot}/%{install_prefix}/src
@@ -901,6 +908,7 @@ echo "%%clang%{maj_ver}_resource_dir %%{install_prefix}/lib/clang/%{maj_ver}" > 
 %{_libdir}/libclang.so.%{maj_ver}*
 %{install_libdir}/libclang-cpp.so.%{maj_ver}*
 %{_libdir}/libclang-cpp.so.%{maj_ver}*
+%{_prefix}/lib/clang/%{maj_ver}
 
 %files -n clang%{maj_ver}-devel
 %license clang/LICENSE.TXT

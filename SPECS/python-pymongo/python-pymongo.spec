@@ -8,18 +8,18 @@
 %global srcname pymongo
 
 Name:           python-%{srcname}
-Version:        4.18.1
+Version:        4.19.0
 Release:        %autorelease
 Summary:        Python driver for MongoDB
-License:        Apache-2.0
+License:        Apache-2.0 AND MIT
 URL:            https://pymongo.readthedocs.io/en/stable/
 VCS:            git:https://github.com/mongodb/mongo-python-driver
-#!RemoteAsset:  sha256:d04134ff4ea0e7d14b6e2ef23dbfe06112a99318c9578b213d2dee9060b23dce
+#!RemoteAsset:  sha256:3c510dd3c5d9b392d3b33bb5d2a594758acfe8f026fca654253f947ce0af9d40
 Source0:        https://files.pythonhosted.org/packages/source/p/%{srcname}/%{srcname}-%{version}.tar.gz
 BuildSystem:    pyproject
 
-BuildOption(install):  -l %{srcname}
-# No module named 'service_identity' even I installed python3dist(service-identity)
+BuildOption(install):  -l %{srcname} bson
+# The PyOpenSSL TLS backend imports the optional service_identity integration.
 BuildOption(check):  -e pymongo.pyopenssl_context
 
 BuildRequires:  pkgconfig(python3)
@@ -41,21 +41,9 @@ Provides:       python3-%{srcname}%{?_isa} = %{version}-%{release}
 %description
 The Python driver for MongoDB.
 
-%package     -n python-bson
-# All code is Apache-2.0 except bson/time64*.{c,h} which is MIT
-License:        Apache-2.0 AND MIT
-Summary:        Python bson library
-Provides:       python3-bson = %{version}-%{release}
-Provides:       python3-bson%{?_isa} = %{version}-%{release}
-%python_provide python3-bson
-
-%description -n python-bson
-BSON is a binary-encoded serialization of JSON-like documents. BSON is designed
-to be lightweight, traversable, and efficient. BSON, like JSON, supports the
-embedding of objects and arrays within other objects and arrays.
-
 %package     -n python-pymongo-gridfs
 Summary:        Python GridFS driver for MongoDB
+License:        Apache-2.0
 Requires:       python-pymongo%{?_isa} = %{version}-%{release}
 Provides:       python3-pymongo-gridfs = %{version}-%{release}
 Provides:       python3-pymongo-gridfs%{?_isa} = %{version}-%{release}
@@ -75,7 +63,9 @@ GridFS is a storage specification for large objects in MongoDB.
 export PYMONGO_C_EXT_MUST_BUILD=1
 
 %check -a
-# Skip tests that require network/nameservers and tests that cause segfaults
+# The SRV polling tests need test1.test.build.10gen.cc; the offline build root has no /etc/resolv.conf.
+# The rejecting and raising validator cases also resolve the initial SRV seed before polling.
+# Deployment detection needs its target environment; recursive encoders can crash the test interpreter.
 %pytest -v \
     --deselect=test/asynchronous/test_client.py::AsyncClientUnitTest::test_connection_timeout_ms_propagates_to_DNS_resolver \
     --deselect=test/asynchronous/test_client.py::AsyncClientUnitTest::test_detected_environment_logging \
@@ -86,6 +76,8 @@ export PYMONGO_C_EXT_MUST_BUILD=1
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_10_all_dns_selected \
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_11_all_dns_selected \
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_12_new_dns_randomly_selected \
+    --deselect=test/test_srv_polling.py::TestSrvPolling::test_14_the_validator_is_consulted_when_srv_records_are_rescanned \
+    --deselect=test/test_srv_polling.py::TestSrvPolling::test_15_a_rejecting_or_raising_validator_does_not_raise_or_stop_polling \
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_addition \
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_dns_failures \
     --deselect=test/test_srv_polling.py::TestSrvPolling::test_dns_record_lookup_empty \
@@ -101,6 +93,8 @@ export PYMONGO_C_EXT_MUST_BUILD=1
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_10_all_dns_selected \
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_11_all_dns_selected \
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_12_new_dns_randomly_selected \
+    --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_14_the_validator_is_consulted_when_srv_records_are_rescanned \
+    --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_15_a_rejecting_or_raising_validator_does_not_raise_or_stop_polling \
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_addition \
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_dns_failures \
     --deselect=test/asynchronous/test_srv_polling.py::TestSrvPolling::test_dns_record_lookup_empty \
@@ -125,15 +119,11 @@ export PYMONGO_C_EXT_MUST_BUILD=1
 
 %files -f %{pyproject_files}
 %doc README.md
-
-%files -n python-bson
-%license LICENSE
-%doc README.md
-%{python3_sitearch}/bson
+%license THIRD-PARTY-NOTICES
 
 %files -n python-pymongo-gridfs
-%license LICENSE
 %doc README.md
+%license LICENSE
 %{python3_sitearch}/gridfs
 
 %changelog

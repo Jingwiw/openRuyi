@@ -11,7 +11,7 @@
 # Authors: SUSE LLC and contributors
 
 %define upstream_version %{lua:print(rpm.expand("%{version}"):match("^[^+]+"))}
-%global git_commit 1f5026241027260e9280039698bca031484c82ad
+%global git_commit c5c6fc6f449dbc95e3a68cacd61852dc0a48e57c
 
 # Disable LTO due to a usage of top-level assembler that causes LTO issues
 %global _lto_cflags %{nil}
@@ -24,16 +24,23 @@
 %bcond nscd 1
 # This is libnsl1, we already have newer libnsl - 251
 %bcond libnsl 0
+# Run the full testsuite, enabled on x86_64 first
+# TODO: Enable the testsuite on riscv64 after a full run on real hardware
+%ifarch x86_64
+%bcond testsuite 1
+%else
+%bcond testsuite 0
+%endif
 
 Name:           glibc
 Summary:        Standard Shared Libraries (from the GNU C Library)
 License:        GPL-2.0-or-later AND LGPL-2.1-or-later AND LGPL-2.1-or-later WITH GCC-exception-2.0 AND GPL-3.0-or-later
-Version:        2.44+git20260918.1f5026241027
+Version:        2.44+git20261107.c5c6fc6f449d
 Release:        %autorelease
 URL:            https://www.gnu.org/software/libc/libc.html
 VCS:            git:https://forge.sourceware.org/glibc/glibc-mirror.git
-#!RemoteAsset:  sha256:9475c022bc2b201ba6455ae6bfb4c59c5c675d8a7065b61ad2db646c1003c699
-Source0:        https://forge.sourceware.org/glibc/glibc-mirror/archive/%{git_commit}.tar.gz#/%{name}-%{version}.tar.gz
+#!RemoteAsset:  sha256:410218b6d866d0b5878c9d030c6997f307f5d7cb2b5188167b3997534eef3789
+Source0:        https://forge.sourceware.org/api/v1/repos/glibc/glibc-mirror/archive/%{git_commit}.tar.gz#/%{name}-%{version}.tar.gz
 %if %{with nscd}
 Source2:        nscd.tmpfiles
 Source3:        nscd.service
@@ -198,6 +205,8 @@ for opt in $tmp; do
     -fstack-protector) enable_stack_protector=yes ;;
     -D_FORTIFY_SOURCE=*) enable_fortify_source=${opt#-D_FORTIFY_SOURCE=} ;;
     -ffortify=* | *_FORTIFY_SOURCE*) ;;
+    # The testsuite generates such warnings on purpose
+    -Wformat | -Werror=format-security) ;;
     *) BuildFlags+=" $opt" ;;
   esac
 done
@@ -247,8 +256,30 @@ cd build-%{_target_cpu}
 cd ..
 
 %check
+%if %{with testsuite}
+export TIMEOUTFACTOR=16
+unset MALLOC_CHECK_ MALLOC_PERTURB_
+make %{?_smp_mflags} %{?make_output_sync} -C build-%{_target_cpu} -k check || :
+cd build-%{_target_cpu}
+# Fail build if there were compilation errors during testsuite run
+if [ ! -f tests.sum ]; then
+  echo "Testsuite failed to build."
+  exit 1
+fi
+set +x
+echo "Testsuite summary:"
+grep -E '^(FAIL|XFAIL|XPASS):' tests.sum | sort || :
+for t in $(sed -e '/^\(FAIL\|XFAIL\): /!d;s/^.*: //' tests.sum); do
+  echo "------ $t ------"
+  test ! -f $t.test-result || cat $t.test-result
+  test ! -f $t.out || cat $t.out
+done
+set -x
+cd ..
+%else
 make %{?_smp_mflags} %{?make_output_sync} -C build-%{_target_cpu} check-abi
 make %{?_smp_mflags} %{?make_output_sync} -C build-%{_target_cpu} test t=elf/check-localplt
+%endif
 
 %define rtldlib %{_lib}
 # Each architecture has a different name for the dynamic linker:

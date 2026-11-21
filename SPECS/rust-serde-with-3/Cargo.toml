@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.88"
 name = "serde_with"
-version = "3.20.0"
+version = "3.21.0"
 authors = [
     "Jonas Bushart",
     "Marcin Kaźmierczak",
@@ -53,6 +53,7 @@ all-features = true
 rustdoc-args = [
     "--cfg=docsrs",
     "-Zunstable-options",
+    "--generate-link-to-definition",
     "--generate-macro-expansion",
     "--extern-html-root-url=core=https://doc.rust-lang.org",
     "--extern-html-root-url=alloc=https://doc.rust-lang.org",
@@ -452,7 +453,7 @@ optional = true
 default-features = false
 
 [dependencies.serde_with_macros]
-version = "=3.20.0"
+version = "=3.21.0"
 optional = true
 
 [dependencies.smallvec_1]
@@ -534,6 +535,7 @@ version = "0.10.3"
 [lints.clippy]
 cloned_instead_of_copied = "warn"
 default_trait_access = "warn"
+disallowed_methods = "warn"
 doc_markdown = "warn"
 explicit_auto_deref = "allow"
 manual-unwrap-or-default = "allow"
@@ -546,6 +548,7 @@ trivial_casts = "warn"
 trivial_numeric_casts = "warn"
 unused_extern_crates = "warn"
 unused_import_braces = "warn"
+unused_qualifications = "warn"
 variant_size_differences = "warn"
 
 [lints.rust.rust_2018_idioms]

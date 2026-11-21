@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name serde_with
-%global full_version 3.20.0
+%global full_version 3.21.0
 %global pkgname serde-with-3
 
 Name:           rust-serde-with-3
-Version:        3.20.0
+Version:        3.21.0
 Release:        %autorelease
 Summary:        Rust crate "serde_with"
 License:        MIT OR Apache-2.0
 URL:            https://github.com/jonasbb/serde_with/
-#!RemoteAsset:  sha256:e72c1c2cb7b223fafb600a619537a871c2818583d619401b785e7c0b746ccde2
+#!RemoteAsset:  sha256:76a5c54c7310e7b8b9577c286d7e399ddd876c3e12b3ed917a8aabc4b96e9e8c
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -21,6 +21,7 @@ BuildSystem:    rustcrates
 BuildRequires:  rust-rpm-macros
 
 Requires:       crate(serde-core-1/result) >= 1.0.225
+
 Provides:       crate(%{pkgname}) = %{version}
 
 %description
@@ -182,7 +183,7 @@ This metapackage enables feature "json" for the Rust serde_with crate, by pullin
 %package     -n %{name}+macros
 Summary:        Custom de/serialization functions for Rust's serde - feature "macros"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(serde-with-macros-3/default) >= 3.20.0
+Requires:       crate(serde-with-macros-3/default) >= 3.21.0
 Provides:       crate(%{pkgname}/macros) = %{version}
 
 %description -n %{name}+macros
@@ -194,7 +195,7 @@ Requires:       crate(%{pkgname}) = %{version}
 Requires:       crate(%{pkgname}/std) = %{version}
 Requires:       crate(schemars-0.8) >= 0.8.16
 Requires:       crate(serde-json-1) >= 1.0.145
-Requires:       crate(serde-with-macros-3/schemars-0-8) >= 3.20.0
+Requires:       crate(serde-with-macros-3/schemars-0-8) >= 3.21.0
 Provides:       crate(%{pkgname}/schemars-0-8) = %{version}
 
 %description -n %{name}+schemars-0-8
@@ -206,7 +207,7 @@ Requires:       crate(%{pkgname}) = %{version}
 Requires:       crate(%{pkgname}/alloc) = %{version}
 Requires:       crate(schemars-0.9) >= 0.9.0
 Requires:       crate(serde-json-1) >= 1.0.145
-Requires:       crate(serde-with-macros-3/schemars-0-9) >= 3.20.0
+Requires:       crate(serde-with-macros-3/schemars-0-9) >= 3.21.0
 Provides:       crate(%{pkgname}/schemars-0-9) = %{version}
 
 %description -n %{name}+schemars-0-9
@@ -218,7 +219,7 @@ Requires:       crate(%{pkgname}) = %{version}
 Requires:       crate(%{pkgname}/alloc) = %{version}
 Requires:       crate(schemars-1) >= 1.0.2
 Requires:       crate(serde-json-1) >= 1.0.145
-Requires:       crate(serde-with-macros-3/schemars-1) >= 3.20.0
+Requires:       crate(serde-with-macros-3/schemars-1) >= 3.21.0
 Provides:       crate(%{pkgname}/schemars-1) = %{version}
 
 %description -n %{name}+schemars-1

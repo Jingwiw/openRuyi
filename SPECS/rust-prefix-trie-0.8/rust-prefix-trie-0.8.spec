@@ -1,26 +1,29 @@
 # SPDX-FileCopyrightText: (C) 2026 Institute of Software, Chinese Academy of Sciences (ISCAS)
 # SPDX-FileCopyrightText: (C) 2026 openRuyi Project Contributors
+# SPDX-FileContributor: Jingwiw <wangjingwei@iscas.ac.cn>
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name prefix-trie
-%global full_version 0.7.0
-%global pkgname prefix-trie-0.7
+%global full_version 0.8.0
+%global pkgname prefix-trie-0.8
 
-Name:           rust-prefix-trie-0.7
-Version:        0.7.0
+Name:           rust-prefix-trie-0.8
+Version:        0.8.0
 Release:        %autorelease
 Summary:        Rust crate "prefix-trie"
 License:        MIT OR Apache-2.0
 URL:            https://github.com/tiborschneider/prefix-trie
-#!RemoteAsset:  sha256:85cf4c7c25f1dd66c76b451e9041a8cfce26e4ca754934fa7aed8d5a59a01d20
+#!RemoteAsset:  sha256:ac603d58e15098b29663114afa83d1d38dee2175bc80b7a3b9892b9e6f4303dc
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
 
 BuildRequires:  rust-rpm-macros
 
+Requires:       crate(either-1/default) >= 1.0.0
 Requires:       crate(num-traits-0.2/default) >= 0.2.0
+
 Provides:       crate(%{pkgname}) = %{version}
 
 %description

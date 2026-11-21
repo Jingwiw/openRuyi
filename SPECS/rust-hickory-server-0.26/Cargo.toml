@@ -11,9 +11,9 @@
 
 [package]
 edition = "2021"
-rust-version = "1.71.1"
+rust-version = "1.88"
 name = "hickory-server"
-version = "0.25.2"
+version = "0.26.1"
 authors = ["The contributors to Hickory DNS"]
 build = false
 autolib = false
@@ -22,49 +22,44 @@ autoexamples = false
 autotests = false
 autobenches = false
 description = """
-Hickory DNS is a safe and secure DNS server with DNSSEC support.
- Eventually this could be a replacement for BIND9. The DNSSEC support allows
- for live signing of all records, in it does not currently support
- records signed offline. The server supports dynamic DNS with SIG0 authenticated
- requests. Hickory DNS is based on the Tokio and Futures libraries, which means
- it should be easily integrated into other software that also use those
- libraries.
+hickory-server is a library for integrating safe and secure DNS servers into
+an async Tokio application. It supports a variety of protocol features
+(DNSSEC, TSIG, SIG(0), DoT, DoQ, DoH). Servers can be operated in an authoritative
+role, or as a forwarding resolver, stub resolver, or a recursive resolver
+(experimental).
 """
 homepage = "https://hickory-dns.org/"
 documentation = "https://docs.rs/hickory-server"
 readme = "README.md"
 keywords = [
-    "DNS",
-    "BIND",
-    "dig",
-    "named",
+    "dns",
     "dnssec",
 ]
 categories = ["network-programming"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/hickory-dns/hickory-dns"
 
+[package.metadata.docs.rs]
+all-features = true
+default-target = "x86_64-unknown-linux-gnu"
+targets = [
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+]
+rustdoc-args = [
+    "--cfg",
+    "docsrs",
+]
+
 [package.metadata.cargo-all-features]
+skip_optional_dependencies = true
+max_combination_size = 2
 denylist = [
     "__tls",
     "__https",
     "__quic",
     "__h3",
     "__dnssec",
-]
-max_combination_size = 2
-skip_optional_dependencies = true
-
-[package.metadata.docs.rs]
-all-features = true
-default-target = "x86_64-unknown-linux-gnu"
-rustdoc-args = [
-    "--cfg",
-    "docsrs",
-]
-targets = [
-    "x86_64-apple-darwin",
-    "x86_64-pc-windows-msvc",
 ]
 
 [features]
@@ -84,78 +79,78 @@ __tls = [
     "dep:rustls",
     "dep:tokio-rustls",
 ]
-backtrace = ["hickory-proto/backtrace"]
 blocklist = ["resolver"]
 dnssec-aws-lc-rs = [
     "hickory-proto/dnssec-aws-lc-rs",
-    "hickory-recursor?/dnssec-aws-lc-rs",
     "hickory-resolver?/dnssec-aws-lc-rs",
     "serde/rc",
     "__dnssec",
 ]
 dnssec-ring = [
     "hickory-proto/dnssec-ring",
-    "hickory-recursor?/dnssec-ring",
     "hickory-resolver?/dnssec-ring",
     "serde/rc",
     "__dnssec",
 ]
 h3-aws-lc-rs = [
-    "hickory-proto/h3-aws-lc-rs",
+    "hickory-net/h3-aws-lc-rs",
     "hickory-resolver?/h3-aws-lc-rs",
     "quic-aws-lc-rs",
     "__h3",
 ]
 h3-ring = [
-    "hickory-proto/h3-ring",
+    "hickory-net/h3-ring",
     "hickory-resolver?/h3-ring",
     "quic-ring",
     "__h3",
 ]
 https-aws-lc-rs = [
-    "hickory-proto/https-aws-lc-rs",
+    "hickory-net/https-aws-lc-rs",
     "hickory-resolver?/https-aws-lc-rs",
     "tls-aws-lc-rs",
     "__https",
 ]
 https-ring = [
-    "hickory-proto/https-ring",
+    "hickory-net/https-ring",
     "hickory-resolver?/https-ring",
     "tls-ring",
     "__https",
 ]
-metrics = ["dep:metrics"]
+metrics = [
+    "hickory-resolver?/metrics",
+    "dep:metrics",
+]
 quic-aws-lc-rs = [
-    "hickory-proto/quic-aws-lc-rs",
+    "hickory-net/quic-aws-lc-rs",
     "hickory-resolver?/quic-aws-lc-rs",
     "tls-aws-lc-rs",
     "__quic",
 ]
 quic-ring = [
-    "hickory-proto/quic-ring",
+    "hickory-net/quic-ring",
     "hickory-resolver?/quic-ring",
     "tls-ring",
     "__quic",
 ]
-recursor = [
-    "dep:hickory-recursor",
-    "dep:hickory-resolver",
-]
+recursor = ["hickory-resolver/recursor"]
 resolver = ["dep:hickory-resolver"]
 rustls-platform-verifier = ["hickory-resolver?/rustls-platform-verifier"]
-sqlite = ["rusqlite"]
+sqlite = ["dep:rusqlite"]
 testing = []
 tls-aws-lc-rs = [
-    "hickory-proto/tls-aws-lc-rs",
+    "hickory-net/tls-aws-lc-rs",
     "hickory-resolver?/tls-aws-lc-rs",
     "__tls",
 ]
 tls-ring = [
-    "hickory-proto/tls-ring",
+    "hickory-net/tls-ring",
     "hickory-resolver?/tls-ring",
     "__tls",
 ]
-toml = ["dep:toml"]
+toml = [
+    "dep:toml",
+    "hickory-resolver?/toml",
+]
 webpki-roots = ["hickory-resolver?/webpki-roots"]
 
 [lib]
@@ -175,9 +170,6 @@ version = "1"
 version = "2.2.0"
 default-features = false
 
-[dependencies.enum-as-inner]
-version = "0.6"
-
 [dependencies.futures-util]
 version = "0.3.5"
 features = ["std"]
@@ -189,31 +181,28 @@ features = ["stream"]
 optional = true
 
 [dependencies.h3]
-version = "0.0.7"
+version = "0.0.8"
 optional = true
 
 [dependencies.h3-quinn]
-version = "0.0.9"
+version = "0.0.10"
 optional = true
 
+[dependencies.hickory-net]
+version = "0.26.0"
+features = ["tokio"]
+default-features = false
+
 [dependencies.hickory-proto]
-version = "0.25"
+version = "0.26.0"
 features = [
     "std",
     "serde",
-    "text-parsing",
-    "tokio",
 ]
 default-features = false
 
-[dependencies.hickory-recursor]
-version = "0.25"
-features = ["serde"]
-optional = true
-default-features = false
-
 [dependencies.hickory-resolver]
-version = "0.25"
+version = "0.26.0"
 features = [
     "serde",
     "system-config",
@@ -239,10 +228,10 @@ version = "0.24.1"
 optional = true
 
 [dependencies.prefix-trie]
-version = "0.7"
+version = "0.8"
 
 [dependencies.rusqlite]
-version = "0.35"
+version = "0.39"
 features = [
     "bundled",
     "time",
@@ -287,7 +276,7 @@ default-features = false
 version = "0.7.9"
 
 [dependencies.toml]
-version = "0.8.14"
+version = "1.0.1"
 optional = true
 
 [dependencies.tracing]
@@ -314,6 +303,26 @@ features = [
     "std",
 ]
 default-features = false
+
+[lints.clippy]
+bool_to_int_with_if = "allow"
+default_trait_access = "warn"
+manual_let_else = "warn"
+or_fun_call = "warn"
+single_component_path_imports = "allow"
+unimplemented = "warn"
+upper_case_acronyms = "allow"
+use_self = "warn"
+
+[lints.rust]
+non_snake_case = "warn"
+non_upper_case_globals = "warn"
+rust_2018_idioms = "warn"
+unnameable_types = "warn"
+unreachable_pub = "warn"
+unused_extern_crates = "warn"
+unused_import_braces = "warn"
+unused_qualifications = "warn"
 
 [lints.rust.unexpected_cfgs]
 level = "warn"

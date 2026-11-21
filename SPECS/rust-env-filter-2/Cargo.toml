@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.71"
 name = "env_filter"
-version = "1.0.1"
+version = "2.0.0"
 build = false
 include = [
     "build.rs",
@@ -82,8 +82,15 @@ replace = """
 exactly = 1
 
 [features]
-default = ["regex"]
+default = [
+    "std",
+    "regex",
+]
 regex = ["dep:regex"]
+std = [
+    "log/std",
+    "regex?/std",
+]
 
 [lib]
 name = "env_filter"
@@ -91,14 +98,10 @@ path = "src/lib.rs"
 
 [dependencies.log]
 version = "0.4.29"
-features = ["std"]
 
 [dependencies.regex]
 version = "1.12.3"
-features = [
-    "std",
-    "perf",
-]
+features = ["perf"]
 optional = true
 default-features = false
 

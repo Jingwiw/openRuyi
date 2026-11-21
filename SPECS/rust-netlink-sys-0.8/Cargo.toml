@@ -10,9 +10,9 @@
 # See Cargo.toml.orig for the original contents.
 
 [package]
-edition = "2018"
+edition = "2021"
 name = "netlink-sys"
-version = "0.8.7"
+version = "0.8.8"
 authors = ["Corentin Henry <corentinhenry@gmail.com>"]
 build = false
 autolib = false
@@ -30,6 +30,18 @@ keywords = [
 ]
 license = "MIT"
 repository = "https://github.com/rust-netlink/netlink-sys"
+
+[features]
+default = []
+mio_socket = ["mio"]
+smol_socket = [
+    "async-io",
+    "futures-util",
+]
+tokio_socket = [
+    "tokio",
+    "futures-util",
+]
 
 [lib]
 name = "netlink_sys"
@@ -61,7 +73,7 @@ optional = true
 [dependencies.bytes]
 version = "1.8"
 
-[dependencies.futures]
+[dependencies.futures-util]
 version = "0.3.31"
 optional = true
 
@@ -90,7 +102,10 @@ version = "1.13"
 features = ["attributes"]
 
 [dev-dependencies.netlink-packet-audit]
-version = "0.4.1"
+version = "0.6.1"
+
+[dev-dependencies.netlink-packet-core]
+version = "0.8.0"
 
 [dev-dependencies.tokio]
 version = "1.0.1"
@@ -100,15 +115,3 @@ features = [
     "rt-multi-thread",
 ]
 default-features = false
-
-[features]
-default = []
-mio_socket = ["mio"]
-smol_socket = [
-    "async-io",
-    "futures",
-]
-tokio_socket = [
-    "tokio",
-    "futures",
-]

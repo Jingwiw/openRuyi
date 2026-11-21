@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name mozim
-%global full_version 0.3.1
+%global full_version 0.3.2
 %global pkgname mozim-0.3
 
 Name:           rust-mozim-0.3
-Version:        0.3.1
+Version:        0.3.2
 Release:        %autorelease
 Summary:        Rust crate "mozim"
 License:        Apache-2.0
 URL:            https://github.com/nispor/mozim
-#!RemoteAsset:  sha256:f0437e58b082a444d57ee1e67eff5f5b98e4c3c64063bffc447ac9ae29a5ca3a
+#!RemoteAsset:  sha256:3cbbd829ba3312b0f3b68b4c9953eabd72d3218b697b02e89be627a395b0dab2
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -38,6 +38,7 @@ Requires:       crate(tokio-1/macros) >= 1.19.0
 Requires:       crate(tokio-1/net) >= 1.19.0
 Requires:       crate(tokio-1/rt) >= 1.19.0
 Requires:       crate(tokio-1/time) >= 1.19.0
+
 Provides:       crate(%{pkgname}) = %{version}
 
 %description
@@ -46,7 +47,7 @@ Source code for takopackized Rust crate "mozim"
 %package     -n %{name}+netlink
 Summary:        DHCP Client Library - feature "netlink" and 1 more
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(rtnetlink-0.18/default) >= 0.18.0
+Requires:       crate(rtnetlink-0.20/default) >= 0.20.0
 Provides:       crate(%{pkgname}/default) = %{version}
 Provides:       crate(%{pkgname}/netlink) = %{version}
 

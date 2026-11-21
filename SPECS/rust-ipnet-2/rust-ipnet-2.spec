@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name ipnet
-%global full_version 2.12.0
+%global full_version 2.12.1
 %global pkgname ipnet-2
 
 Name:           rust-ipnet-2
-Version:        2.12.0
+Version:        2.12.1
 Release:        %autorelease
 Summary:        Rust crate "ipnet"
 License:        MIT OR Apache-2.0
 URL:            https://github.com/krisprice/ipnet
-#!RemoteAsset:  sha256:d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2
+#!RemoteAsset:  sha256:6a756c3fac73139e83f14c2d742155dd2b78d3ee56597b419a0579b7bdd6dd78
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates

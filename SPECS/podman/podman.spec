@@ -5,66 +5,81 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
+%global build_tags seccomp systemd libsqlite3 libsubid grpcnotrace
+
 Name:           podman
-Version:        5.8.2
+Version:        6.2.0
 Release:        %autorelease
 Summary:        Manage containers, images, pods, and their volumes
 License:        Apache-2.0 AND BSD-2-Clause AND BSD-3-Clause AND ISC AND MIT AND MPL-2.0
 URL:            https://podman.io/
 VCS:            git:https://github.com/podman-container-tools/podman
-#!RemoteAsset:  sha256:b20ea65afc5a58ea1cea019bd51a5d84eb9042d25d3eb82c55010c8815732d84
+#!RemoteAsset:  sha256:cb182273c5c5e3ea079f8f88a9a30a574d247f80e0b9dd9c02df1d2e6f6f3705
 Source0:        https://github.com/podman-container-tools/podman/archive/refs/tags/v%{version}.tar.gz
 BuildSystem:    autotools
 
 BuildOption(build):  BUILDFLAGS=-trimpath
+BuildOption(build):  all docker-docs
+BuildOption(build):  GOMD2MAN=go-md2man
+BuildOption(build):  BUILDTAGS="%{build_tags}"
+BuildOption(build):  GOPROXY=off
 BuildOption(build):  PREFIX=%{_prefix}
-BuildOption(build):  BINDIR=%{_bindir}
 BuildOption(build):  TMPFILESDIR=%{_tmpfilesdir}
-BuildOption(build):  MANDIR=%{_mandir}
-BuildOption(build):  ETCDIR=%{_sysconfdir}
 BuildOption(build):  LIBEXECDIR=%{_libexecdir}
+BuildOption(install):  BUILDTAGS="%{build_tags}"
+BuildOption(install):  install.docker-full
+BuildOption(install):  GOPROXY=off
 BuildOption(install):  install.completions
 BuildOption(install):  PREFIX=%{_prefix}
-BuildOption(install):  BINDIR=%{_bindir}
 BuildOption(install):  TMPFILESDIR=%{_tmpfilesdir}
-BuildOption(install):  MANDIR=%{_mandir}
-BuildOption(install):  ETCDIR=%{_sysconfdir}
 BuildOption(install):  LIBEXECDIR=%{_libexecdir}
 
 BuildRequires:  gcc
-BuildRequires:  go
+BuildRequires:  go >= 1.26.8
+BuildRequires:  go-md2man
 BuildRequires:  groff
 BuildRequires:  make
 BuildRequires:  man
 BuildRequires:  pkg-config
+BuildRequires:  subid-devel
+BuildRequires:  envsubst
 BuildRequires:  pkgconfig(gpgme)
 BuildRequires:  pkgconfig(libbtrfsutil)
 BuildRequires:  pkgconfig(libseccomp)
 BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(systemd)
-BuildRequires:  python
+BuildRequires:  pkgconfig(python3)
 BuildRequires:  systemd-rpm-macros
 
 Requires:       containers-common
 Requires:       conmon
 Requires:       crun
 Requires:       passt
-Requires:       netavark
-Requires:       tini
+Requires:       netavark >= 2.0.0
+Requires:       catatonit
+
+%package        docker
+Summary:        Docker command interface for Podman
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Conflicts:      docker-cli
+
+%description    docker
+Docker command wrappers and compatibility files for Podman.
 
 %description
 Podman (the POD MANager) is a tool for managing containers and images,
 volumes mounted into those containers, and pods made from groups of
 containers.
 
+%prep -a
+# Read the system CA bundle without legacy compatibility links.
+sed -i 's|^}$|\t"/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",\n}|' pkg/machine/certificates/certificates_linux.go
+
 # no configure scripts
 %conf
 
-%install -a
-ln -s %{_bindir}/tini %{buildroot}%{_libexecdir}/podman/catatonit
-
-# TODO: enable tests when we have bats
 %check
+%make_build localunit GOPROXY=off BUILDTAGS="%{build_tags}"
 
 %files
 %doc README.md CONTRIBUTING.md install.md transfer.md
@@ -76,7 +91,6 @@ ln -s %{_bindir}/tini %{buildroot}%{_libexecdir}/podman/catatonit
 %{_datadir}/fish/vendor_completions.d/podman*.fish
 %{_datadir}/zsh/site-functions/_podman*
 %dir %{_libexecdir}/podman
-%{_libexecdir}/podman/catatonit
 %{_libexecdir}/podman/quadlet
 %{_libexecdir}/podman/rootlessport
 %{_mandir}/man*/podman*
@@ -86,6 +100,14 @@ ln -s %{_bindir}/tini %{buildroot}%{_libexecdir}/podman/catatonit
 %{_tmpfilesdir}/podman.conf
 %{_unitdir}/podman*
 %{_userunitdir}/podman*
+
+%files docker
+%{_bindir}/docker
+%{_sysconfdir}/profile.d/podman-docker.*
+%{_tmpfilesdir}/podman-docker.conf
+%{_datadir}/user-tmpfiles.d/podman-docker.conf
+%{_mandir}/man1/docker*
+%{_mandir}/man5/docker*
 
 %changelog
 %autochangelog

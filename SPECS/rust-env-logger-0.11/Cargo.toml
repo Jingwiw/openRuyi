@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.71"
 name = "env_logger"
-version = "0.11.10"
+version = "0.11.11"
 build = false
 include = [
     "build.rs",
@@ -130,6 +130,10 @@ name = "in_tests"
 path = "examples/in_tests.rs"
 
 [[example]]
+name = "millis_since_init"
+path = "examples/millis_since_init.rs"
+
+[[example]]
 name = "syslog_friendly_format"
 path = "examples/syslog_friendly_format.rs"
 
@@ -144,7 +148,8 @@ version = "1.0.13"
 optional = true
 
 [dependencies.env_filter]
-version = "1.0.0"
+version = "2.0.0"
+features = ["std"]
 default-features = false
 
 [dependencies.jiff]

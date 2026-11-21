@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name zvariant
-%global full_version 5.10.1
+%global full_version 5.13.1
 %global pkgname zvariant-5
 
 Name:           rust-zvariant-5
-Version:        5.10.1
+Version:        5.13.1
 Release:        %autorelease
 Summary:        Rust crate "zvariant"
 License:        MIT
 URL:            https://github.com/z-galaxy/zbus/
-#!RemoteAsset:  sha256:c4db0ecb8987cf5e92653c57c098f7f0e39a03112edb796f4fe089fb7eaa14ff
+#!RemoteAsset:  sha256:bee2a0bcd2a907786a456fff45aaaaf54c9ba5f50b71ae9ec1a4edd200c94911
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -24,8 +24,9 @@ Requires:       crate(endi-1/default) >= 1.1.0
 Requires:       crate(serde-1/default) >= 1.0.200
 Requires:       crate(serde-1/derive) >= 1.0.200
 Requires:       crate(winnow-1/default) >= 1.0.0
-Requires:       crate(zvariant-derive-5/default) >= 5.10.1
-Requires:       crate(zvariant-utils-3/default) >= 3.3.1
+Requires:       crate(zvariant-derive-5/default) >= 5.13.1
+Requires:       crate(zvariant-utils-3/default) >= 3.5.0
+
 Provides:       crate(%{pkgname}) = %{version}
 Provides:       crate(%{pkgname}/default) = %{version}
 Provides:       crate(%{pkgname}/option-as-array) = %{version}
@@ -74,8 +75,8 @@ This metapackage enables feature "enumflags2" for the Rust zvariant crate, by pu
 %package     -n %{name}+gvariant
 Summary:        D-Bus & GVariant encoding & decoding - feature "gvariant" and 1 more
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-derive-5/gvariant) >= 5.10.1
-Requires:       crate(zvariant-utils-3/gvariant) >= 3.3.1
+Requires:       crate(zvariant-derive-5/gvariant) >= 5.13.1
+Requires:       crate(zvariant-utils-3/gvariant) >= 3.5.0
 Provides:       crate(%{pkgname}/gvariant) = %{version}
 Provides:       crate(%{pkgname}/ostree-tests) = %{version}
 

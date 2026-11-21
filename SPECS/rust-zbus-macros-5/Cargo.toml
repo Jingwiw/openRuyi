@@ -13,7 +13,7 @@
 edition = "2024"
 rust-version = "1.87"
 name = "zbus_macros"
-version = "5.15.0"
+version = "5.18.0"
 authors = [
     "Marc-André Lureau <marcandre.lureau@redhat.com>",
     "Zeeshan Ali Khan <zeeshanak@gnome.org>",
@@ -87,13 +87,13 @@ features = [
 ]
 
 [dependencies.zbus_names]
-version = "4.3.2"
+version = "4.3.4"
 
 [dependencies.zvariant]
-version = "5.10.1"
+version = "5.13.1"
 
 [dependencies.zvariant_utils]
-version = "3.3.1"
+version = "3.5.0"
 
 [dev-dependencies.async-io]
 version = "2.3.2"

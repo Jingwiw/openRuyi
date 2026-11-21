@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name zbus
-%global full_version 5.15.0
+%global full_version 5.18.0
 %global pkgname zbus-5
 
 Name:           rust-zbus-5
-Version:        5.15.0
+Version:        5.18.0
 Release:        %autorelease
 Summary:        Rust crate "zbus"
 License:        MIT
 URL:            https://github.com/z-galaxy/zbus/
-#!RemoteAsset:  sha256:c3bcbf15c8708d7fc1be0c993622e0a5cbd5e8b52bfa40afa4c3e0cd8d724ac1
+#!RemoteAsset:  sha256:fe18fb60dc696039e738717b76eaea21e7a4489bbb1885020b43c94236d7e98a
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -53,10 +53,11 @@ Requires:       crate(windows-sys-0.61/win32-system-memory) >= 0.61.0
 Requires:       crate(windows-sys-0.61/win32-system-threading) >= 0.61.0
 Requires:       crate(windows-sys-0.61/win32-system-windowsprogramming) >= 0.61.0
 Requires:       crate(winnow-1/default) >= 1.0.0
-Requires:       crate(zbus-macros-5/default) >= 5.15.0
-Requires:       crate(zbus-names-4/default) >= 4.3.2
-Requires:       crate(zvariant-5/default) >= 5.10.1
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
+Requires:       crate(zbus-macros-5/default) >= 5.18.0
+Requires:       crate(zbus-names-4/default) >= 4.3.4
+Requires:       crate(zvariant-5/default) >= 5.13.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+
 Provides:       crate(%{pkgname}) = %{version}
 Provides:       crate(%{pkgname}/async-fs) = %{version}
 
@@ -126,7 +127,7 @@ This metapackage enables feature "blocking" for the Rust zbus crate, by pulling 
 %package     -n %{name}+blocking-api
 Summary:        API for D-Bus communication - feature "blocking-api"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zbus-macros-5/blocking-api) >= 5.15.0
+Requires:       crate(zbus-macros-5/blocking-api) >= 5.18.0
 Provides:       crate(%{pkgname}/blocking-api) = %{version}
 
 %description -n %{name}+blocking-api
@@ -135,8 +136,8 @@ This metapackage enables feature "blocking-api" for the Rust zbus crate, by pull
 %package     -n %{name}+camino
 Summary:        API for D-Bus communication - feature "camino"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/camino) >= 5.10.1
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
+Requires:       crate(zvariant-5/camino) >= 5.13.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
 Provides:       crate(%{pkgname}/camino) = %{version}
 
 %description -n %{name}+camino
@@ -145,8 +146,8 @@ This metapackage enables feature "camino" for the Rust zbus crate, by pulling in
 %package     -n %{name}+chrono
 Summary:        API for D-Bus communication - feature "chrono"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/chrono) >= 5.10.1
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
+Requires:       crate(zvariant-5/chrono) >= 5.13.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
 Provides:       crate(%{pkgname}/chrono) = %{version}
 
 %description -n %{name}+chrono
@@ -165,8 +166,8 @@ This metapackage enables feature "default" for the Rust zbus crate, by pulling i
 %package     -n %{name}+heapless
 Summary:        API for D-Bus communication - feature "heapless"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/heapless) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/heapless) >= 5.13.1
 Provides:       crate(%{pkgname}/heapless) = %{version}
 
 %description -n %{name}+heapless
@@ -175,8 +176,8 @@ This metapackage enables feature "heapless" for the Rust zbus crate, by pulling 
 %package     -n %{name}+option-as-array
 Summary:        API for D-Bus communication - feature "option-as-array"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/option-as-array) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/option-as-array) >= 5.13.1
 Provides:       crate(%{pkgname}/option-as-array) = %{version}
 
 %description -n %{name}+option-as-array
@@ -198,8 +199,8 @@ Additionally, this package also provides the "bus-impl" feature.
 %package     -n %{name}+serde-bytes
 Summary:        API for D-Bus communication - feature "serde_bytes"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/serde-bytes) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/serde-bytes) >= 5.13.1
 Provides:       crate(%{pkgname}/serde-bytes) = %{version}
 
 %description -n %{name}+serde-bytes
@@ -208,8 +209,8 @@ This metapackage enables feature "serde_bytes" for the Rust zbus crate, by pulli
 %package     -n %{name}+time
 Summary:        API for D-Bus communication - feature "time"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/time) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/time) >= 5.13.1
 Provides:       crate(%{pkgname}/time) = %{version}
 
 %description -n %{name}+time
@@ -246,8 +247,8 @@ This metapackage enables feature "tokio-vsock" for the Rust zbus crate, by pulli
 %package     -n %{name}+url
 Summary:        API for D-Bus communication - feature "url"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/url) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/url) >= 5.13.1
 Provides:       crate(%{pkgname}/url) = %{version}
 
 %description -n %{name}+url
@@ -256,8 +257,8 @@ This metapackage enables feature "url" for the Rust zbus crate, by pulling in an
 %package     -n %{name}+uuid
 Summary:        API for D-Bus communication - feature "uuid"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-5/enumflags2) >= 5.10.1
-Requires:       crate(zvariant-5/uuid) >= 5.10.1
+Requires:       crate(zvariant-5/enumflags2) >= 5.13.1
+Requires:       crate(zvariant-5/uuid) >= 5.13.1
 Provides:       crate(%{pkgname}/uuid) = %{version}
 
 %description -n %{name}+uuid

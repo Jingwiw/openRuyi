@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name tonic-prost-build
-%global full_version 0.14.2
+%global full_version 0.14.6
 %global pkgname tonic-prost-build-0.14
 
 Name:           rust-tonic-prost-build-0.14
-Version:        0.14.2
+Version:        0.14.6
 Release:        %autorelease
 Summary:        Rust crate "tonic-prost-build"
 License:        MIT
 URL:            https://github.com/hyperium/tonic
-#!RemoteAsset:  sha256:b4a16cba4043dc3ff43fcb3f96b4c5c154c64cbd18ca8dce2ab2c6a451d058a2
+#!RemoteAsset:  sha256:654e5643eff75d7f8c99197ce1440ed19a3474eada74c12bbac488b2cafdae27
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -27,7 +27,8 @@ Requires:       crate(prost-types-0.14/default) >= 0.14.0
 Requires:       crate(quote-1/default) >= 1.0.0
 Requires:       crate(syn-2/default) >= 2.0.0
 Requires:       crate(tempfile-3/default) >= 3.0.0
-Requires:       crate(tonic-build-0.14) >= 0.14.0
+Requires:       crate(tonic-build-0.14) >= 0.14.6
+
 Provides:       crate(%{pkgname}) = %{version}
 
 %description
@@ -55,7 +56,7 @@ This metapackage enables feature "default" for the Rust tonic-prost-build crate,
 %package     -n %{name}+transport
 Summary:        Prost build integration for tonic - feature "transport"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(tonic-build-0.14/transport) >= 0.14.0
+Requires:       crate(tonic-build-0.14/transport) >= 0.14.6
 Provides:       crate(%{pkgname}/transport) = %{version}
 
 %description -n %{name}+transport

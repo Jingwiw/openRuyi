@@ -1,7 +1,7 @@
 This directory /etc/pki/ca-trust/extracted/java/ contains 
 CA certificate bundle files which are automatically created
 based on the information found in the
-/usr/share/pki/ca-trust-source/ and /etc/pki/ca-trust/source/
+/usr/share/pki/trust/ and /etc/pki/trust/
 directories.
 
 All files are in the java keystore file format.

@@ -23,7 +23,7 @@ usage() {
 		(absent/empty command): Same as the extract command without arguments.
 
 		extract: Instruct update-ca-trust to scan the source configuration in
-		/usr/share/pki/ca-trust-source and /etc/pki/ca-trust/source and produce
+		/usr/share/pki/trust and /etc/pki/trust and produce
 		updated versions of the consolidated configuration files stored below
 		the $DEST directory hierarchy.
 
@@ -64,6 +64,15 @@ rhbz2387674_msg() {
 
 	Thank you for helping improve Fedora.
 	EOF
+}
+
+warn_legacy_inputs() {
+	for directory in /etc/pki/ca-trust/source /usr/share/pki/ca-trust-source; do
+		[ -d "$directory" ] || continue
+		if [ -n "$(find "$directory" -mindepth 1 ! -type d ! -path "$directory/README" -print -quit)" ]; then
+			echo >&2 "Warning: $directory contains ignored trust inputs. Files were not moved. Review $directory/README before migration."
+		fi
+	done
 }
 
 extract() {
@@ -119,6 +128,8 @@ extract() {
 		    "$DEST"/edk2
 	fi
 
+
+	warn_legacy_inputs
 
 	# Delete all directory hash symlinks from the cert directory
 	if [ -z "$USER_DEST" ]; then

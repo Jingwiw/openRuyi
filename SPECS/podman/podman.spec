@@ -71,6 +71,10 @@ Podman (the POD MANager) is a tool for managing containers and images,
 volumes mounted into those containers, and pods made from groups of
 containers.
 
+%prep -a
+# Read the system CA bundle without legacy compatibility links.
+sed -i 's|^}$|\t"/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",\n}|' pkg/machine/certificates/certificates_linux.go
+
 # no configure scripts
 %conf
 

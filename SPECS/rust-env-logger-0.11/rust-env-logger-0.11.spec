@@ -4,25 +4,26 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name env_logger
-%global full_version 0.11.10
+%global full_version 0.11.11
 %global pkgname env-logger-0.11
 
 Name:           rust-env-logger-0.11
-Version:        0.11.10
+Version:        0.11.11
 Release:        %autorelease
 Summary:        Rust crate "env_logger"
 License:        MIT OR Apache-2.0
 URL:            https://github.com/rust-cli/env_logger
-#!RemoteAsset:  sha256:0621c04f2196ac3f488dd583365b9c09be011a4ab8b9f37248ffcc8f6198b56a
+#!RemoteAsset:  sha256:de671bd27a75a797dc9ae289ba1e77276e75e2026408aab65185384e2d5cd3f6
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
 
 BuildRequires:  rust-rpm-macros
 
-Requires:       crate(env-filter-1) >= 1.0.0
+Requires:       crate(env-filter-2/std) >= 2.0.0
 Requires:       crate(log-0.4/default) >= 0.4.29
 Requires:       crate(log-0.4/std) >= 0.4.29
+
 Provides:       crate(%{pkgname}) = %{version}
 
 %description
@@ -85,7 +86,8 @@ Additionally, this package also provides the "unstable-kv" feature.
 %package     -n %{name}+regex
 Summary:        Logging implementation for `log` which is configured via an environment variable - feature "regex"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(env-filter-1/regex) >= 1.0.0
+Requires:       crate(env-filter-2/regex) >= 2.0.0
+Requires:       crate(env-filter-2/std) >= 2.0.0
 Provides:       crate(%{pkgname}/regex) = %{version}
 
 %description -n %{name}+regex

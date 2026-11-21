@@ -13,7 +13,7 @@
 edition = "2024"
 rust-version = "1.87"
 name = "zbus"
-version = "5.15.0"
+version = "5.18.0"
 authors = ["Zeeshan Ali Khan <zeeshanak@gnome.org>"]
 build = false
 autolib = false
@@ -33,7 +33,21 @@ license = "MIT"
 repository = "https://github.com/z-galaxy/zbus/"
 
 [package.metadata.docs.rs]
-all-features = true
+features = [
+    "async-io",
+    "blocking-api",
+    "uuid",
+    "url",
+    "time",
+    "chrono",
+    "heapless",
+    "option-as-array",
+    "camino",
+    "bus-impl",
+    "p2p",
+    "tokio",
+    "serde_bytes",
+]
 targets = [
     "x86_64-unknown-linux-gnu",
     "x86_64-pc-windows-gnu",
@@ -102,6 +116,10 @@ name = "builder_message_stream"
 path = "tests/builder_message_stream.rs"
 
 [[test]]
+name = "connection_closed"
+path = "tests/connection_closed.rs"
+
+[[test]]
 name = "e2e"
 path = "tests/e2e.rs"
 
@@ -121,6 +139,12 @@ path = "tests/unixexec.rs"
 name = "benchmarks"
 path = "benches/benchmarks.rs"
 harness = false
+
+[[bench]]
+name = "concurrent_method_calls"
+path = "benches/concurrent_method_calls.rs"
+harness = false
+required-features = ["p2p"]
 
 [dependencies.async-broadcast]
 version = "0.7.0"
@@ -195,10 +219,6 @@ features = [
 ]
 optional = true
 
-[dependencies.tokio-vsock]
-version = "0.7"
-optional = true
-
 [dependencies.tracing]
 version = "0.1.40"
 
@@ -206,25 +226,21 @@ version = "0.1.40"
 version = "1.8.0"
 features = ["serde"]
 
-[dependencies.vsock]
-version = "0.5.0"
-optional = true
-
 [dependencies.winnow]
 version = "1.0"
 
 [dependencies.zbus_macros]
-version = "5.15.0"
+version = "5.18.0"
 
 [dependencies.zbus_names]
-version = "4.3.2"
+version = "4.3.4"
 
 [dependencies.zvariant]
-version = "5.10.1"
+version = "5.13.1"
 features = ["enumflags2"]
 
 [dev-dependencies.criterion]
-version = "4.0.4"
+version = "5.0.0"
 package = "codspeed-criterion-compat"
 
 [dev-dependencies.doc-comment]
@@ -271,6 +287,14 @@ features = [
     "ansi",
 ]
 default-features = false
+
+[target.'cfg(target_os = "linux")'.dependencies.tokio-vsock]
+version = "0.7"
+optional = true
+
+[target.'cfg(target_os = "linux")'.dependencies.vsock]
+version = "0.5.0"
+optional = true
 
 [target."cfg(unix)".dependencies.async-recursion]
 version = "1.1.1"

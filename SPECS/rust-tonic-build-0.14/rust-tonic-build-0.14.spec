@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name tonic-build
-%global full_version 0.14.2
+%global full_version 0.14.6
 %global pkgname tonic-build-0.14
 
 Name:           rust-tonic-build-0.14
-Version:        0.14.2
+Version:        0.14.6
 Release:        %autorelease
 Summary:        Rust crate "tonic-build"
 License:        MIT
 URL:            https://github.com/hyperium/tonic
-#!RemoteAsset:  sha256:4c40aaccc9f9eccf2cd82ebc111adc13030d23e887244bc9cfa5d1d636049de3
+#!RemoteAsset:  sha256:c68f61875ac5293cf72e6c8cf0158086428c82c37229e98c840878f1706b0322
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -24,6 +24,7 @@ Requires:       crate(prettyplease-0.2/default) >= 0.2.0
 Requires:       crate(proc-macro2-1/default) >= 1.0.0
 Requires:       crate(quote-1/default) >= 1.0.0
 Requires:       crate(syn-2/default) >= 2.0.0
+
 Provides:       crate(%{pkgname}) = %{version}
 Provides:       crate(%{pkgname}/default) = %{version}
 Provides:       crate(%{pkgname}/transport) = %{version}

@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 %global crate_name zvariant_derive
-%global full_version 5.10.1
+%global full_version 5.13.1
 %global pkgname zvariant-derive-5
 
 Name:           rust-zvariant-derive-5
-Version:        5.10.1
+Version:        5.13.1
 Release:        %autorelease
 Summary:        Rust crate "zvariant_derive"
 License:        MIT
 URL:            https://github.com/z-galaxy/zbus/
-#!RemoteAsset:  sha256:5b949b639ab1b4bed763aa7481ba0e368af68d8b55532f8ed4bec86a59f2ca98
+#!RemoteAsset:  sha256:38a708216a18780796770bfe3f4739c7c83a3e8f789b755534bbbc06e4e23e12
 Source:         https://static.crates.io/crates/%{crate_name}/%{full_version}/download#/%{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildSystem:    rustcrates
@@ -26,7 +26,8 @@ Requires:       crate(quote-1/default) >= 1.0.36
 Requires:       crate(syn-2/default) >= 2.0.64
 Requires:       crate(syn-2/extra-traits) >= 2.0.64
 Requires:       crate(syn-2/full) >= 2.0.64
-Requires:       crate(zvariant-utils-3/default) >= 3.3.1
+Requires:       crate(zvariant-utils-3/default) >= 3.5.0
+
 Provides:       crate(%{pkgname}) = %{version}
 Provides:       crate(%{pkgname}/default) = %{version}
 
@@ -36,7 +37,7 @@ Source code for takopackized Rust crate "zvariant_derive"
 %package     -n %{name}+gvariant
 Summary:        D-Bus & GVariant encoding & decoding - feature "gvariant"
 Requires:       crate(%{pkgname}) = %{version}
-Requires:       crate(zvariant-utils-3/gvariant) >= 3.3.1
+Requires:       crate(zvariant-utils-3/gvariant) >= 3.5.0
 Provides:       crate(%{pkgname}/gvariant) = %{version}
 
 %description -n %{name}+gvariant

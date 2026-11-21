@@ -6,20 +6,33 @@
 
 %define _test_target test-unit-local
 
+%global build_tags libsqlite3 libsubid
+
 Name:           skopeo
-Version:        1.24.0
+Version:        1.25.2
 Release:        %autorelease
 Summary:        Work with remote images registries - retrieving information, images, signing content
 License:        Apache-2.0
 URL:            https://github.com/podman-container-tools/skopeo
-#!RemoteAsset:  sha256:1eea9364e344c4d6cb398fac53bc387663d19690552003b43c75819e8bb55527
+#!RemoteAsset:  sha256:d2ebe154195934908e2dd8d992bfda5dc554e1f5d8586c49b6a931fd69563d24
 Source0:        https://github.com/podman-container-tools/skopeo/archive/v%{version}.tar.gz
 BuildSystem:    autotools
 
+BuildOption(build):  BUILDTAGS="%{build_tags}"
+BuildOption(build):  GOPROXY=off
+BuildOption(install):  GOPROXY=off
+BuildOption(build):  PREFIX=%{_prefix}
+
+BuildOption(install):  BUILDTAGS="%{build_tags}"
 BuildOption(install):  DESTDIR=%{buildroot}
 BuildOption(install):  PREFIX=%{_prefix}
 
-BuildRequires:  go
+BuildOption(check):  BUILDTAGS="%{build_tags}"
+BuildOption(check):  GOPROXY=off
+
+BuildRequires:  go >= 1.26.0
+BuildRequires:  subid-devel
+BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  automake
 BuildRequires:  go-md2man
 BuildRequires:  pkgconfig(libbtrfsutil)

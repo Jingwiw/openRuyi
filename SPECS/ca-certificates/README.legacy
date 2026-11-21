@@ -1,0 +1,20 @@
+This directory is not read by openRuyi's system trust module.
+The active input directories are /etc/pki/trust and /usr/share/pki/trust.
+Existing files are kept. They are not imported automatically: importing a
+previously ignored certificate can change system trust.
+
+Before migration, back up both the old and active input directories.
+Review each certificate's identity, fingerprint and intended trust settings.
+For local policy, copy each approved file into /etc/pki/trust, keeping its
+relative location: anchors/ for trusted CAs, blocklist/ for distrusted CAs,
+and the root directory for files with embedded trust settings.
+Do not put a blocklisted certificate into anchors/.
+
+If the destination exists, compare the contents. Do not overwrite different
+contents. Resolve conflicting trust settings before importing either file.
+For files owned by an RPM, correct that package rather than moving its files.
+
+Run update-ca-trust, then verify both the expected trust and distrust with
+the affected applications. Remove the old copy only after verification.
+To undo a migration, restore the active inputs from the backup and run
+update-ca-trust again.

@@ -21,6 +21,7 @@ Source4:        README.extr
 Source5:        README.java
 Source6:        README.src
 Source7:        README.usr
+Source8:        README.legacy
 BuildRequires:  p11-kit-devel
 BuildRequires:  coreutils
 BuildRequires:  bash
@@ -47,27 +48,33 @@ certificate store that is managed by p11-kit.
 %install
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/tls/certs
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/ssl
-mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/source
-mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/source/anchors
-mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/source/blocklist
+mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/trust
+mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/trust/anchors
+mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/trust/blocklist
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/pem
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/pem/directory-hash
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/java
 mkdir -p -m 755 %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/edk2
-mkdir -p -m 755 %{buildroot}%{_datadir}/pki/ca-trust-source
-mkdir -p -m 755 %{buildroot}%{_datadir}/pki/ca-trust-source/anchors
-mkdir -p -m 755 %{buildroot}%{_datadir}/pki/ca-trust-source/blocklist
+mkdir -p -m 755 %{buildroot}%{_datadir}/pki/trust
+mkdir -p -m 755 %{buildroot}%{_datadir}/pki/trust/anchors
+mkdir -p -m 755 %{buildroot}%{_datadir}/pki/trust/blocklist
 mkdir -p -m 755 %{buildroot}%{_datadir}/pki/ca-trust-legacy
 mkdir -p -m 755 %{buildroot}%{_bindir}
+
+# Preserve directories that can contain local certificates from older installs.
+for directory in %{_sysconfdir}/pki/ca-trust/source %{_datadir}/pki/ca-trust-source; do
+    mkdir -p %{buildroot}$directory/anchors %{buildroot}$directory/blocklist
+    install -p -m 644 %{SOURCE8} %{buildroot}$directory/README
+done
 
 install -p -m 755 %{SOURCE0} %{buildroot}%{_bindir}/update-ca-trust
 install -p -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/pki/ca-trust/README
 install -p -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/ssl/README
 install -p -m 644 %{SOURCE4} %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/README
 install -p -m 644 %{SOURCE5} %{buildroot}%{_sysconfdir}/pki/ca-trust/extracted/java/README
-install -p -m 644 %{SOURCE6} %{buildroot}%{_sysconfdir}/pki/ca-trust/source/README
-install -p -m 644 %{SOURCE7} %{buildroot}%{_datadir}/pki/ca-trust-source/README
+install -p -m 644 %{SOURCE6} %{buildroot}%{_sysconfdir}/pki/trust/README
+install -p -m 644 %{SOURCE7} %{buildroot}%{_datadir}/pki/trust/README
 
 
 # touch ghosted files that will be extracted dynamically
@@ -117,21 +124,30 @@ fi
 %{_bindir}/update-ca-trust || true
 
 %files
+%doc %{SOURCE1}
+%dir %{_sysconfdir}/pki/ca-trust/source
+%dir %{_sysconfdir}/pki/ca-trust/source/anchors
+%dir %{_sysconfdir}/pki/ca-trust/source/blocklist
+%{_sysconfdir}/pki/ca-trust/source/README
+%dir %{_datadir}/pki/ca-trust-source
+%dir %{_datadir}/pki/ca-trust-source/anchors
+%dir %{_datadir}/pki/ca-trust-source/blocklist
+%{_datadir}/pki/ca-trust-source/README
 %dir %{_sysconfdir}/ssl
 %dir %{_sysconfdir}/pki/tls
 %dir %{_sysconfdir}/pki/tls/certs
 %dir %{_sysconfdir}/pki/ca-trust
-%dir %{_sysconfdir}/pki/ca-trust/source
-%dir %{_sysconfdir}/pki/ca-trust/source/anchors
-%dir %{_sysconfdir}/pki/ca-trust/source/blocklist
+%dir %{_sysconfdir}/pki/trust
+%dir %{_sysconfdir}/pki/trust/anchors
+%dir %{_sysconfdir}/pki/trust/blocklist
 %dir %{_sysconfdir}/pki/ca-trust/extracted
 %dir %{_sysconfdir}/pki/ca-trust/extracted/pem
 %dir %{_sysconfdir}/pki/ca-trust/extracted/java
 %dir %{_sysconfdir}/pki/ca-trust/extracted/edk2
 %dir %{_datadir}/pki
-%dir %{_datadir}/pki/ca-trust-source
-%dir %{_datadir}/pki/ca-trust-source/anchors
-%dir %{_datadir}/pki/ca-trust-source/blocklist
+%dir %{_datadir}/pki/trust
+%dir %{_datadir}/pki/trust/anchors
+%dir %{_datadir}/pki/trust/blocklist
 %dir %{_datadir}/pki/ca-trust-legacy
 %dir %{_sysconfdir}/pki/ca-trust/extracted/pem/directory-hash
 %{_sysconfdir}/ssl/certs
@@ -139,11 +155,11 @@ fi
 %{_sysconfdir}/ssl/openssl.cnf
 %{_sysconfdir}/ssl/ct_log_list.cnf
 %{_bindir}/update-ca-trust
-%{_datadir}/pki/ca-trust-source/README
+%{_datadir}/pki/trust/README
 %{_sysconfdir}/pki/ca-trust/README
 %{_sysconfdir}/pki/ca-trust/extracted/README
 %{_sysconfdir}/pki/ca-trust/extracted/java/README
-%{_sysconfdir}/pki/ca-trust/source/README
+%{_sysconfdir}/pki/trust/README
 # files extracted files
 %ghost %{_sysconfdir}/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 %ghost %{_sysconfdir}/pki/ca-trust/extracted/pem/email-ca-bundle.pem
@@ -151,4 +167,4 @@ fi
 %ghost %{_sysconfdir}/pki/ca-trust/extracted/edk2/cacerts.bin
 
 %changelog
-%{?autochangelog}
+%autochangelog

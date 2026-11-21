@@ -5,17 +5,14 @@
 # SPDX-License-Identifier: MulanPSL-2.0
 
 Name:           containers-common
-Version:        0.67.0
+Version:        0.70.0
 Release:        %autorelease
 Summary:        Common libraries and configuration for container tools
 License:        Apache-2.0
 URL:            https://github.com/podman-container-tools/container-libs
-#!RemoteAsset:  sha256:503756a080d66141fc3103952b6a5c0253c45da8475673c8d4ee5c948f4dade4
+#!RemoteAsset:  sha256:73100f319ccd0d16153e4f09862f6d0e405fd049fb8accb13fc2ec91aadd7893
 Source:         https://github.com/podman-container-tools/container-libs/archive/refs/tags/common/v%{version}.tar.gz
 BuildArch:      noarch
-
-# https://github.com/podman-container-tools/container-libs/pull/1203
-Patch2000:      2000-seccomp-allow-riscv_hwprobe.patch
 
 BuildRequires:  go
 BuildRequires:  go-md2man
@@ -46,6 +43,8 @@ install -Dp -m0644 image/registries.conf %{buildroot}%{_sysconfdir}/containers/r
 install -Dp -m0644 storage/storage.conf %{buildroot}%{_datadir}/containers/storage.conf
 install -m0644 common/pkg/subscriptions/mounts.conf %{buildroot}%{_datadir}/containers/mounts.conf
 install -m0644 common/pkg/seccomp/seccomp.json %{buildroot}%{_datadir}/containers/seccomp.json
+sed -i -e 's|^#runtime = "crun"$|runtime = "crun"|' \
+    -e 's|^#init_path = ".*"$|init_path = "%{_bindir}/catatonit"|' common/pkg/config/containers.conf
 install -m0644 common/pkg/config/containers.conf %{buildroot}%{_datadir}/containers/containers.conf
 for i in man5/*.5; do
     install -Dp -m0644 $i -t %{buildroot}%{_mandir}/man5

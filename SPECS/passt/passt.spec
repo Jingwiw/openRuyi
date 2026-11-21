@@ -4,15 +4,15 @@
 #
 # SPDX-License-Identifier: MulanPSL-2.0
 
-%global commit ec96f0124282338cd2b2e65ff1aa3def8882ae23
+%global commit cba357068dc586e7540971eb40bb56c5e62c4de1
 
 Name:           passt
-Version:        0+git20260424.ec96f01
+Version:        0+git20261002.cba3570
 Release:        %autorelease
 Summary:        Plug A Simple Socket Transport
 License:        GPL-2.0-or-later AND BSD-3-Clause
 URL:            https://passt.top/passt
-#!RemoteAsset:  sha256:416094ef9ad15ab5696e9988c8f06c0e2954ed847abbcb2004d12e1491409bb2
+#!RemoteAsset:  sha256:2bd6f52562a201e8960c17d6ae459a10bb18dc7ef2e7fa617ec82a872db9e403
 Source:         https://passt.top/passt/snapshot/passt-%{commit}.tar.xz
 BuildSystem:    autotools
 
@@ -38,10 +38,10 @@ Plug A Simple Socket Transport.
 %license LICENSES/BSD-3-Clause.txt
 %{_mandir}/man1/passt*
 %{_mandir}/man1/pasta*
-%{_mandir}/man1/qrap.1*
 %{_bindir}/passt*
 %{_bindir}/pasta*
-%{_bindir}/qrap
+%{_bindir}/pesto
+%{_mandir}/man1/pesto.1*
 
 %changelog
 %autochangelog

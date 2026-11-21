@@ -13,7 +13,7 @@
 edition = "2024"
 rust-version = "1.87"
 name = "zvariant"
-version = "5.10.1"
+version = "5.13.1"
 authors = ["Zeeshan Ali Khan <zeeshanak@gnome.org>"]
 build = false
 autolib = false
@@ -227,10 +227,10 @@ optional = true
 version = "1.0"
 
 [dependencies.zvariant_derive]
-version = "5.10.1"
+version = "5.13.1"
 
 [dependencies.zvariant_utils]
-version = "3.3.1"
+version = "3.5.0"
 
 [dev-dependencies.chrono]
 version = "0.4.38"
@@ -242,7 +242,7 @@ features = [
 default-features = false
 
 [dev-dependencies.criterion]
-version = "4.0.4"
+version = "5.0.0"
 package = "codspeed-criterion-compat"
 
 [dev-dependencies.fastrand]

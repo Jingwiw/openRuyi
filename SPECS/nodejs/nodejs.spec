@@ -8,10 +8,11 @@
 # Show build output without waiting for a Make target to finish.
 %global _make_output_sync     %{nil}
 %global toolchain             clang
+%global build_ldflags         %{build_ldflags} -fuse-ld=lld
 %global _test_target          test-ci-js
 %global nodejs_major          26
 %global nodejs_minor          13
-%global nodejs_patch          0
+%global nodejs_patch          1
 %global nodejs_abi            %{nodejs_major}.%{nodejs_minor}
 %global nodejs_soversion      147
 %global nodejs_version        %{nodejs_major}.%{nodejs_minor}.%{nodejs_patch}
@@ -33,7 +34,7 @@ Summary:        JavaScript runtime
 License:        Apache-2.0 AND Artistic-2.0 AND BSD-2-Clause AND BSD-3-Clause AND BlueOak-1.0.0 AND CC-BY-3.0 AND CC0-1.0 AND ISC AND MIT AND Unicode-3.0
 URL:            https://nodejs.org/
 VCS:            git:https://github.com/nodejs/node
-#!RemoteAsset:  sha256:263f639ecfa7a17b49438d76cdbf9aff73179e3c7cb789da69b900718427fa2e
+#!RemoteAsset:  sha256:a7f6204ff63b6a2cd274d48903285abb86ed53a99070e532d4c2fd787457d9e6
 Source0:        https://nodejs.org/dist/v%{version}/node-v%{version}.tar.xz
 Source1:        nodejs_native.attr
 BuildSystem:    autotools
@@ -48,10 +49,10 @@ BuildOption(check):  CI_SKIP_TESTS=parallel/test-snapshot-reproducible
 
 BuildRequires:  chrpath
 BuildRequires:  clang >= 19.1
-BuildRequires:  rust >= 1.86
-BuildRequires:  cargo >= 1.86
+BuildRequires:  lld
 BuildRequires:  make >= 3.81
 BuildRequires:  ninja
+BuildRequires:  pkgconfig(absl_base)
 BuildRequires:  pkgconfig(ada)
 BuildRequires:  pkgconfig(openssl) >= 3.5.1
 BuildRequires:  pkgconfig(icu-i18n) >= 73
@@ -68,6 +69,7 @@ BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig(simdjson)
 BuildRequires:  pkgconfig(sqlite3) >= 3.54.0
 BuildRequires:  pkgconfig(simdutf)
+BuildRequires:  pkgconfig(temporal_capi) >= 0.2.6
 BuildRequires:  pkgconfig(zlib)
 BuildRequires:  python-rpm-macros
 BuildRequires:  pkgconfig(python3)
@@ -105,6 +107,16 @@ Requires:       sqlite%{?_isa} >= 3.54.0
 1005-v8-riscv-fp-comparison.patch
 # Handle ICU 79 case folding; https://github.com/v8/v8/commit/f607706154eabc4a949628a88b38dbe95cd2274c.
 1006-v8-icu79-case-folding.patch
+# Look up active Wasm code by its saved return address; https://github.com/v8/v8/commit/dec5f6bdbe683eb74f7908310ac9a742d057181a.
+1007-v8-wasm-frame-code-lookup.patch
+# Read the ARM64 return address with the correct offset and authentication; https://github.com/v8/v8/commit/42ae3ed711b2a9a4a78f33415dbdf1f1246dc3f8.
+1008-v8-arm64-frame-calling-pc.patch
+# Account for RISC-V parameter and vector slots; https://github.com/v8/v8/commit/9235e225af3555365398cd7d24b31a2efe51650f.
+1009-v8-riscv-frame-calling-pc.patch
+# Adjust test expectations for OpenSSL 4; https://github.com/nodejs/node/commit/c61ba86ed02dc0c80c51b9333d3fe9e3e4e2f887.
+1010-openssl4-tests.patch
+# Adapt BlockList tests to libuv 1.53; https://github.com/nodejs/node/commit/62b471723d60845d6f094a41348d59d59faf4246.
+1011-blocklist-libuv153.patch
 # Adapt the version test for zlib-ng compatibility; https://github.com/nodejs/node/blob/v26.12.0/test/parallel/test-process-versions.js.
 2002-zlib-ng-version-test.patch
 # Report unsupported Wasm SIMD as skipped; https://github.com/felixonmars/archriscv-packages/blob/2c56f9918e59cb5cfb7af860d2336785d0a36dea/nodejs/wasm-simd-skip.patch.
@@ -159,10 +171,12 @@ rm -rf deps/v8/third_party/simdutf
 # Node.js uses GYP instead of GNU configure.
 %set_build_flags
 %{__python3} configure.py --prefix=%{_prefix} \
+           --use-prefix-to-find-headers \
            --verbose \
            --ninja \
            --shared \
            --libdir=%{_lib} \
+           --shared-abseil \
            --shared-ada \
            --shared-brotli \
            --shared-cares \
@@ -176,6 +190,7 @@ rm -rf deps/v8/third_party/simdutf
            --shared-simdjson \
            --shared-simdutf \
            --shared-sqlite \
+           --shared-temporal_capi \
            --shared-zlib \
            --shared-zstd \
            --with-intl=system-icu \

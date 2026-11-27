@@ -50,13 +50,13 @@
   /usr/lib/rpm/brp-compress
 
 Name:           go
-Version:        1.27.3
+Version:        1.27.4
 Release:        %autorelease
 Summary:        The Go Programming Language toolchain
 License:        BSD-3-Clause
 URL:            https://go.dev/
 VCS:            git:https://github.com/golang/go
-#!RemoteAsset:  sha256:6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb
+#!RemoteAsset:  sha256:73cfb8571aec0c01177687db87163d46aa20e9779672772891aa17654d9a6099
 Source0:        https://go.dev/dl/%{name}%{version}.src.tar.gz
 #!RemoteAsset:  sha256:5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053
 Source1:        https://go.dev/dl/%{name}1.26.5.linux-amd64.tar.gz
@@ -82,6 +82,8 @@ Requires:       glibc
 1002-internal-cpu-detect-RISC-V-VLENB-when-the-vector-ext.patch
 1003-crypto-internal-fips140-sha256-enable-zvknha-for-ris.patch
 1004-crypto-internal-fips140-sha512-enable-zvknhb-for-ris.patch
+# Backport Zvk AES support for RISC-V from Go master
+1005-release-branch.go1.27-crypto-internal-fips140-aes-bl.patch
 # Backport index optimization for RISC-V from Go gerrit
 2001-internal-bytealg-add-index-assembly-optimization-for.patch
 

@@ -11,7 +11,7 @@
 
 %global maj_ver 23
 %global min_ver 1
-%global patch_ver 4
+%global patch_ver 5
 #global rc_ver rc3
 
 %bcond check 0
@@ -78,7 +78,7 @@ Summary:        The Low Level Virtual Machine (%{maj_ver})
 License:        Apache-2.0 WITH LLVM-exception OR NCSA
 URL:            http://llvm.org
 VCS:            git:https://github.com/llvm/llvm-project.git
-#!RemoteAsset:  sha256:819ecf7351f1a66f76b2d701d8942faaf5faeb324cb90c9d5b090de142434bb2
+#!RemoteAsset:  sha256:fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e
 Source0:        https://github.com/llvm/llvm-project/releases/download/llvmorg-%{maj_ver}.%{min_ver}.%{patch_ver}%{?rc_ver:-%{rc_ver}}/%{src_tarball_dir}.tar.xz
 
 # please keep the patches in different groups for easier maintenance
@@ -548,7 +548,7 @@ OLD_CWD="$PWD"
 %global cmake_config_args %{cmake_config_args} \\\
     -DCLANG_BUILD_EXAMPLES:BOOL=OFF \\\
     -DCLANG_CONFIG_FILE_SYSTEM_DIR=%{_sysconfdir}/clang%{maj_ver}/ \\\
-    -DCLANG_DEFAULT_PIE_ON_LINUX=OFF \\\
+    -DCLANG_DEFAULT_PIE_ON_LINUX=ON \\\
     -DCLANG_DEFAULT_UNWINDLIB=libgcc \\\
     -DCLANG_ENABLE_STATIC_ANALYZER:BOOL=ON \\\
     -DCLANG_INCLUDE_DOCS:BOOL=ON \\\
@@ -712,8 +712,15 @@ for e in `ls %{buildroot}/%{install_libdir} | grep -e '-%{maj_ver}.so' -e '.so.%
 done
 popd
 
+mkdir -p %{buildroot}/%{_prefix}/lib/clang
+pushd %{buildroot}/%{_prefix}/lib/clang
+relpath=`realpath --relative-to=. %{buildroot}/%{install_libdir}/clang/%{maj_ver}`
+ln -sf $relpath .
+popd
+
 mkdir -p %{buildroot}/%{install_python3mod}
 cp -a clang/bindings/python/clang %{buildroot}/%{install_python3mod}
+sed -i 's/^\([[:space:]]*file = \)"libclang\.so"$/\1"libclang.so.%{maj_ver}.%{min_ver}.%{patch_ver}"/' %{buildroot}/%{install_python3mod}/clang/cindex.py
 mv -f %{buildroot}/%{install_prefix}/python_packages/mlir_core/mlir %{buildroot}/%{install_python3mod}
 
 rm -rf %{buildroot}/%{install_prefix}/src
@@ -896,6 +903,7 @@ rm -rf %{buildroot}/%{install_prefix}/src
 %{_libdir}/libclang.so.%{maj_ver}*
 %{install_libdir}/libclang-cpp.so.%{maj_ver}*
 %{_libdir}/libclang-cpp.so.%{maj_ver}*
+%{_prefix}/lib/clang/%{maj_ver}
 
 %files -n clang%{maj_ver}-devel
 %license clang/LICENSE.TXT
